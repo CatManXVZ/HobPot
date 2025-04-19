@@ -32,31 +32,6 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    position: relative;
-    overflow: hidden; /* Ensure no overflow from animation */
-}
-
-body:hover::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 70%);
-    pointer-events: none; /* Ensure it doesn't block interactions */
-    animation: dullEffect 1s ease-out;
-}
-
-@keyframes dullEffect {
-    0% {
-        opacity: 1;
-        transform: scale(0);
-    }
-    100% {
-        opacity: 0;
-        transform: scale(1.5);
-    }
 }
 
 .logo {
