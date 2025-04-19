@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Post Builder</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        
+        <h1>Humanity is Obliviously Blinded to Powers of Ten</h1>
+        <nav>
+            <ul>
+                <li><a href="Homepage.html">Homepage</a></li>
+                <li class="dropdown">
+                    <a href="#">Projects</a>
+                    <div class="dropdown-content">
+                        <a href="#">Archived</a>
+                        <a href="#">Current</a>
+                    </div>
+                </li>
+                <li><a href="#">Trips</a></li>
+                <li class="dropdown">
+                    <a href="#">Posts</a>
+                    <div class="dropdown-content">
+                        <a href="#">Computer Science</a>
+                        <a href="#">Maths</a>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section class="section">
+            <h2>Create a New Post</h2>
+            <form action="/post-website" method="POST" class="post-form" id="postForm">
+                <div class="form-group">
+                    <label for="category">Category:</label>
+                    <select id="category" name="category" required>
+                        <option value="ComputerScience">Computer Science</option>
+                        <option value="Math">Math</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="title">Post Name:</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="body">Body:</label>
+                    <div style="display:flex; gap:0.5em; margin-bottom:0.5em;">
+                        <button type="button" id="bold-btn" title="Bold"><b>B</b></button>
+                        <button type="button" id="underline-btn" title="Underline"><u>U</u></button>
+                        <button type="button" id="italic-btn" title="Italics"><i>I</i></button>
+                        <button type="button" id="subheading-btn" title="Subheading">H2</button>
+                        <button type="button" id="section-btn" title="Section">/s</button>
+                    </div>
+                    <textarea id="body" name="body" rows="8" required></textarea>
+                    <label id="preview-label" style="display:block; margin-top:1em; font-weight:bold; color:#4A5568;">Preview:</label>
+                    <div id="body-preview" style="margin-top:0.3em; background:#f7fafc; border-radius:0.7rem; padding:1em; min-height:2em;"></div>
+                </div>
+                <div class="form-group">
+                    <button type="submit">Create Post</button>
+                </div>
+            </form>
+            <script>
+            document.getElementById('postForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const form = e.target;
+                const formData = new FormData(form);
+                const params = new URLSearchParams();
+                for (const pair of formData) {
+                    params.append(pair[0], pair[1]);
+                }
+                const res = await fetch(form.action, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: params
+                });
+                if (res.ok) {
+                    form.reset();
+                    alert('Post created successfully!');
+                } else {
+                    alert('Error creating post.');
+                }
+            });
+
+            // Live preview for /s, /h, /l, /b, /i, /u as described
+            const bodyInput = document.getElementById('body');
+            const preview = document.getElementById('body-preview');
+            bodyInput.addEventListener('input', function() {
+                let html = bodyInput.value;
+
+                // /l /e item /e item/ → <ul><li>item</li><li>item</li></ul>
+                html = html.replace(/\/l\s*((?:\/e\s*[^\/]+)+)\/\s*/g, (match, listContent) => {
+                    const items = [...listContent.matchAll(/\/e\s*([^\/\n]+)/g)].map(m => `<li>${m[1].trim()}</li>`);
+                    return `<ul>${items.join('')}</ul>`;
+                });
+
+                // /h text / → <h2>text</h2>
+                html = html.replace(/\/h\s*([^\n\/]+)\s*\//g, (match, headerText) => {
+                    return `|||H2|||${headerText.trim()}|||H2|||`;
+                });
+
+                // /b text / → <b>text</b>
+                html = html.replace(/\/b\s*([^\n\/]+)\s*\//g, (match, boldText) => {
+                    return `<b>${boldText.trim()}</b>`;
+                });
+
+                // /i text / → <i>text</i>
+                html = html.replace(/\/i\s*([^\n\/]+)\s*\//g, (match, italicText) => {
+                    return `<i>${italicText.trim()}</i>`;
+                });
+
+                // /u text / → <u>text</u>
+                html = html.replace(/\/u\s*([^\n\/]+)\s*\//g, (match, underlineText) => {
+                    return `<u>${underlineText.trim()}</u>`;
+                });
+
+                // /s → split into sections for preview
+                const sectionParts = html.split(/(?:\r?\n)?\s*\/s\s*(?:\r?\n)?/g);
+                html = sectionParts.map(part => {
+                    // Split by our fake H2 marker
+                    let parts = part.split('|||H2|||');
+                    let result = '';
+                    for (let i = 0; i < parts.length; i++) {
+                        if (i % 2 === 1) {
+                            // Heading
+                            result += `<h2>${parts[i]}</h2>`;
+                        } else {
+                            // Paragraphs: split by double newlines or single newlines, wrap in <p>
+                            let paras = parts[i].split(/\n{2,}/g).map(p => p.trim()).filter(p => p.length > 0);
+                            result += paras.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+                        }
+                    }
+                    return `<div class="section-preview">${result}</div>`;
+                }).join('');
+
+                preview.innerHTML = html;
+            });
+
+            // Insert markup at selection or cursor
+            function wrapSelection(textarea, before, after) {
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const value = textarea.value;
+                const selected = value.substring(start, end);
+                const newValue = value.substring(0, start) + before + selected + after + value.substring(end);
+                textarea.value = newValue;
+                // Set cursor after the inserted markup
+                if (selected.length === 0) {
+                    textarea.selectionStart = textarea.selectionEnd = start + before.length;
+                } else {
+                    textarea.selectionStart = start + before.length;
+                    textarea.selectionEnd = end + before.length;
+                }
+                textarea.dispatchEvent(new Event('input'));
+                textarea.focus();
+            }
+
+            function insertAtCursor(textarea, text) {
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const value = textarea.value;
+                textarea.value = value.substring(0, start) + text + value.substring(end);
+                textarea.selectionStart = textarea.selectionEnd = start + text.length;
+                textarea.dispatchEvent(new Event('input'));
+                textarea.focus();
+            }
+
+            document.getElementById('bold-btn').onclick = function() {
+                wrapSelection(document.getElementById('body'), '/b ', ' /');
+            };
+            document.getElementById('underline-btn').onclick = function() {
+                wrapSelection(document.getElementById('body'), '/u ', ' /');
+            };
+            document.getElementById('italic-btn').onclick = function() {
+                wrapSelection(document.getElementById('body'), '/i ', ' /');
+            };
+            document.getElementById('subheading-btn').onclick = function() {
+                wrapSelection(document.getElementById('body'), '/h ', ' /');
+            };
+            document.getElementById('section-btn').onclick = function() {
+                insertAtCursor(document.getElementById('body'), '/s');
+            };
+            </script>
+            <style>
+            .section-preview {
+                background: #e6e8ea;
+                border: 2px solid #4A5568;
+                border-radius: 1.2rem;
+                margin: 1.2em 0;
+                padding: 1.5em 1.2em;
+                box-shadow: 0 8px 32px 0 rgba(74,85,104,0.08);
+            }
+            .form-group > div > button {
+                background: #F6E05E;
+                color: #4A5568;
+                border: 1px solid #4A5568;
+                border-radius: 0.5em;
+                padding: 0.2em 0.7em;
+                font-size: 1.1em;
+                font-family: inherit;
+                cursor: pointer;
+                transition: background 0.2s, color 0.2s;
+            }
+            .form-group > div > button:hover,
+            .form-group > div > button:focus {
+                background: #FF6B00;
+                color: #fff;
+                outline: none;
+            }
+            </style>
+        </section>
+    </main>
+    <footer>
+        <p>Contact me at <a href="mailto:aliomarabdelsalam@gmail.com">aliomarabdelsalam@gmail.com</a></p>
+        <div class="footer-details">
+            &copy; 2024 Humanity is Obliviously Blinded to Powers of Ten.<br>
+            Designed &amp; built by Ali Abdelsalam.<br>
+            All rights reserved.<br>
+        </div>
+        <div class="footer-links">
+            <a href="/HumanityIsObliviouslyBlindedToPowersOfTen/LICENSE">Terms of Service</a>
+            <a href="701116705027391598"  target="_blank">Discord</a>
+            <a href="https://github.com/CatManXVZ/HobPot/">GitHub</a>
+        </div>
+    </footer>
+</body>
+</html>
