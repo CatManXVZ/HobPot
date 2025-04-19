@@ -9,11 +9,54 @@ body {
     font-family: "Roboto Condensed", sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #F7FAFC;
+    /* Use a repeating pattern of a thin 'x' for the background */
+    background-color: #F3F4F6; /* Lighter grey */
+    background-image:
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 28px,
+            #e2e8f0 28px,
+            #e2e8f0 30px
+        ),
+        repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 28px,
+            #e2e8f0 28px,
+            #e2e8f0 30px
+        ),
+        url("data:image/svg+xml;utf8,<svg width='30' height='30' xmlns='http://www.w3.org/2000/svg'><g stroke='rgba(74,85,104,0.28)' stroke-width='1.2'><line x1='8' y1='8' x2='22' y2='22'/><line x1='22' y1='8' x2='8' y2='22'/></g></svg>");
+    background-repeat: repeat;
     color: #1A202C;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    position: relative;
+    overflow: hidden; /* Ensure no overflow from animation */
+}
+
+body:hover::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 70%);
+    pointer-events: none; /* Ensure it doesn't block interactions */
+    animation: dullEffect 1s ease-out;
+}
+
+@keyframes dullEffect {
+    0% {
+        opacity: 1;
+        transform: scale(0);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
 }
 
 .logo {
@@ -168,6 +211,7 @@ main {
     background-color: #FFFFFF;
     border-radius: 0.5rem;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin-bottom: 1rem; /* Add a small gap below each section */
 }
 
 .section h2 {
