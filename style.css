@@ -50,7 +50,7 @@ header {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: flex-start; /* Align items to the start */
+    justify-content: space-between; /* Align items to the start */
     gap: 1rem;
     min-height: 40px;
 }
@@ -183,12 +183,27 @@ main {
 
 .section {
     padding: 2rem;
+    margin-bottom: 10px;
     background-color: #FFFFFF;
     border-radius: 0.5rem;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    margin-bottom: 1rem; /* Add a small gap below each section */
 }
-
+.section:hover{
+    box-shadow: 0 10px 16px rgba(0,0,0,0.2);
+    transition: box-shadow 0.3s ease;
+    margin-bottom: 20px;
+    transition: margin-bottom 0.3s ease;
+    margin-top: 20px;
+    transition: margin-top 0.3s ease;
+}
+.section:not(:hover){
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    transition: box-shadow 0.3s ease;
+    margin-bottom: 10px;
+    transition: margin-bottom 0.3s ease;
+    margin-top: 0px;
+    transition: margin-top 0.3s ease; 
+}
 .section h2 {
     color: #4A5568;
     font-size: 2rem;
