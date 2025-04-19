@@ -9,8 +9,7 @@ body {
     font-family: "Roboto Condensed", sans-serif;
     margin: 0;
     padding: 0;
-    /* Use a repeating pattern of a thin 'x' for the background */
-    background-color: #F3F4F6; /* Lighter grey */
+    background-color: #F3F4F6; 
     background-image:
         repeating-linear-gradient(
             0deg,
@@ -36,7 +35,7 @@ body {
 
 .logo {
     display: block;
-    width: 200px; /* Reduce logo width */
+    width: 200px; 
     height: auto;
     margin-left: 1%;
     margin-top: 0.5%;
@@ -51,18 +50,18 @@ header {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between; /* Align items to the start */
+    justify-content: space-between; 
     gap: 1rem;
     min-height: 40px;
 }
 
 header h1 {
-    font-size: 3rem; /* Increase font size */
+    font-size: 3rem; 
     margin: 0;
     margin-left: 15%;
     text-align: left;
     flex: 1;
-    line-height: 1; /* Tighter line height to maintain header height */
+    line-height: 1; 
 }
 
 nav ul,
@@ -85,14 +84,14 @@ nav {
     display: flex;
     align-items: stretch;
     justify-content: flex-end;
-    background-color: #4A5568; /* Set background color for full width */
+    background-color: #4A5568;
 }
 
 nav > ul {
     display: flex;
-    align-items: stretch; /* Stretch menu items vertically */
+    align-items: stretch; 
     height: 100%;
-    justify-content: flex-end; /* Push menu items to the right */
+    justify-content: flex-end; 
 }
 
 nav > ul > li {
@@ -104,12 +103,12 @@ nav > ul > li > a {
     display: flex;
     align-items: center;
     height: 100%;
-    padding: 1.0rem 2.5rem; /* Increase vertical padding for more height */
+    padding: 1.0rem 2.5rem; 
     color: white;
     text-decoration: none;
     font-weight: bold;
     font-size: 1.6rem;
-    background-color: #4A5568; /* Changed background to dark gray */
+    background-color: #4A5568; 
     border: 2px solid #F6E05E;
     transition: background-color 0.3s ease;
 }
@@ -126,7 +125,7 @@ nav > ul > li > a:active {
 
 .dropdown-content {
     display: none;
-    background-color: #4A5568; /* Changed background to dark gray */
+    background-color: #4A5568; 
     min-width: 160px;
     box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     z-index: 1;
@@ -166,22 +165,22 @@ nav ul li.dropdown {
 
 /* Dropdown Arrow Styling */
 nav ul li.dropdown > a::after {
-    content: '\25BC'; /* Unicode character for a down arrow */
+    content: '\25BC'; 
     font-size: 0.8em;
     margin-left: 0.5em;
     transition: transform 0.3s ease;
-    display: inline-block; /* Ensure it's on the same line */
+    display: inline-block; 
 }
 
 nav ul li.dropdown:hover > a::after {
-    transform: rotate(180deg); /* Rotate arrow on hover */
+    transform: rotate(180deg); 
 }
 
 main {
     padding: 2rem;
     flex: 1;
-    margin: 0 auto; /* Center the main content horizontally */
-    width: 800px; /* Limit the width of the main content */
+    margin: 0 auto; 
+    width: 800px; 
 }
 
 .section {
