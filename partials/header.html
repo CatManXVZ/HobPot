@@ -1,0 +1,39 @@
+<header class="main-header">
+    <img src="/Assets/Fundementals/Logo.png" alt="Logo" class="logo">
+    <h1 style="font-size:200%;"><span id="header-title">Humanity is Obliviously Blinded to Powers of Ten</span></h1>
+    <nav class="main-nav">
+        <ul>
+            <li><a href="Homepage.html" id="menu-homepage" class="">Homepage</a></li>
+            <li class="dropdown">
+                <a href="#">Projects</a>
+                <div class="dropdown-content">
+                    <a href="#">Archived</a>
+                    <a href="#">Current</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#">Posts</a>
+                <div class="dropdown-content">
+                    <a href="#">Computer Science</a>
+                    <a href="#">Maths</a>
+                </div>
+            </li>
+            <li>
+                <a href="/login" class="login-btn" id="login-btn">Log In</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<style>
+.main-header {
+    position: sticky !important;
+    top: 0;
+    z-index: 1000;
+}
+.main-nav {
+    position: sticky;
+    top: 0;
+    z-index: 1001;
+    background: inherit;
+}
+</style>

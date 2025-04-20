@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Homepage</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,48 +11,91 @@
         href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <style>
+        .login-btn {
+            background: #F6E05E !important;
+            color: #4A5568 !important;
+            border: 2px solid #FF6B00;
+            font-weight: bold;
+            border-radius: 1.2rem;
+            padding: 1.0rem 2.5rem;
+            margin-left: 1.2rem;
+            transition: background 0.2s, color 0.2s, border 0.2s;
+        }
+
+        .login-btn:hover,
+        .login-btn:focus {
+            background: #FF6B00 !important;
+            color: #fff !important;
+            border: 2px solid #F6E05E;
+            outline: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: auto;
+            background: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background: #fff;
+            margin: 8% auto;
+            padding: 2em 2.5em 2em 2.5em;
+            border: 2px solid #F6E05E;
+            border-radius: 1.2rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 32px 0 rgba(74,85,104,0.18);
+            position: relative;
+            color: #4A5568;
+            font-family: inherit;
+        }
+        .modal-content label {
+            display: block;
+            margin-top: 1em;
+            font-weight: bold;
+            color: #FF6B00;
+        }
+        .modal-content input[type="text"],
+        .modal-content input[type="password"] {
+            width: 100%;
+            padding: 0.7em;
+            margin-top: 0.3em;
+            border-radius: 0.7em;
+            border: 1px solid #4A5568;
+            background: #F7FAFC;
+            font-size: 1.1em;
+            margin-bottom: 0.7em;
+        }
+        .modal-content .close {
+            position: absolute;
+            top: 0.7em;
+            right: 1.2em;
+            color: #FF6B00;
+            font-size: 2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .modal-content .close:hover {
+            color: #E55D00;
+        }
+        .dulled {
+            opacity: 0.5;
+            pointer-events: none;
+            cursor: default;
+        }
+    </style>
 </head>
 
 <body>
-    <header>
-        <img src="/HumanityIsObliviouslyBlindedToPowersOfTen/Assets/Fundementals/Logo.png" alt="Logo" class="logo">
-        <h1>Humanity is Obliviously Blinded to Powers of Ten</h1>
-        <nav>
-            <ul>
-                <li><a href="#">Homepage</a></li>
-                <li class="dropdown">
-                    <a href="#">Projects</a>
-                    <div class="dropdown-content">
-                        <a href="#">Archived</a>
-                        <a href="#">Current</a>
-                    </div>
-                </li>
-                <li><a href="#">Trips</a></li>
-                <li class="dropdown">
-                    <a href="#">Posts</a>
-                    <div class="dropdown-content">
-                        <a href="#">Computer Science</a>
-                        <a href="#">Maths</a>
-                    </div>
-                </li>
-            </ul>
-        </nav>
-    </header>
-    <aside class="sidebar">
-        <h2>Posts</h2>
-        <ul>
-            <li><a href="#" class="sidebar-latest-project">Latest Project</a></li>
-            <li><a href="#">Why Powers of Ten Matter</a></li>
-            <li><a href="#">Design & Technology</a></li>
-            <li><a href="#">Reflections</a></li>
-        </ul>
-        <p>
-            Explore a variety of posts covering technology, design, science, and the wonders of scale. Stay tuned for regular updates and deep dives into the powers of ten and their impact on our world.
-        </p>
-        <p>
-            More categories and featured articles coming soon. Use this sidebar to quickly navigate to topics that interest you most!
-        </p>
-    </aside>
+    <div id="header-include"></div>
+    <div id="sidebar-include"></div>
     <div class="content-layout">
         <main>
             <section class="section">
@@ -118,19 +161,25 @@
             </section>
         </main>
     </div>
-    <footer>
-        <p>Contact me at <a href="mailto:aliomarabdelsalam@gmail.com">aliomarabdelsalam@gmail.com</a></p>
-        <div class="footer-details">
-            &copy; 2024 Humanity is Obliviously Blinded to Powers of Ten.<br>
-            Designed &amp; built by Ali Abdelsalam.<br>
-            All rights reserved.<br>
-        </div>
-        <div class="footer-links">
-            <a href="/HumanityIsObliviouslyBlindedToPowersOfTen/LICENSE">Terms of Service</a>
-            <a href="701116705027391598"  target="_blank">Discord</a>
-            <a href="https://github.com/CatManXVZ/HobPot/">GitHub</a>
-        </div>
-    </footer>
+    <div id="footer-include"></div>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script>
+    function includeHTML(id, url, cb) {
+        fetch(url)
+          .then(res => res.text())
+          .then(html => {
+              document.getElementById(id).innerHTML = html;
+              if (cb) cb();
+          });
+    }
+    includeHTML('header-include', 'partials/header.html', function() {
+        var homeMenu = document.getElementById('menu-homepage');
+        if (homeMenu) homeMenu.classList.add('dulled');
+        // No modal logic here!
+    });
+    includeHTML('sidebar-include', 'partials/sidebar.html');
+    includeHTML('footer-include', 'partials/footer.html');
+    </script>
 </body>
 
 </html>

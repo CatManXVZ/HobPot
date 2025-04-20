@@ -4,32 +4,72 @@
     <meta charset="UTF-8">
     <title>Post Builder</title>
     <link rel="stylesheet" href="style.css">
+        opacity: 0.5;
+        pointer-events: none;
+        cursor: default;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: auto;
+        background: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+        background: #fff;
+        margin: 8% auto;
+        padding: 2em 2.5em 2em 2.5em;
+        border: 2px solid #F6E05E;
+        border-radius: 1.2rem;
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0 8px 32px 0 rgba(74,85,104,0.18);
+        position: relative;
+        color: #4A5568;
+        font-family: inherit;
+    }
+    .modal-content label {
+        display: block;
+        margin-top: 1em;
+        font-weight: bold;
+        color: #FF6B00;
+    }
+    .modal-content input[type="text"],
+    .modal-content input[type="password"] {
+        width: 100%;
+        padding: 0.7em;
+        margin-top: 0.3em;
+        border-radius: 0.7em;
+        border: 1px solid #4A5568;
+        background: #F7FAFC;
+        font-size: 1.1em;
+        margin-bottom: 0.7em;
+    }
+    .modal-content .close {
+        position: absolute;
+        top: 0.7em;
+        right: 1.2em;
+        color: #FF6B00;
+        font-size: 2em;
+        font-weight: bold;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    .modal-content .close:hover {
+        color: #E55D00;
+    }
+    </style>
 </head>
 <body>
-    <header>
-        
-        <h1>Humanity is Obliviously Blinded to Powers of Ten</h1>
-        <nav>
-            <ul>
-                <li><a href="Homepage.html">Homepage</a></li>
-                <li class="dropdown">
-                    <a href="#">Projects</a>
-                    <div class="dropdown-content">
-                        <a href="#">Archived</a>
-                        <a href="#">Current</a>
-                    </div>
-                </li>
-                <li><a href="#">Trips</a></li>
-                <li class="dropdown">
-                    <a href="#">Posts</a>
-                    <div class="dropdown-content">
-                        <a href="#">Computer Science</a>
-                        <a href="#">Maths</a>
-                    </div>
-                </li>
-            </ul>
-        </nav>
-    </header>
+    <div style="background:#ffdddd;color:#a00;padding:1em 2em;font-weight:bold;text-align:center;border-bottom:2px solid #a00;">
+        Developer Access Only: This page is private and restricted to authorized developers. Unauthorized access is prohibited.
+    </div>
+    <div id="header-include"></div>
+    <div id="sidebar-include"></div>
     <main>
         <section class="section">
             <h2>Create a New Post</h2>
@@ -211,19 +251,137 @@
             }
             </style>
         </section>
+        <section class="section" id="all-posts-section">
+            <h2>All Posts</h2>
+            <div style="margin-bottom:1em;">
+                <label for="post-filter" style="font-weight:bold;color:#FF6B00;">Filter:</label>
+                <select id="post-filter" style="
+                    background: #F7FAFC;
+                    color: #4A5568;
+                    border: 2px solid #FF6B00;
+                    border-radius: 0.7em;
+                    padding: 0.6em 1.2em;
+                    font-size: 1.1em;
+                    margin-left: 0.7em;
+                    font-family: inherit;
+                    font-weight: bold;
+                    outline: none;
+                    transition: border 0.2s, box-shadow 0.2s;
+                ">
+                    <option value="all">All</option>
+                    <option value="ComputerScience">Computer Science</option>
+                    <option value="Math">Math</option>
+                </select>
+            </div>
+            <div id="posts-list">
+                <!-- Posts will be loaded here -->
+            </div>
+        </section>
     </main>
-    <footer>
-        <p>Contact me at <a href="mailto:aliomarabdelsalam@gmail.com">aliomarabdelsalam@gmail.com</a></p>
-        <div class="footer-details">
-            &copy; 2024 Humanity is Obliviously Blinded to Powers of Ten.<br>
-            Designed &amp; built by Ali Abdelsalam.<br>
-            All rights reserved.<br>
-        </div>
-        <div class="footer-links">
-            <a href="/HumanityIsObliviouslyBlindedToPowersOfTen/LICENSE">Terms of Service</a>
-            <a href="701116705027391598"  target="_blank">Discord</a>
-            <a href="https://github.com/CatManXVZ/HobPot/">GitHub</a>
-        </div>
-    </footer>
+    <div id="footer-include"></div>
+    <script>
+    function includeHTML(id, url, cb) {
+        fetch(url)
+          .then(res => res.text())
+          .then(html => {
+              document.getElementById(id).innerHTML = html;
+              if (cb) cb();
+          });
+    }
+    includeHTML('header-include', 'partials/header.html');
+    includeHTML('sidebar-include', 'partials/sidebar.html');
+    includeHTML('footer-include', 'partials/footer.html');
+
+    // Fetch and display posts grouped by month and filter
+    async function loadPosts() {
+        const res = await fetch('list-posts');
+        if (!res.ok) {
+            document.getElementById('posts-list').innerHTML = '<p style="color:#a00;">Could not load posts.</p>';
+            return;
+        }
+        const posts = await res.json();
+        renderPosts(posts, document.getElementById('post-filter').value);
+        document.getElementById('post-filter').onchange = function() {
+            renderPosts(posts, this.value);
+        };
+    }
+
+    function renderPosts(posts, filter) {
+        let filtered = {};
+        if (filter === 'all') {
+            filtered = posts;
+        } else if (filter === 'ComputerScience') {
+            filtered = { ComputerScience: posts.ComputerScience };
+        } else if (filter === 'Math') {
+            filtered = { Math: posts.Math };
+        }
+        let months = {};
+        for (const [cat, arr] of Object.entries(filtered)) {
+            arr.forEach(post => {
+                const [day, month, year] = post.date.split('-');
+                const monthKey = `${year}-${month}`;
+                if (!months[monthKey]) months[monthKey] = [];
+                months[monthKey].push({ ...post, category: cat });
+            });
+        }
+        const sortedMonths = Object.keys(months).sort((a, b) => b.localeCompare(a));
+        let html = '';
+        if (sortedMonths.length === 0) {
+            html = '<p>No posts found.</p>';
+        }
+        for (const monthKey of sortedMonths) {
+            const [year, month] = monthKey.split('-');
+            const monthName = new Date(`${year}-${month}-01`).toLocaleString('default', { month: 'long', year: 'numeric' });
+            html += `<h3 style="color:#4A5568;margin-top:1.5em;">${monthName}</h3><ul style="margin-bottom:1.5em;">`;
+            months[monthKey].sort((a, b) => b.date.localeCompare(a.date));
+            for (const post of months[monthKey]) {
+                html += `<li>
+                    <a href="/Posts/${post.category}/${post.filename}" target="_blank" style="font-weight:bold;color:#FF6B00;text-decoration:underline;">${post.title}</a>
+                    <span style="color:#4A5568;margin-left:1em;">${post.date}</span>
+                    <span style="color:#888;margin-left:0.7em;font-size:0.95em;">[${post.category}]</span>
+                    <button class="delete-post-btn" data-category="${post.category}" data-filename="${post.filename}" style="
+                        margin-left:1.5em;
+                        background:#fff;
+                        color:#a00;
+                        border:1.5px solid #a00;
+                        border-radius:0.5em;
+                        padding:0.2em 0.8em;
+                        font-size:1em;
+                        font-weight:bold;
+                        cursor:pointer;
+                        transition:background 0.2s,color 0.2s;
+                    ">Delete</button>
+                </li>`;
+            }
+            html += '</ul>';
+        }
+        document.getElementById('posts-list').innerHTML = html;
+
+        // Add delete button logic
+        document.querySelectorAll('.delete-post-btn').forEach(btn => {
+            btn.onclick = async function() {
+                const category = btn.getAttribute('data-category');
+                const filename = btn.getAttribute('data-filename');
+                const confirmed = confirm(`Are you sure you want to delete "${filename}" from ${category}? This cannot be undone.`);
+                if (!confirmed) return;
+                const res = await fetch('delete-post', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ category, filename })
+                });
+                if (res.ok) {
+                    // Remove the post from the UI
+                    btn.closest('li').remove();
+                } else {
+                    alert('Failed to delete post.');
+                }
+            };
+        });
+    }
+
+    if (window.location.pathname.endsWith('Poster.html')) {
+        loadPosts();
+    }
+    </script>
 </body>
 </html>

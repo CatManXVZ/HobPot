@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>jjjj</title>
+    <link rel="stylesheet" href="/HumanityIsObliviouslyBlindedToPowersOfTen/style.css">
+</head>
+<body>
+    <div id="header-include"></div>
+    <div id="sidebar-include"></div>
+    <div class="content-layout">
+        <main>
+            <section class="section">
+Hey <u>hey</u>
+</section>
+        </main>
+    </div>
+    <div id="footer-include"></div>
+    <script>
+    // Dynamically include header, sidebar, and footer for consistent styling
+    function includeHTML(id, url, cb) {
+        fetch(url)
+          .then(res => res.text())
+          .then(html => {
+              document.getElementById(id).innerHTML = html;
+              if (cb) cb();
+          });
+    }
+    // Replace static header/sidebar/footer with partials if present
+    document.addEventListener('DOMContentLoaded', function() {
+        // Remove static header/sidebar/footer if present
+        var header = document.querySelector('header');
+        if (header) header.outerHTML = '<div id="header-include"></div>';
+        var sidebar = document.querySelector('.sidebar');
+        if (sidebar) sidebar.outerHTML = '<div id="sidebar-include"></div>';
+        var footer = document.querySelector('footer');
+        if (footer) footer.outerHTML = '<div id="footer-include"></div>';
+        includeHTML('header-include', '/HumanityIsObliviouslyBlindedToPowersOfTen/partials/header.html');
+        includeHTML('sidebar-include', '/HumanityIsObliviouslyBlindedToPowersOfTen/partials/sidebar.html');
+        includeHTML('footer-include', '/HumanityIsObliviouslyBlindedToPowersOfTen/partials/footer.html');
+    });
+    </script>
+</body>
+</html>
