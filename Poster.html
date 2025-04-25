@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Post Builder</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+    .dulled {
         opacity: 0.5;
         pointer-events: none;
         cursor: default;
@@ -69,192 +71,857 @@
         Developer Access Only: This page is private and restricted to authorized developers. Unauthorized access is prohibited.
     </div>
     <div id="header-include"></div>
+    <!-- Poster-specific sidebar for drafts -->
+     
     <div id="sidebar-include"></div>
-    <main>
-        <section class="section">
-            <h2>Create a New Post</h2>
-            <form action="/post-website" method="POST" class="post-form" id="postForm">
-                <div class="form-group">
-                    <label for="category">Category:</label>
-                    <select id="category" name="category" required>
-                        <option value="ComputerScience">Computer Science</option>
-                        <option value="Math">Math</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="title">Post Name:</label>
-                    <input type="text" id="title" name="title" required>
-                </div>
-                <div class="form-group">
-                    <label for="body">Body:</label>
-                    <div style="display:flex; gap:0.5em; margin-bottom:0.5em;">
-                        <button type="button" id="bold-btn" title="Bold"><b>B</b></button>
-                        <button type="button" id="underline-btn" title="Underline"><u>U</u></button>
-                        <button type="button" id="italic-btn" title="Italics"><i>I</i></button>
-                        <button type="button" id="subheading-btn" title="Subheading">H2</button>
-                        <button type="button" id="section-btn" title="Section">/s</button>
+    <div id="poster-main-layout" style="display:flex;align-items:flex-start;position:relative;min-height:calc(100vh - 60px);">
+        <main style="flex:1;min-width:0;">
+            <section class="section">
+                <h2 id="form-title">Create a New Post</h2>
+                <form action="/post-website" method="POST" class="post-form" id="postForm">
+                    <div class="form-group">
+                        <label for="category">Category:</label>
+                        <select id="category" name="category" required>
+                            <option value="ComputerScience">Computer Science</option>
+                            <option value="Math">Math</option>
+                        </select>
                     </div>
-                    <textarea id="body" name="body" rows="8" required></textarea>
-                    <label id="preview-label" style="display:block; margin-top:1em; font-weight:bold; color:#4A5568;">Preview:</label>
-                    <div id="body-preview" style="margin-top:0.3em; background:#f7fafc; border-radius:0.7rem; padding:1em; min-height:2em;"></div>
+                    <div class="form-group">
+                        <label for="title">Post Name:</label>
+                        <input type="text" id="title" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="body">Body:</label>
+                        <div style="display:flex; gap:0.5em; margin-bottom:0.5em;">
+                            <button type="button" id="bold-btn" title="Bold"><b>B</b></button>
+                            <button type="button" id="underline-btn" title="Underline"><u>U</u></button>
+                            <button type="button" id="italic-btn" title="Italics"><i>I</i></button>
+                            <button type="button" id="subheading-btn" title="Subheading">H2</button>
+                            <button type="button" id="section-btn" title="Section">/s</button>
+                            <button type="button" id="list-btn" title="List">/l</button>
+                            <div id="list-dropdown" style="display:none;position:relative;">
+                                <button type="button" id="list-dropdown-btn" style="background:#F6E05E;color:#4A5568;border:1px solid #4A5568;border-radius:0.5em;padding:0.2em 0.7em;font-size:1.1em;font-family:inherit;cursor:pointer;">+ List Item</button>
+                            </div>
+                            <button type="button" id="img-insert-btn" title="Insert Image" style="background:#F6E05E;color:#4A5568;border:1px solid #4A5568;border-radius:0.5em;padding:0.2em 0.7em;font-size:1.1em;font-family:inherit;cursor:pointer;">Insert Image</button>
+                        </div>
+                        <textarea id="body" name="body" rows="8" required></textarea>
+                        <label id="preview-label" style="display:block; margin-top:1em; font-weight:bold; color:#4A5568;">Preview:</label>
+                        <div id="body-preview" style="margin-top:0.3em; background:#f7fafc; border-radius:0.7rem; padding:1em; min-height:2em;"></div>
+                    </div>
+                    <div class="form-group" id="form-buttons" style="display:flex;flex-direction:row;gap:1em;align-items:stretch;">
+                        <button type="submit" id="submit-btn" class="main-action-btn">Create Post</button>
+                        <button type="button" id="save-draft-btn" class="main-action-btn" style="background:#F6E05E;color:#4A5568;border:2px solid #FF6B00;">Save Draft</button>
+                        <button type="button" id="cancel-edit-btn" class="main-action-btn" style="background:#eee;color:#a00;border:2px solid #a00;display:none;">Cancel Edit</button>
+                    </div>
+                </form>
+                <section class="section" id="image-upload-section">
+                    <h3 style="display:flex;align-items:center;justify-content:space-between;">
+                        Upload Images
+                        <button id="img-table-toggle" type="button" style="background:#F6E05E;color:#4A5568;border:1.5px solid #FF6B00;border-radius:0.7em;padding:0.3em 1.1em;font-size:1em;font-weight:bold;cursor:pointer;transition:background 0.2s;">&#x25B2;</button>
+                    </h3>
+                    <form id="img-upload-form" enctype="multipart/form-data" style="margin-bottom:1em;">
+                        <input type="file" id="img-upload-input" name="image" accept="image/*" required>
+                        <button type="submit" style="background:#FF6B00;color:#fff;border:none;border-radius:0.7rem;padding:0.7rem 1.2rem;font-weight:bold;cursor:pointer;">Upload</button>
+                    </form>
+                    <div id="img-table-container" style="max-width:100%;overflow-x:auto;">
+                        <h4>Available Images</h4>
+                        <table id="img-table" style="width:100%;border-collapse:collapse;max-width:100%;">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Image</th>
+                                    <th>Filename</th>
+                                    <th>Delete</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Images will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <!-- Image insert popup -->
+                <div id="img-insert-popup" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:3000;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;">
+                    <div style="background:#fff;padding:2em 2.5em;border-radius:1.2rem;max-width:350px;width:90vw;box-shadow:0 8px 32px 0 rgba(74,85,104,0.18);position:relative;">
+                        <span id="img-insert-close" style="position:absolute;top:0.7em;right:1.2em;color:#FF6B00;font-size:2em;font-weight:bold;cursor:pointer;">&times;</span>
+                        <h3>Insert Image</h3>
+                        <form id="img-insert-form">
+                            <label for="img-insert-select">Image:</label>
+                            <select id="img-insert-select" required style="width:100%;margin-bottom:1em;"></select>
+                            <label for="img-insert-height">Height (px):</label>
+                            <input type="number" id="img-insert-height" min="1" max="2000" style="width:100%;margin-bottom:1em;">
+                            <label for="img-insert-width">Width (px):</label>
+                            <input type="number" id="img-insert-width" min="1" max="2000" style="width:100%;margin-bottom:1em;">
+                            <label for="img-insert-style">Style:</label>
+                            <select id="img-insert-style" style="width:100%;margin-bottom:1em;">
+                                <option value="">Block (default)</option>
+                                <option value="wrap">Wrap (float right)</option>
+                            </select>
+                            <label for="img-insert-caption">Caption:</label>
+                            <input type="text" id="img-insert-caption" maxlength="200" style="width:100%;margin-bottom:1em;">
+                            <button type="submit" style="background:#FF6B00;color:#fff;border:none;border-radius:0.7rem;padding:0.7rem 1.2rem;font-weight:bold;cursor:pointer;width:100%;">Insert</button>
+                        </form>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <button type="submit">Create Post</button>
-                </div>
-            </form>
-            <script>
-            document.getElementById('postForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const form = e.target;
-                const formData = new FormData(form);
-                const params = new URLSearchParams();
-                for (const pair of formData) {
-                    params.append(pair[0], pair[1]);
+                <script>
+                let editingPost = null; // {category, filename}
+                let editingDraft = null;
+                let autosaveId = null;
+                let autosaveTimeout = null;
+                let lastAutosaveContent = '';
+
+                // Cancel edit logic
+                document.getElementById('cancel-edit-btn').onclick = function() {
+                    document.getElementById('form-title').textContent = "Create a New Post";
+                    document.getElementById('submit-btn').textContent = "Create Post";
+                    document.getElementById('save-draft-btn').textContent = "Save Draft";
+                    editingPost = null;
+                    editingDraft = null;
+                    document.getElementById('postForm').reset();
+                    document.getElementById('cancel-edit-btn').style.display = 'none';
+                    autosaveId = null;
+                    lastAutosaveContent = '';
+                };
+
+                // Auto-save logic
+                function triggerAutosave() {
+                    const category = document.getElementById('category').value;
+                    const title = document.getElementById('title').value;
+                    const body = document.getElementById('body').value;
+                    if (!title && !body) return;
+                    const content = category + '\n' + title + '\n' + body;
+                    if (content === lastAutosaveContent) return;
+                    lastAutosaveContent = content;
+                    let payload = {
+                        category,
+                        title,
+                        body,
+                        is_autosave: true
+                    };
+                    if (editingDraft) payload.edit_filename = editingDraft.filename;
+                    if (autosaveId) payload.autosave_id = autosaveId;
+                    fetch('save-draft', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.filename) autosaveId = data.filename;
+                    });
                 }
-                const res = await fetch(form.action, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: params
-                });
-                if (res.ok) {
-                    form.reset();
-                    alert('Post created successfully!');
-                } else {
-                    alert('Error creating post.');
+
+                function scheduleAutosave() {
+                    if (autosaveTimeout) clearTimeout(autosaveTimeout);
+                    autosaveTimeout = setTimeout(triggerAutosave, 1200); // Save 1.2s after last change
                 }
-            });
 
-            // Live preview for /s, /h, /l, /b, /i, /u as described
-            const bodyInput = document.getElementById('body');
-            const preview = document.getElementById('body-preview');
-            bodyInput.addEventListener('input', function() {
-                let html = bodyInput.value;
+                document.getElementById('category').addEventListener('input', scheduleAutosave);
+                document.getElementById('title').addEventListener('input', scheduleAutosave);
+                document.getElementById('body').addEventListener('input', scheduleAutosave);
 
-                // /l /e item /e item/ → <ul><li>item</li><li>item</li></ul>
-                html = html.replace(/\/l\s*((?:\/e\s*[^\/]+)+)\/\s*/g, (match, listContent) => {
-                    const items = [...listContent.matchAll(/\/e\s*([^\/\n]+)/g)].map(m => `<li>${m[1].trim()}</li>`);
-                    return `<ul>${items.join('')}</ul>`;
+                document.getElementById('postForm').addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const form = e.target;
+                    const formData = new FormData(form);
+                    const params = new URLSearchParams();
+                    for (const pair of formData) {
+                        params.append(pair[0], pair[1]);
+                    }
+                    // If editing, send extra info
+                    if (editingPost) {
+                        params.append('edit_category', editingPost.category);
+                        params.append('edit_filename', editingPost.filename);
+                    }
+                    if (editingDraft) {
+                        params.append('draft_filename', editingDraft.filename);
+                    }
+                    if (autosaveId) {
+                        params.append('autosave_id', autosaveId);
+                    }
+                    const res = await fetch(form.action, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: params
+                    });
+                    if (res.ok) {
+                        // Remove autosave draft after posting
+                        if (autosaveId) {
+                            await fetch('delete-draft', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ filename: autosaveId })
+                            });
+                            autosaveId = null;
+                        }
+                        form.reset();
+                        document.getElementById('form-title').textContent = "Create a New Post";
+                        document.getElementById('submit-btn').textContent = "Create Post";
+                        document.getElementById('save-draft-btn').textContent = "Save Draft";
+                        editingPost = null;
+                        editingDraft = null;
+                        document.getElementById('cancel-edit-btn').style.display = 'none';
+                        loadPosts();
+                        loadDrafts();
+                        alert('Post saved successfully!');
+                    } else {
+                        alert('Error saving post.');
+                    }
                 });
 
-                // /h text / → <h2>text</h2>
-                html = html.replace(/\/h\s*([^\n\/]+)\s*\//g, (match, headerText) => {
-                    return `|||H2|||${headerText.trim()}|||H2|||`;
+                // Live preview for /s, /h, /l, /b, /i, /u as described
+                const bodyInput = document.getElementById('body');
+                const preview = document.getElementById('body-preview');
+                bodyInput.addEventListener('input', function() {
+                    let html = bodyInput.value;
+
+                    // /l /e item /e item/ → <ul><li>item</li><li>item</li></ul>
+                    html = html.replace(/\/l\s*((?:\/e\s*[^\/]+)+)\/\s*/g, (match, listContent) => {
+                        const items = [...listContent.matchAll(/\/e\s*([^\/\n]+)/g)].map(m => `<li>${m[1].trim()}</li>`);
+                        return `<ul>${items.join('')}</ul>`;
+                    });
+
+                    // /h text / → <h2>text</h2>
+                    html = html.replace(/\/h\s*([^\n\/]+)\s*\//g, (match, headerText) => {
+                        return `|||H2|||${headerText.trim()}|||H2|||`;
+                    });
+
+                    // /b text / → <b>text</b>
+                    html = html.replace(/\/b\s*([^\n\/]+)\s*\//g, (match, boldText) => {
+                        return `<b>${boldText.trim()}</b>`;
+                    });
+
+                    // /i text / → <i>text</i>
+                    html = html.replace(/\/i\s*([^\n\/]+)\s*\//g, (match, italicText) => {
+                        return `<i>${italicText.trim()}</i>`;
+                    });
+
+                    // /u text / → <u>text</u>
+                    html = html.replace(/\/u\s*([^\n\/]+)\s*\//g, (match, underlineText) => {
+                        return `<u>${underlineText.trim()}</u>`;
+                    });
+
+                    // /s → split into sections for preview
+                    const sectionParts = html.split(/(?:\r?\n)?\s*\/s\s*(?:\r?\n)?/g);
+                    html = sectionParts.map(part => {
+                        // Split by our fake H2 marker
+                        let parts = part.split('|||H2|||');
+                        let result = '';
+                        for (let i = 0; i < parts.length; i++) {
+                            if (i % 2 === 1) {
+                                // Heading
+                                result += `<h2>${parts[i]}</h2>`;
+                            } else {
+                                // Paragraphs: split by double newlines or single newlines, wrap in <p>
+                                let paras = parts[i].split(/\n{2,}/g).map(p => p.trim()).filter(p => p.length > 0);
+                                result += paras.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+                            }
+                        }
+                        return `<div class="section-preview">${result}</div>`;
+                    }).join('');
+
+                    preview.innerHTML = html;
                 });
 
-                // /b text / → <b>text</b>
-                html = html.replace(/\/b\s*([^\n\/]+)\s*\//g, (match, boldText) => {
-                    return `<b>${boldText.trim()}</b>`;
-                });
+                // Insert markup at selection or cursor
+                function wrapSelection(textarea, before, after) {
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const value = textarea.value;
+                    const selected = value.substring(start, end);
+                    const newValue = value.substring(0, start) + before + selected + after + value.substring(end);
+                    textarea.value = newValue;
+                    // Set cursor after the inserted markup
+                    if (selected.length === 0) {
+                        textarea.selectionStart = textarea.selectionEnd = start + before.length;
+                    } else {
+                        textarea.selectionStart = start + before.length;
+                        textarea.selectionEnd = end + before.length;
+                    }
+                    textarea.dispatchEvent(new Event('input'));
+                    textarea.focus();
+                }
 
-                // /i text / → <i>text</i>
-                html = html.replace(/\/i\s*([^\n\/]+)\s*\//g, (match, italicText) => {
-                    return `<i>${italicText.trim()}</i>`;
-                });
+                function insertAtCursor(textarea, text) {
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const value = textarea.value;
+                    textarea.value = value.substring(0, start) + text + value.substring(end);
+                    textarea.selectionStart = textarea.selectionEnd = start + text.length;
+                    textarea.dispatchEvent(new Event('input'));
+                    textarea.focus();
+                }
 
-                // /u text / → <u>text</u>
-                html = html.replace(/\/u\s*([^\n\/]+)\s*\//g, (match, underlineText) => {
-                    return `<u>${underlineText.trim()}</u>`;
-                });
+                document.getElementById('bold-btn').onclick = function() {
+                    wrapSelection(document.getElementById('body'), '/b ', ' /');
+                };
+                document.getElementById('underline-btn').onclick = function() {
+                    wrapSelection(document.getElementById('body'), '/u ', ' /');
+                };
+                document.getElementById('italic-btn').onclick = function() {
+                    wrapSelection(document.getElementById('body'), '/i ', ' /');
+                };
+                document.getElementById('subheading-btn').onclick = function() {
+                    wrapSelection(document.getElementById('body'), '/h ', ' /');
+                };
+                document.getElementById('section-btn').onclick = function() {
+                    insertAtCursor(document.getElementById('body'), '/s');
+                };
 
-                // /s → split into sections for preview
-                const sectionParts = html.split(/(?:\r?\n)?\s*\/s\s*(?:\r?\n)?/g);
-                html = sectionParts.map(part => {
-                    // Split by our fake H2 marker
-                    let parts = part.split('|||H2|||');
-                    let result = '';
-                    for (let i = 0; i < parts.length; i++) {
-                        if (i % 2 === 1) {
-                            // Heading
-                            result += `<h2>${parts[i]}</h2>`;
-                        } else {
-                            // Paragraphs: split by double newlines or single newlines, wrap in <p>
-                            let paras = parts[i].split(/\n{2,}/g).map(p => p.trim()).filter(p => p.length > 0);
-                            result += paras.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+                document.getElementById('list-btn').onclick = function() {
+                    insertAtCursor(document.getElementById('body'), '/l \n/e  \n/');
+                    document.getElementById('body').focus();
+                    // Move cursor inside the first /e
+                    const textarea = document.getElementById('body');
+                    const val = textarea.value;
+                    const idx = val.indexOf('/e  ');
+                    if (idx !== -1) {
+                        textarea.selectionStart = textarea.selectionEnd = idx + 3;
+                    }
+                    textarea.dispatchEvent(new Event('input'));
+                };
+
+                // Show/hide the "+ List Item" dropdown button if cursor is inside a /l ... / block
+                const bodyTextarea = document.getElementById('body');
+                bodyTextarea.addEventListener('keyup', updateListDropdown);
+                bodyTextarea.addEventListener('click', updateListDropdown);
+                bodyTextarea.addEventListener('input', updateListDropdown);
+
+                function updateListDropdown() {
+                    const textarea = bodyTextarea;
+                    const pos = textarea.selectionStart;
+                    const val = textarea.value;
+                    // Find all /l ... / blocks and see if cursor is inside one
+                    let show = false;
+                    const regex = /\/l[\s\S]*?\/\s*/g;
+                    let match;
+                    while ((match = regex.exec(val)) !== null) {
+                        const start = match.index;
+                        const end = regex.lastIndex;
+                        if (pos > start && pos < end) {
+                            show = true;
+                            break;
                         }
                     }
-                    return `<div class="section-preview">${result}</div>`;
-                }).join('');
-
-                preview.innerHTML = html;
-            });
-
-            // Insert markup at selection or cursor
-            function wrapSelection(textarea, before, after) {
-                const start = textarea.selectionStart;
-                const end = textarea.selectionEnd;
-                const value = textarea.value;
-                const selected = value.substring(start, end);
-                const newValue = value.substring(0, start) + before + selected + after + value.substring(end);
-                textarea.value = newValue;
-                // Set cursor after the inserted markup
-                if (selected.length === 0) {
-                    textarea.selectionStart = textarea.selectionEnd = start + before.length;
-                } else {
-                    textarea.selectionStart = start + before.length;
-                    textarea.selectionEnd = end + before.length;
+                    document.getElementById('list-dropdown').style.display = show ? 'inline-block' : 'none';
                 }
-                textarea.dispatchEvent(new Event('input'));
-                textarea.focus();
-            }
 
-            function insertAtCursor(textarea, text) {
-                const start = textarea.selectionStart;
-                const end = textarea.selectionEnd;
-                const value = textarea.value;
-                textarea.value = value.substring(0, start) + text + value.substring(end);
-                textarea.selectionStart = textarea.selectionEnd = start + text.length;
-                textarea.dispatchEvent(new Event('input'));
-                textarea.focus();
-            }
+                // Insert /e at cursor when "+ List Item" is pressed
+                document.getElementById('list-dropdown-btn').onclick = function() {
+                    insertAtCursor(bodyTextarea, '/e  ');
+                    bodyTextarea.focus();
+                    // Move cursor inside the new /e
+                    const pos = bodyTextarea.selectionStart;
+                    bodyTextarea.selectionStart = bodyTextarea.selectionEnd = pos;
+                    bodyTextarea.dispatchEvent(new Event('input'));
+                };
 
-            document.getElementById('bold-btn').onclick = function() {
-                wrapSelection(document.getElementById('body'), '/b ', ' /');
-            };
-            document.getElementById('underline-btn').onclick = function() {
-                wrapSelection(document.getElementById('body'), '/u ', ' /');
-            };
-            document.getElementById('italic-btn').onclick = function() {
-                wrapSelection(document.getElementById('body'), '/i ', ' /');
-            };
-            document.getElementById('subheading-btn').onclick = function() {
-                wrapSelection(document.getElementById('body'), '/h ', ' /');
-            };
-            document.getElementById('section-btn').onclick = function() {
-                insertAtCursor(document.getElementById('body'), '/s');
-            };
-            </script>
-            <style>
-            .section-preview {
-                background: #e6e8ea;
-                border: 2px solid #4A5568;
-                border-radius: 1.2rem;
-                margin: 1.2em 0;
-                padding: 1.5em 1.2em;
-                box-shadow: 0 8px 32px 0 rgba(74,85,104,0.08);
-            }
-            .form-group > div > button {
-                background: #F6E05E;
-                color: #4A5568;
-                border: 1px solid #4A5568;
-                border-radius: 0.5em;
-                padding: 0.2em 0.7em;
-                font-size: 1.1em;
-                font-family: inherit;
-                cursor: pointer;
-                transition: background 0.2s, color 0.2s;
-            }
-            .form-group > div > button:hover,
-            .form-group > div > button:focus {
-                background: #FF6B00;
-                color: #fff;
-                outline: none;
-            }
-            </style>
-        </section>
-        <section class="section" id="all-posts-section">
-            <h2>All Posts</h2>
-            <div style="margin-bottom:1em;">
-                <label for="post-filter" style="font-weight:bold;color:#FF6B00;">Filter:</label>
+                document.getElementById('save-draft-btn').onclick = async function() {
+                    const category = document.getElementById('category').value;
+                    const title = document.getElementById('title').value;
+                    const body = document.getElementById('body').value;
+                    if (!title || !body) {
+                        alert('Title and body are required to save a draft.');
+                        return;
+                    }
+                    let payload = { category, title, body };
+                    if (editingDraft) payload.edit_filename = editingDraft.filename;
+                    if (autosaveId) payload.autosave_id = autosaveId;
+                    const res = await fetch('save-draft', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (res.ok) {
+                        // Remove autosave draft after manual save
+                        if (autosaveId) {
+                            await fetch('delete-draft', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ filename: autosaveId })
+                            });
+                            autosaveId = null;
+                        }
+                        location.reload();
+                    } else {
+                        alert('Error saving draft.');
+                    }
+                };
+
+                document.querySelectorAll('.edit-post-btn').forEach(btn => {
+                    btn.onclick = async function() {
+                        const category = btn.getAttribute('data-category');
+                        const filename = btn.getAttribute('data-filename');
+                        const confirmed = confirm(`Are you sure you want to edit "${filename}" from ${category}? This will load the post into the form for editing.`);
+                        if (!confirmed) return;
+                        // Fetch post content from server
+                        const res = await fetch('get-post', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ category, filename })
+                        });
+                        if (!res.ok) {
+                            alert('Failed to load post for editing.');
+                            return;
+                        }
+                        const data = await res.json();
+                        document.getElementById('category').value = category;
+                        document.getElementById('title').value = data.title || '';
+                        document.getElementById('body').value = data.rawBody || '';
+                        document.getElementById('form-title').textContent = "Edit Post";
+                        document.getElementById('submit-btn').textContent = "Edit Post";
+                        editingPost = { category, filename };
+                        document.getElementById('body').dispatchEvent(new Event('input'));
+                        document.getElementById('cancel-edit-btn').style.display = '';
+                        autosaveId = null;
+                        lastAutosaveContent = '';
+                    };
+                });
+                document.querySelectorAll('.edit-draft-btn').forEach(btn => {
+                    btn.onclick = async function() {
+                        const filename = btn.getAttribute('data-filename');
+                        const confirmed = confirm(`Edit draft "${filename}"?`);
+                        if (!confirmed) return;
+                        const res = await fetch('get-draft', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ filename })
+                        });
+                        if (!res.ok) {
+                            alert('Failed to load draft.');
+                            return;
+                        }
+                        const data = await res.json();
+                        document.getElementById('category').value = data.category || '';
+                        document.getElementById('title').value = data.title || '';
+                        document.getElementById('body').value = data.rawBody || '';
+                        document.getElementById('form-title').textContent = "Edit Draft";
+                        document.getElementById('submit-btn').textContent = "Save as Post";
+                        document.getElementById('save-draft-btn').textContent = "Keep as draft";
+                        editingPost = null;
+                        editingDraft = { filename };
+                        document.getElementById('body').dispatchEvent(new Event('input'));
+                        document.getElementById('cancel-edit-btn').style.display = '';
+                        autosaveId = btn.getAttribute('data-filename');
+                        lastAutosaveContent = '';
+                    };
+                });
+
+                document.querySelectorAll('.delete-post-btn, .delete-draft-btn').forEach(btn => {
+                    btn.onclick = async function() {
+                        const category = btn.getAttribute('data-category');
+                        const filename = btn.getAttribute('data-filename');
+                        const confirmed = confirm(`Are you sure you want to delete "${filename}" from ${category}? This cannot be undone.`);
+                        if (!confirmed) return;
+                        const res = await fetch('delete-post', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ category, filename })
+                        });
+                        if (res.ok) {
+                            location.reload();
+                        } else {
+                            alert('Failed to delete.');
+                        }
+                    };
+                });
+
+                // IMAGE UPLOAD & TABLE LOGIC
+                async function loadImagesTable() {
+                    const res = await fetch('/list-images');
+                    if (!res.ok) return;
+                    const images = await res.json();
+                    const tbody = document.querySelector('#img-table tbody');
+                    tbody.innerHTML = '';
+                    images.forEach((img, idx) => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td style="text-align:center;font-weight:bold;">${idx+1}</td>
+                                <td style="text-align:center;"><img src="${img.url}" style="max-width:60px;max-height:60px;border-radius:0.3em;"></td>
+                                <td style="font-size:0.95em;">${img.filename}</td>
+                                <td style="text-align:center;">
+                                    <button class="img-delete-btn" data-filename="${img.filename}" style="background:#fff;color:#a00;border:1.5px solid #a00;border-radius:0.5em;padding:0.2em 0.8em;font-size:1em;font-weight:bold;cursor:pointer;">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    // Update popup select
+                    const select = document.getElementById('img-insert-select');
+                    if (select) {
+                        select.innerHTML = '';
+                        images.forEach((img, idx) => {
+                            select.innerHTML += `<option value="${idx+1}">${idx+1}: ${img.filename}</option>`;
+                        });
+                    }
+                    // Add delete logic
+                    document.querySelectorAll('.img-delete-btn').forEach(btn => {
+                        btn.onclick = async function() {
+                            const filename = btn.getAttribute('data-filename');
+                            if (!confirm(`Delete image "${filename}"? This cannot be undone.`)) return;
+                            const res = await fetch('/delete-image', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ filename })
+                            });
+                            if (res.ok) {
+                                await loadImagesTable();
+                            } else {
+                                alert('Failed to delete image.');
+                            }
+                        };
+                    });
+                }
+                document.getElementById('img-upload-form').onsubmit = async function(e) {
+                    e.preventDefault();
+                    const input = document.getElementById('img-upload-input');
+                    if (!input.files.length) return;
+                    const formData = new FormData();
+                    formData.append('image', input.files[0]);
+                    const res = await fetch('/upload-image', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (res.ok) {
+                        input.value = '';
+                        await loadImagesTable();
+                        alert('Image uploaded!');
+                    } else {
+                        alert('Upload failed.');
+                    }
+                };
+                loadImagesTable();
+
+                // IMAGE INSERT POPUP LOGIC
+                document.getElementById('img-insert-btn').onclick = function() {
+                    loadImagesTable();
+                    document.getElementById('img-insert-popup').style.display = 'flex';
+                };
+                document.getElementById('img-insert-close').onclick = function() {
+                    document.getElementById('img-insert-popup').style.display = 'none';
+                };
+                document.getElementById('img-insert-form').onsubmit = function(e) {
+                    e.preventDefault();
+                    const code = document.getElementById('img-insert-select').value;
+                    const h = document.getElementById('img-insert-height').value;
+                    const w = document.getElementById('img-insert-width').value;
+                    const style = document.getElementById('img-insert-style').value;
+                    const caption = document.getElementById('img-insert-caption').value;
+                    let markup = `/pic ${code}`;
+                    if (h) markup += ` ${h}`;
+                    if (w) markup += ` ${w}`;
+                    if (style) markup += ` ${style}`;
+                    if (caption) markup += ` ${caption}`;
+                    markup += ' /';
+                    insertAtCursor(document.getElementById('body'), markup);
+                    document.getElementById('img-insert-popup').style.display = 'none';
+                };
+
+                // In preview: render /pic code height width/ as <img src="..." height="..." width="...">
+                function getImageUrlByCode(code, images) {
+                    code = parseInt(code, 10);
+                    if (!Array.isArray(images) || isNaN(code) || code < 1 || code > images.length) return '';
+                    return images[code-1].url;
+                }
+                const originalPreviewInput = bodyInput.oninput || null;
+                bodyInput.addEventListener('input', async function() {
+                    let html = bodyInput.value;
+                    // ...existing markup replacements...
+                    // Add image rendering (use /pic instead of /img)
+                    const res = await fetch('/list-images');
+                    let images = [];
+                    if (res.ok) images = await res.json();
+                    html = html.replace(/\/pic\s+(\d+)(?:\s+(\d+))?(?:\s+(\d+))?\s*\//g, (match, code, h, w) => {
+                        const url = getImageUrlByCode(code, images);
+                        if (!url) return '';
+                        let attrs = '';
+                        if (h) attrs += ` height="${h}"`;
+                        if (w) attrs += ` width="${w}"`;
+                        return `<img src="${url}"${attrs} style="max-width:100%;border-radius:0.4em;">`;
+                    });
+                    // ...existing section splitting and preview logic...
+                    const sectionParts = html.split(/(?:\r?\n)?\s*\/s\s*(?:\r?\n)?/g);
+                    html = sectionParts.map(part => {
+                        // Split by our fake H2 marker
+                        let parts = part.split('|||H2|||');
+                        let result = '';
+                        for (let i = 0; i < parts.length; i++) {
+                            if (i % 2 === 1) {
+                                // Heading
+                                result += `<h2>${parts[i]}</h2>`;
+                            } else {
+                                // Paragraphs: split by double newlines or single newlines, wrap in <p>
+                                let paras = parts[i].split(/\n{2,}/g).map(p => p.trim()).filter(p => p.length > 0);
+                                result += paras.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+                            }
+                        }
+                        return `<div class="section-preview">${result}</div>`;
+                    }).join('');
+
+                    preview.innerHTML = html;
+                });
+
+                // IMAGE PREVIEW: Render /pic code height width style caption/ as <figure><img ...><figcaption>...</figcaption></figure>
+                function getImageUrlByCode(code, images) {
+                    code = parseInt(code, 10);
+                    if (!Array.isArray(images) || isNaN(code) || code < 1 || code > images.length) return '';
+                    return images[code-1].url;
+                }
+
+                bodyInput.addEventListener('input', async function() {
+                    let html = bodyInput.value;
+                    // ...existing markup replacements before section splitting...
+
+                    // Fetch images for /pic code/ rendering
+                    let images = [];
+                    try {
+                        const res = await fetch('/list-images');
+                        if (res.ok) images = await res.json();
+                    } catch {}
+
+                    // Replace /pic code height width style caption/ with <figure><img ...><figcaption>...</figcaption></figure>
+                    html = html.replace(
+                        /\/pic\s+(\d+)(?:\s+(\d+))?(?:\s+(\d+))?(?:\s+(wrap|block))?(?:\s+([^\/]+?))?\s*\//g,
+                        (match, code, h, w, style, caption) => {
+                            const url = getImageUrlByCode(code, images);
+                            if (!url) return '';
+                            let attrs = '';
+                            if (h) attrs += ` height="${h}"`;
+                            if (w) attrs += ` width="${w}"`;
+                            let imgClass = '';
+                            let figStyle = '';
+                            if (style === 'wrap') {
+                                imgClass = 'float-img';
+                                figStyle = 'style="display:inline-block;float:right;margin:0 0 1em 2em;max-width:320px;width:40%;"';
+                            }
+                            let imgTag = `<img src="${url}"${attrs} style="max-width:100%;border-radius:0.4em;"${imgClass ? ` class="${imgClass}"` : ''}>`;
+                            let figcaption = caption ? `<figcaption>${caption.trim()}</figcaption>` : '';
+                            return `<figure ${figStyle}>${imgTag}${figcaption}</figure>`;
+                        }
+                    );
+
+                    // ...existing section splitting and preview logic...
+                    const sectionParts = html.split(/(?:\r?\n)?\s*\/s\s*(?:\r?\n)?/g);
+                    html = sectionParts.map(part => {
+                        // Split by our fake H2 marker
+                        let parts = part.split('|||H2|||');
+                        let result = '';
+                        for (let i = 0; i < parts.length; i++) {
+                            if (i % 2 === 1) {
+                                // Heading
+                                result += `<h2>${parts[i]}</h2>`;
+                            } else {
+                                // Paragraphs: split by double newlines or single newlines, wrap in <p>
+                                let paras = parts[i].split(/\n{2,}/g).map(p => p.trim()).filter(p => p.length > 0);
+                                result += paras.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+                            }
+                        }
+                        return `<div class="section-preview">${result}</div>`;
+                    }).join('');
+
+                    preview.innerHTML = html;
+                });
+
+                // IMAGE PREVIEW: Render /pic code height width style caption/ as <figure class="float-img-container"><img ... class="float-img"><figcaption>...</figcaption></figure>
+                function getImageUrlByCode(code, images) {
+                    code = parseInt(code, 10);
+                    if (!Array.isArray(images) || isNaN(code) || code < 1 || code > images.length) return '';
+                    return images[code-1].url;
+                }
+
+                bodyInput.addEventListener('input', async function() {
+                    let html = bodyInput.value;
+                    // ...markup replacements...
+                    html = html.replace(/\/l\s*((?:\/e\s*[^\/]+)+)\/\s*/g, (match, listContent) => {
+                        const items = [...listContent.matchAll(/\/e\s*([^\/\n]+)/g)].map(m => `<li>${m[1].trim()}</li>`);
+                        return `<ul>${items.join('')}</ul>`;
+                    });
+                    html = html.replace(/\/h\s*([^\n\/]+)\s*\//g, (match, headerText) => {
+                        return `|||H2|||${headerText.trim()}|||H2|||`;
+                    });
+                    html = html.replace(/\/b\s*([^\n\/]+)\s*\//g, (match, boldText) => {
+                        return `<b>${boldText.trim()}</b>`;
+                    });
+                    html = html.replace(/\/i\s*([^\n\/]+)\s*\//g, (match, italicText) => {
+                        return `<i>${italicText.trim()}</i>`;
+                    });
+                    html = html.replace(/\/u\s*([^\n\/]+)\s*\//g, (match, underlineText) => {
+                        return `<u>${underlineText.trim()}</u>`;
+                    });
+
+                    // Fetch images for /pic code/ rendering
+                    let images = [];
+                    try {
+                        const res = await fetch('/list-images');
+                        if (res.ok) images = await res.json();
+                    } catch {}
+
+                    // Replace /pic code height width style caption/ with <figure class="float-img-container"><img ... class="float-img"><figcaption>...</figcaption></figure>
+                    html = html.replace(
+                        /\/pic\s+(\d+)(?:\s+(\d+))?(?:\s+(\d+))?(?:\s+(wrap|block))?(?:\s+([^\/]+?))?\s*\//g,
+                        (match, code, h, w, style, caption) => {
+                            const url = getImageUrlByCode(code, images);
+                            if (!url) return '';
+                            let attrs = '';
+                            if (h) attrs += ` height="${h}"`;
+                            if (w) attrs += ` width="${w}"`;
+                            let figClass = '';
+                            let imgClass = '';
+                            if (style === 'wrap') {
+                                figClass = 'float-img-container';
+                                imgClass = 'float-img';
+                            }
+                            let imgTag = `<img src="${url}"${attrs} class="${imgClass}" style="max-width:100%;border-radius:0.4em;">`;
+                            let figcaption = caption ? `<figcaption>${caption.trim()}</figcaption>` : '';
+                            return `<figure${figClass ? ` class="${figClass}"` : ''}>${imgTag}${figcaption}</figure>`;
+                        }
+                    );
+
+                    // ...section splitting and preview logic...
+                    const sectionParts = html.split(/(?:\r?\n)?\s*\/s\s*(?:\r?\n)?/g);
+                    html = sectionParts.map(part => {
+                        let parts = part.split('|||H2|||');
+                        let result = '';
+                        for (let i = 0; i < parts.length; i++) {
+                            if (i % 2 === 1) {
+                                result += `<h2>${parts[i]}</h2>`;
+                            } else {
+                                let paras = parts[i].split(/\n{2,}/g).map(p => p.trim()).filter(p => p.length > 0);
+                                result += paras.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+                            }
+                        }
+                        return `<div class="section-preview">${result}</div>`;
+                    }).join('');
+
+                    preview.innerHTML = html;
+                });
+
+                // Minimize/expand image table
+                document.addEventListener('DOMContentLoaded', function() {
+                    var toggleBtn = document.getElementById('img-table-toggle');
+                    var tableContainer = document.getElementById('img-table-container');
+                    if (toggleBtn && tableContainer) {
+                        toggleBtn.onclick = function() {
+                            tableContainer.classList.toggle('minimized');
+                            toggleBtn.classList.toggle('minimized');
+                            toggleBtn.innerHTML = tableContainer.classList.contains('minimized') ? '&#x25BC;' : '&#x25B2;';
+                        };
+                    }
+                });
+
+                // Populate all category dropdowns and filters dynamically
+                fetch('/categories').then(res => res.json()).then(categories => {
+                    // Post creation form
+                    const catSel = document.getElementById('category');
+                    if (catSel) {
+                        catSel.innerHTML = categories.map(cat => {
+                            let label = cat.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim();
+                            return `<option value="${cat}">${label}</option>`;
+                        }).join('');
+                    }
+                    // Posts filter
+                    const postFilter = document.getElementById('post-filter');
+                    if (postFilter) {
+                        postFilter.innerHTML = '<option value="all">All</option>' +
+                            categories.map(cat => {
+                                let label = cat.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim();
+                                return `<option value="${cat}">${label}</option>`;
+                            }).join('');
+                    }
+                    // Comments filter
+                    const commentsCatFilter = document.getElementById('comments-filter-category');
+                    if (commentsCatFilter) {
+                        commentsCatFilter.innerHTML = '<option value="all">All</option>' +
+                            categories.map(cat => {
+                                let label = cat.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim();
+                                return `<option value="${cat}">${label}</option>`;
+                            }).join('');
+                    }
+                });
+                </script>
+                <style>
+                .section-preview {
+                    background: #e6e8ea;
+                    border: 2px solid #4A5568;
+                    border-radius: 1.2rem;
+                    margin: 1.2em 0;
+                    padding: 1.5em 1.2em;
+                    box-shadow: 0 8px 32px 0 rgba(74,85,104,0.08);
+                }
+                .form-group > div > button {
+                    background: #F6E05E;
+                    color: #4A5568;
+                    border: 1px solid #4A5568;
+                    border-radius: 0.5em;
+                    padding: 0.2em 0.7em;
+                    font-size: 1.1em;
+                    font-family: inherit;
+                    cursor: pointer;
+                    transition: background 0.2s, color 0.2s;
+                }
+                .form-group > div > button:hover,
+                .form-group > div > button:focus {
+                    background: #FF6B00;
+                    color: #fff;
+                    outline: none;
+                }
+                /* Make main action buttons equal width and horizontal */
+                .main-action-btn {
+                    flex: 1 1 0;
+                    min-width: 0;
+                    background: #FF6B00;
+                    color: #fff;
+                    border: none;
+                    border-radius: 0.7rem;
+                    padding: 0.9rem 1.5rem !important;
+                    font-size: 1.2rem;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: background 0.2s, color 0.2s;
+                    margin-top: 0;
+                    box-sizing: border-box;
+                    display: block;
+                }
+                .main-action-btn:hover,
+                .main-action-btn:focus {
+                    background: #F6E05E;
+                    color: #23272f;
+                }
+                #img-table-container {
+                    max-width: 100%;
+                    overflow-x: auto;
+                    transition: max-height 0.3s;
+                }
+                #img-table-container.minimized {
+                    max-height: 0;
+                    overflow: hidden;
+                    padding: 0;
+                    margin: 0;
+                    opacity: 0;
+                    pointer-events: none;
+                }
+                #img-table-toggle {
+                    margin-left: 1em;
+                    font-size: 1.1em;
+                    background: #F6E05E;
+                    color: #4A5568;
+                    border: 1.5px solid #FF6B00;
+                    border-radius: 0.7em;
+                    padding: 0.3em 1.1em;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                }
+                #img-table-toggle.minimized {
+                    transform: rotate(180deg);
+                }
+                </style>
+            </section>
+            <section class="section" id="all-posts-section">
+                <h2 style="display:flex;align-items:center;justify-content:space-between;">
+                    All Posts
+                    <button id="toggle-posts-section" type="button" style="background:#F6E05E;color:#4A5568;border:1.5px solid #FF6B00;border-radius:0.7em;padding:0.3em 1.1em;font-size:1em;font-weight:bold;cursor:pointer;transition:background 0.2s;">&#x25B2;</button>
+                </h2>
+                <div id="posts-filters" style="margin-bottom:1em;">
                 <select id="post-filter" style="
                     background: #F7FAFC;
                     color: #4A5568;
@@ -276,19 +943,66 @@
             <div id="posts-list">
                 <!-- Posts will be loaded here -->
             </div>
+            <div id="all-posts-pagination" style="text-align:center;margin-top:1em;"></div>
         </section>
     </main>
-    <div id="footer-include"></div>
+    </div>
+    <!-- All Comments Section moved here, after main content but before footer -->
+    <section class="section" id="all-comments-section" style="margin-top:2em;">
+        <h2 style="display:flex;align-items:center;justify-content:space-between;">
+            All Comments
+            <button id="toggle-comments-section" type="button" style="background:#F6E05E;color:#4A5568;border:1.5px solid #FF6B00;border-radius:0.7em;padding:0.3em 1.1em;font-size:1em;font-weight:bold;cursor:pointer;transition:background 0.2s;">&#x25B2;</button>
+        </h2>
+        <div id="comments-filters" style="display:flex;gap:1em;flex-wrap:wrap;margin-bottom:1em;">
+            <label>
+                Year:
+                <select id="comments-filter-year">
+                    <option value="all">All</option>
+                </select>
+            </label>
+            <label>
+                Month:
+                <select id="comments-filter-month">
+                    <option value="all">All</option>
+                </select>
+            </label>
+            <label>
+                Category:
+                <select id="comments-filter-category">
+                    <option value="all">All</option>
+                    <option value="ComputerScience">Computer Science</option>
+                    <option value="Math">Math</option>
+                </select>
+            </label>
+        </div>
+        <div id="all-comments-list" style="max-height:500px;overflow-y:auto;"></div>
+        <div id="all-comments-pagination" style="text-align:center;margin-top:1em;"></div>
+    </section>
+
     <script>
     function includeHTML(id, url, cb) {
         fetch(url)
           .then(res => res.text())
           .then(html => {
+              // Patch homepage link for Poster.html only
+              if (id === 'header-include') {
+                  // Always use absolute path from site root for homepage
+                  html = html.replace(
+                      /(<a[^>]+id=["']menu-homepage["'][^>]+href=["'])[^"']+(["'])/i,
+                      '$1/HumanityIsObliviouslyBlindedToPowersOfTen/Homepage.html$2'
+                  );
+              }
               document.getElementById(id).innerHTML = html;
               if (cb) cb();
           });
     }
-    includeHTML('header-include', 'partials/header.html');
+    // Dull the login button only on Poster.html
+    includeHTML('header-include', 'partials/header.html', function() {
+        var loginBtn = document.getElementById('login-btn');
+        if (loginBtn) loginBtn.classList.add('dulled');
+        var homeMenu = document.getElementById('menu-homepage');
+        if (homeMenu) homeMenu.classList.remove('dulled');
+    });
     includeHTML('sidebar-include', 'partials/sidebar.html');
     includeHTML('footer-include', 'partials/footer.html');
 
@@ -300,12 +1014,21 @@
             return;
         }
         const posts = await res.json();
-        renderPosts(posts, document.getElementById('post-filter').value);
-        document.getElementById('post-filter').onchange = function() {
-            renderPosts(posts, this.value);
-        };
+        // Flatten posts for pagination
+        let flatPosts = [];
+        for (const [cat, arr] of Object.entries(posts)) {
+            arr.forEach(post => {
+                flatPosts.push({ ...post, category: cat });
+            });
+        }
+        // Sort by date descending, then filename
+        flatPosts.sort((a, b) => b.date.localeCompare(a.date) || b.filename.localeCompare(a.filename));
+        allPostsData = flatPosts;
+        filterAllPosts();
+        document.getElementById('post-filter').onchange = filterAllPosts;
     }
 
+    // Fix preview for posts: show parsed preview (first 40 chars)
     function renderPosts(posts, filter) {
         let filtered = {};
         if (filter === 'all') {
@@ -332,28 +1055,37 @@
         for (const monthKey of sortedMonths) {
             const [year, month] = monthKey.split('-');
             const monthName = new Date(`${year}-${month}-01`).toLocaleString('default', { month: 'long', year: 'numeric' });
-            html += `<h3 style="color:#4A5568;margin-top:1.5em;">${monthName}</h3><ul style="margin-bottom:1.5em;">`;
+            html += `<h3 style="color:#4A5568;margin-top:1.5em;">${monthName}</h3><div style="margin-bottom:1.5em;">`;
             months[monthKey].sort((a, b) => b.date.localeCompare(a.date));
             for (const post of months[monthKey]) {
-                html += `<li>
-                    <a href="/Posts/${post.category}/${post.filename}" target="_blank" style="font-weight:bold;color:#FF6B00;text-decoration:underline;">${post.title}</a>
-                    <span style="color:#4A5568;margin-left:1em;">${post.date}</span>
-                    <span style="color:#888;margin-left:0.7em;font-size:0.95em;">[${post.category}]</span>
-                    <button class="delete-post-btn" data-category="${post.category}" data-filename="${post.filename}" style="
-                        margin-left:1.5em;
-                        background:#fff;
-                        color:#a00;
-                        border:1.5px solid #a00;
-                        border-radius:0.5em;
-                        padding:0.2em 0.8em;
-                        font-size:1em;
-                        font-weight:bold;
-                        cursor:pointer;
-                        transition:background 0.2s,color 0.2s;
-                    ">Delete</button>
-                </li>`;
+                html += `
+                <div class="post-list-item" style="
+                    border:2px solid #FF6B00;
+                    border-radius:1.1em;
+                    margin-bottom:1.2em;
+                    padding:1.1em 1.2em;
+                    background:#fff;
+                    box-shadow:0 2px 12px 0 rgba(255,107,0,0.06);
+                    display:flex;
+                    flex-direction:column;
+                    gap:0.5em;
+                ">
+                    <div style="display:flex;align-items:center;gap:0.7em;">
+                        <a href="/Posts/${post.category}/${post.filename}" target="_blank" style="font-weight:bold;color:#FF6B00;text-decoration:underline;font-size:1.15em;">${post.title}</a>
+                        <span style="color:#4A5568;margin-left:1em;">${post.date}</span>
+                        <span style="color:#888;margin-left:0.7em;font-size:0.95em;">[${post.category}]</span>
+                        <button class="edit-post-btn main-action-btn" data-category="${post.category}" data-filename="${post.filename}">Edit</button>
+                        <button class="delete-post-btn main-action-btn" data-category="${post.category}" data-filename="${post.filename}">Delete</button>
+                    </div>
+                    <div class="post-preview" style="font-size:0.93em;color:#4A5568;opacity:0.7;margin-top:0.2em;">
+                        <span>Preview: </span>
+                        <span id="preview-${post.category}-${post.filename.replace(/[^a-zA-Z0-9]/g,'')}">Loading...</span>
+                        <div id="section-${post.category}-${post.filename.replace(/[^a-zA-Z0-9]/g,'')}" style="margin-top:0.4em;font-size:0.98em;color:#23272f;opacity:0.95;"></div>
+                    </div>
+                </div>
+                `;
             }
-            html += '</ul>';
+            html += '</div>';
         }
         document.getElementById('posts-list').innerHTML = html;
 
@@ -370,18 +1102,764 @@
                     body: JSON.stringify({ category, filename })
                 });
                 if (res.ok) {
-                    // Remove the post from the UI
-                    btn.closest('li').remove();
+                    btn.closest('.post-list-item').remove();
                 } else {
                     alert('Failed to delete post.');
                 }
             };
+        });
+
+        // Add edit button logic
+        document.querySelectorAll('.edit-post-btn').forEach(btn => {
+            btn.onclick = async function() {
+                const category = btn.getAttribute('data-category');
+                const filename = btn.getAttribute('data-filename');
+                const confirmed = confirm(`Are you sure you want to edit "${filename}" from ${category}? This will load the post into the form for editing.`);
+                if (!confirmed) return;
+                // Fetch post content from server
+                const res = await fetch('get-post', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ category, filename })
+                });
+                if (!res.ok) {
+                    alert('Failed to load post for editing.');
+                    return;
+                }
+                const data = await res.json();
+                document.getElementById('category').value = category;
+                document.getElementById('title').value = data.title || '';
+                document.getElementById('body').value = data.rawBody || '';
+                document.getElementById('form-title').textContent = "Edit Post";
+                document.getElementById('submit-btn').textContent = "Edit Post";
+                editingPost = { category, filename };
+                document.getElementById('body').dispatchEvent(new Event('input'));
+                document.getElementById('cancel-edit-btn').style.display = '';
+                autosaveId = null;
+                lastAutosaveContent = '';
+            };
+        });
+
+        // Fetch and show preview for each post (first section, 40 chars) and show full first section below
+        document.querySelectorAll('.post-preview span[id^="preview-"]').forEach(async function(span) {
+            const id = span.id;
+            const match = id.match(/^preview-(ComputerScience|Math)-(.+)$/);
+            if (!match) return;
+            const category = match[1];
+            const parent = span.closest('.post-list-item');
+            if (!parent) return;
+            const btn = parent.querySelector('.edit-post-btn');
+            if (!btn) return;
+            const filename = btn.getAttribute('data-filename');
+            // Fetch preview
+            const res = await fetch('get-post', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ category, filename })
+            });
+            if (!res.ok) {
+                span.textContent = 'Preview unavailable';
+                return;
+            }
+            const data = await res.json();
+            if (data.rawBody) {
+                let firstSection = data.rawBody.split(/(?:\r?\n)?\s*\/s\s*(?:\r?\n)?/g)[0] || '';
+                let plain = firstSection
+                    .replace(/\/l\s*((?:\/e\s*[^\/]+)+)\/\s*/g, '')
+                    .replace(/\/h\s*([^\n\/]+)\s*\//g, '$1')
+                    .replace(/\/b\s*([^\n\/]+)\s*\//g, '$1')
+                    .replace(/\/i\s*([^\n\/]+)\s*\//g, '$1')
+                    .replace(/\/u\s*([^\n\/]+)\s*\//g, '$1')
+                    .replace(/\n+/g, ' ')
+                    .trim();
+                if (plain.length > 40) plain = plain.slice(0, 40) + '...';
+                span.textContent = plain || '[Empty]';
+
+                // Show full first section (with markup rendered) under preview
+                const sectionDiv = document.getElementById(`section-${category}-${filename.replace(/[^a-zA-Z0-9]/g,'')}`);
+                if (sectionDiv) {
+                    // Render markup for first section
+                    let html = firstSection;
+                    html = html.replace(/\/l\s*((?:\/e\s*[^\/]+)+)\/\s*/g, (match, listContent) => {
+                        const items = [...listContent.matchAll(/\/e\s*([^\/\n]+)/g)].map(m => `<li>${m[1].trim()}</li>`);
+                        return `<ul>${items.join('')}</ul>`;
+                    });
+                    html = html.replace(/\/h\s*([^\n\/]+)\s*\//g, (match, headerText) => {
+                        return `<h2>${headerText.trim()}</h2>`;
+                    });
+                    html = html.replace(/\/b\s*([^\n\/]+)\s*\//g, (match, boldText) => {
+                        return `<b>${boldText.trim()}</b>`;
+                    });
+                    html = html.replace(/\/i\s*([^\n\/]+)\s*\//g, (match, italicText) => {
+                        return `<i>${italicText.trim()}</i>`;
+                    });
+                    html = html.replace(/\/u\s*([^\n\/]+)\s*\//g, (match, underlineText) => {
+                        return `<u>${underlineText.trim()}</u>`;
+                    });
+                    // Paragraphs: split by double newlines or single newlines, wrap in <p>
+                    let parts = html.split(/\n{2,}/g).map(p => p.trim()).filter(p => p.length > 0);
+                    html = parts.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+                    sectionDiv.innerHTML = html;
+                }
+            } else {
+                span.textContent = '[No preview]';
+            }
         });
     }
 
     if (window.location.pathname.endsWith('Poster.html')) {
         loadPosts();
     }
+
+    // Sidebar for drafts (override only in Poster.html)
+    function renderDraftSidebar(drafts) {
+        let html = `<aside class="sidebar"><h2>Drafts</h2><ul id="drafts-list"></ul></aside>`;
+        document.getElementById('sidebar-include').innerHTML = html;
+        const ul = document.getElementById('drafts-list');
+        if (!drafts || drafts.length === 0) {
+            ul.innerHTML = '<li style="color:#888;">No drafts saved.</li>';
+            return;
+        }
+        for (const draft of drafts) {
+            // Label "auto" for autosave drafts, "old" for drafts not edited in 24h
+            let label = '';
+            if (/_autosave\.json$/.test(draft.filename)) {
+                label = `<span style="color:#0077cc;font-size:0.95em;margin-left:0.5em;">[auto]</span>`;
+            } else {
+                // Check if draft is "old" (not edited in 24h)
+                try {
+                    const now = Date.now();
+                    const m = draft.filename.match(/_(\d+)(?:_autosave)?\.json$/);
+                    if (m && m[1]) {
+                        const ts = parseInt(m[1], 10);
+                        if (!isNaN(ts) && now - ts > 24 * 60 * 60 * 1000) {
+                            label = `<span style="color:#a00;font-size:0.95em;margin-left:0.5em;">[old]</span>`;
+                        }
+                    }
+                } catch {}
+            }
+            ul.innerHTML += `
+                <li style="margin-bottom:1em;">
+                    <span style="font-weight:bold;color:#FF6B00;">${draft.title}</span>
+                    <span style="color:#4A5568;margin-left:0.7em;">${draft.date}</span>
+                    ${label}
+                    <button class="edit-draft-btn main-action-btn" data-filename="${draft.filename}">Edit</button>
+                    <button class="delete-draft-btn main-action-btn" data-filename="${draft.filename}">Delete</button>
+                    <div class="draft-preview" id="draft-preview-${draft.filename.replace(/[^a-zA-Z0-9]/g,'')}" style="font-size:0.93em;color:#4A5568;opacity:0.7;margin-top:0.2em;"></div>
+                </li>
+            `;
+        }
+        // Add edit/delete logic for drafts
+        document.querySelectorAll('.edit-draft-btn').forEach(btn => {
+            btn.onclick = async function() {
+                const filename = btn.getAttribute('data-filename');
+                const confirmed = confirm(`Edit draft "${filename}"?`);
+                if (!confirmed) return;
+                const res = await fetch('get-draft', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename })
+                });
+                if (!res.ok) {
+                    alert('Failed to load draft.');
+                    return;
+                }
+                const data = await res.json();
+                document.getElementById('category').value = data.category || '';
+                document.getElementById('title').value = data.title || '';
+                document.getElementById('body').value = data.rawBody || '';
+                document.getElementById('form-title').textContent = "Edit Draft";
+                document.getElementById('submit-btn').textContent = "Save as Post";
+                document.getElementById('save-draft-btn').textContent = "Keep as draft";
+                editingPost = null;
+                editingDraft = { filename };
+                document.getElementById('body').dispatchEvent(new Event('input'));
+                document.getElementById('cancel-edit-btn').style.display = '';
+                autosaveId = btn.getAttribute('data-filename');
+                lastAutosaveContent = '';
+            };
+        });
+        document.querySelectorAll('.delete-draft-btn').forEach(btn => {
+            btn.onclick = async function() {
+                const filename = btn.getAttribute('data-filename');
+                const confirmed = confirm(`Delete draft "${filename}"?`);
+                if (!confirmed) return;
+                const res = await fetch('delete-draft', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename })
+                });
+                if (res.ok) {
+                    btn.closest('li').remove();
+                } else {
+                    alert('Failed to delete draft.');
+                }
+            };
+        });
+
+        // Fetch and show preview for each draft (parsed, 40 chars max)
+        drafts.forEach(async function(draft) {
+            const previewId = `draft-preview-${draft.filename.replace(/[^a-zA-Z0-9]/g,'')}`;
+            const span = document.getElementById(previewId);
+            if (!span) return;
+            // Fetch draft content
+            const res = await fetch('get-draft', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: draft.filename })
+            });
+            if (!res.ok) {
+                span.textContent = 'Preview unavailable';
+                return;
+            }
+            const data = await res.json();
+            if (data.rawBody) {
+                // Show first section (up to /s or end), parse markup for preview
+                let firstSection = data.rawBody.split(/(?:\r?\n)?\s*\/s\s*(?:\r?\n)?/g)[0] || '';
+                // Remove markup for preview
+                let plain = firstSection
+                    .replace(/\/l\s*((?:\/e\s*[^\/]+)+)\/\s*/g, '')
+                    .replace(/\/h\s*([^\n\/]+)\s*\//g, '$1')
+                    .replace(/\/b\s*([^\n\/]+)\s*\//g, '$1')
+                    .replace(/\/i\s*([^\n\/]+)\s*\//g, '$1')
+                    .replace(/\/u\s*([^\n\/]+)\s*\//g, '$1')
+                    .replace(/\n+/g, ' ')
+                    .trim();
+                if (plain.length > 40) plain = plain.slice(0, 40) + '...';
+                span.textContent = "Preview: " + (plain || '[Empty]');
+            } else {
+                span.textContent = 'Preview: [No preview]';
+            }
+        });
+    }
+
+    // Fetch drafts for sidebar
+    async function loadDrafts() {
+        const res = await fetch('list-drafts');
+        if (!res.ok) {
+            renderDraftSidebar([]);
+            return;
+        }
+        const drafts = await res.json();
+        renderDraftSidebar(drafts);
+    }
+
+    // Draft system state
+
+    // Save Draft button logic
+    document.getElementById('save-draft-btn').onclick = async function() {
+        const category = document.getElementById('category').value;
+        const title = document.getElementById('title').value;
+        const body = document.getElementById('body').value;
+        if (!title || !body) {
+            alert('Title and body are required to save a draft.');
+            return;
+        }
+        let payload = { category, title, body };
+        if (editingDraft) payload.edit_filename = editingDraft.filename;
+        if (autosaveId) payload.autosave_id = autosaveId;
+        const res = await fetch('save-draft', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+            alert('Draft saved!');
+            document.getElementById('form-title').textContent = "Create a New Post";
+            document.getElementById('submit-btn').textContent = "Create Post";
+            document.getElementById('save-draft-btn').textContent = "Save Draft";
+            editingPost = null;
+            editingDraft = null;
+            document.getElementById('cancel-edit-btn').style.display = 'none';
+            document.getElementById('postForm').reset();
+            loadDrafts();
+        } else {
+            alert('Error saving draft.');
+        }
+    };
+
+    // On load, fetch drafts for sidebar
+    if (window.location.pathname.endsWith('Poster.html')) {
+        loadPosts();
+        loadDrafts();
+    }
+
+    // Patch: always show Drafts sidebar even before any drafts exist
+    document.addEventListener('DOMContentLoaded', function() {
+        renderDraftSidebar([]);
+    });
+
+    // --- All Comments Section Logic ---
+    let allCommentsData = [];
+    let allCommentsFiltered = [];
+    let allCommentsPage = 1;
+    const ALL_COMMENTS_PER_PAGE = 10;
+
+    async function fetchAllComments() {
+        // Fetch all posts first
+        const postsRes = await fetch('list-posts');
+        if (!postsRes.ok) return;
+        const posts = await postsRes.json();
+        let postList = [];
+        for (const [cat, arr] of Object.entries(posts)) {
+            arr.forEach(post => {
+                postList.push({ category: cat, filename: post.filename, title: post.title, date: post.date });
+            });
+        }
+        // Fetch all comments for each post
+        let allComments = [];
+        for (const post of postList) {
+            try {
+                const res = await fetch(`/comments?category=${encodeURIComponent(post.category)}&filename=${encodeURIComponent(post.filename)}`);
+                if (!res.ok) continue;
+                const comments = await res.json();
+                comments.forEach((comment, idx) => {
+                    // Attach post info and index to each comment
+                    allComments.push({
+                        ...comment,
+                        postTitle: post.title,
+                        postCategory: post.category,
+                        postFilename: post.filename,
+                        postDate: post.date,
+                        commentIndex: idx // index in the file for deletion
+                    });
+                });
+            } catch {}
+        }
+        allCommentsData = allComments;
+        populateCommentsFilters();
+        renderAllComments();
+    }
+
+    function populateCommentsFilters() {
+        // Populate year and month filters based on allCommentsData
+        const years = new Set();
+        const months = new Set();
+        allCommentsData.forEach(c => {
+            const d = new Date(c.date || c.postDate);
+            years.add(d.getFullYear());
+            months.add(d.getMonth() + 1);
+        });
+        const yearSel = document.getElementById('comments-filter-year');
+        const monthSel = document.getElementById('comments-filter-month');
+        // Clear and repopulate
+        yearSel.innerHTML = '<option value="all">All</option>';
+        monthSel.innerHTML = '<option value="all">All</option>';
+        Array.from(years).sort((a, b) => b - a).forEach(y => {
+            yearSel.innerHTML += `<option value="${y}">${y}</option>`;
+        });
+        Array.from(months).sort((a, b) => a - b).forEach(m => {
+            monthSel.innerHTML += `<option value="${m}">${String(m).padStart(2, '0')}</option>`;
+        });
+    }
+
+    function filterAllComments() {
+        const year = document.getElementById('comments-filter-year').value;
+        const month = document.getElementById('comments-filter-month').value;
+        const category = document.getElementById('comments-filter-category').value;
+        allCommentsFiltered = allCommentsData.filter(c => {
+            const d = new Date(c.date || c.postDate);
+            let match = true;
+            if (year !== 'all') match = match && d.getFullYear().toString() === year;
+            if (month !== 'all') match = match && (d.getMonth() + 1).toString() === month;
+            if (category !== 'all') match = match && c.postCategory === category;
+            return match;
+        });
+        allCommentsPage = 1;
+        renderAllComments();
+    }
+
+    function renderAllComments() {
+        const list = document.getElementById('all-comments-list');
+        const pag = document.getElementById('all-comments-pagination');
+        if (!allCommentsFiltered.length) {
+            list.innerHTML = '<div style="color:#888;font-style:italic;">No comments found.</div>';
+            pag.innerHTML = '';
+            return;
+        }
+        // Sort newest to oldest
+        const sorted = allCommentsFiltered.slice().sort((a, b) => new Date(b.date) - new Date(a.date));
+        const totalPages = Math.ceil(sorted.length / ALL_COMMENTS_PER_PAGE);
+        allCommentsPage = Math.max(1, Math.min(allCommentsPage, totalPages));
+        const start = (allCommentsPage - 1) * ALL_COMMENTS_PER_PAGE;
+        const end = start + ALL_COMMENTS_PER_PAGE;
+        const pageComments = sorted.slice(start, end);
+        list.innerHTML = pageComments.map((c, idx) => `
+            <div class="comment" style="border-bottom:1px solid #eee;margin-bottom:1em;padding-bottom:0.5em;">
+                <div style="font-size:1em;">
+                    <span class="comment-name" style="color:#F6E05E;font-weight:bold;">${c.name ? c.name : 'Anonymous'}</span>
+                    <span class="comment-date" style="color:#888;font-size:0.9em;margin-left:0.5em;">${new Date(c.date).toLocaleString()}</span>
+                </div>
+                <h2 class="comment-body" style="font-size:1.1em;margin:0.2em 0 0.5em 0;">${c.text.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>")}</h2>
+                <div style="font-size:0.98em;color:#4A5568;">
+                    On post: <a href="/Posts/${c.postCategory}/${c.postFilename}" target="_blank" style="color:#FF6B00;font-weight:bold;text-decoration:underline;">${c.postTitle}</a>
+                    <span style="color:#888;margin-left:0.7em;">[${c.postCategory}]</span>
+                    <span style="color:#888;margin-left:0.7em;">${c.postDate}</span>
+                    <button class="delete-comment-btn" 
+                        data-category="${c.postCategory}" 
+                        data-filename="${c.postFilename}" 
+                        data-index="${c.commentIndex}" 
+                        style="background:#fff;color:#a00;border:1.5px solid #a00;border-radius:0.5em;padding:0.2em 0.8em;font-size:1em;font-weight:bold;cursor:pointer;margin-left:1em;">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        // Pagination
+        if (totalPages > 1) {
+            let pagHtml = '';
+            for (let i = 1; i <= totalPages; ++i) {
+                pagHtml += `<button class="all-comments-page-btn" data-page="${i}"${i===allCommentsPage?' style="background:#FF6B00;color:#fff;"':''}>${i}</button> `;
+            }
+            pag.innerHTML = pagHtml;
+        } else {
+            pag.innerHTML = '';
+        }
+
+        // Add delete logic for comments
+        document.querySelectorAll('.delete-comment-btn').forEach(btn => {
+            btn.onclick = async function() {
+                const category = btn.getAttribute('data-category');
+                const filename = btn.getAttribute('data-filename');
+                const index = Number(btn.getAttribute('data-index'));
+                if (!confirm('Delete this comment?')) return;
+                const res = await fetch('/delete-comment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ category, filename, index })
+                });
+                if (res.ok) {
+                    // Remove from UI and refetch all comments
+                    await fetchAllComments();
+                    filterAllComments();
+                } else {
+                    alert('Failed to delete comment.');
+                }
+            };
+        });
+    }
+
+    // Minimize/expand logic
+    document.addEventListener('DOMContentLoaded', function() {
+        const section = document.getElementById('all-comments-section');
+        const toggleBtn = document.getElementById('toggle-comments-section');
+        if (toggleBtn && section) {
+            toggleBtn.onclick = function() {
+                section.classList.toggle('minimized');
+                toggleBtn.innerHTML = section.classList.contains('minimized') ? '&#x25BC;' : '&#x25B2;';
+                document.getElementById('comments-filters').style.display = section.classList.contains('minimized') ? 'none' : '';
+                document.getElementById('all-comments-list').style.display = section.classList.contains('minimized') ? 'none' : '';
+                document.getElementById('all-comments-pagination').style.display = section.classList.contains('minimized') ? 'none' : '';
+            };
+        }
+        // Filters
+        document.getElementById('comments-filter-year').onchange = filterAllComments;
+        document.getElementById('comments-filter-month').onchange = filterAllComments;
+        document.getElementById('comments-filter-category').onchange = filterAllComments;
+        // Pagination
+        document.getElementById('all-comments-pagination').addEventListener('click', function(e) {
+            if (e.target.classList.contains('all-comments-page-btn')) {
+                allCommentsPage = Number(e.target.getAttribute('data-page'));
+                renderAllComments();
+            }
+        });
+        // Initial fetch
+        fetchAllComments().then(() => {
+            filterAllComments();
+        });
+    });
+
+    // --- All Posts Pagination Logic ---
+    let allPostsData = [];
+    let allPostsFiltered = [];
+    let allPostsPage = 1;
+    const ALL_POSTS_PER_PAGE = 3;
+
+    async function loadPosts() {
+        const res = await fetch('list-posts');
+        if (!res.ok) {
+            document.getElementById('posts-list').innerHTML = '<p style="color:#a00;">Could not load posts.</p>';
+            return;
+        }
+        const posts = await res.json();
+        // Flatten posts for pagination
+        let flatPosts = [];
+        for (const [cat, arr] of Object.entries(posts)) {
+            arr.forEach(post => {
+                flatPosts.push({ ...post, category: cat });
+            });
+        }
+        // Sort by date descending, then filename
+        flatPosts.sort((a, b) => b.date.localeCompare(a.date) || b.filename.localeCompare(a.filename));
+        allPostsData = flatPosts;
+        filterAllPosts();
+        document.getElementById('post-filter').onchange = filterAllPosts;
+    }
+
+    function filterAllPosts() {
+        const filter = document.getElementById('post-filter').value;
+        if (filter === 'all') {
+            allPostsFiltered = allPostsData.slice();
+        } else {
+            allPostsFiltered = allPostsData.filter(p => p.category === filter);
+        }
+        allPostsPage = 1;
+        renderAllPosts();
+    }
+
+    function renderAllPosts() {
+        const list = document.getElementById('posts-list');
+        const pag = document.getElementById('all-posts-pagination');
+        if (!allPostsFiltered.length) {
+            list.innerHTML = '<p>No posts found.</p>';
+            pag.innerHTML = '';
+            return;
+        }
+        // Pagination
+        const totalPages = Math.ceil(allPostsFiltered.length / ALL_POSTS_PER_PAGE);
+        allPostsPage = Math.max(1, Math.min(allPostsPage, totalPages));
+        const start = (allPostsPage - 1) * ALL_POSTS_PER_PAGE;
+        const end = start + ALL_POSTS_PER_PAGE;
+        const pagePosts = allPostsFiltered.slice(start, end);
+
+        // Group by month for display
+        let months = {};
+        for (const post of pagePosts) {
+            const [day, month, year] = post.date.split('-');
+            const monthKey = `${year}-${month}`;
+            if (!months[monthKey]) months[monthKey] = [];
+            months[monthKey].push(post);
+        }
+        const sortedMonths = Object.keys(months).sort((a, b) => b.localeCompare(a));
+        let html = '';
+        for (const monthKey of sortedMonths) {
+            const [year, month] = monthKey.split('-');
+            const monthName = new Date(`${year}-${month}-01`).toLocaleString('default', { month: 'long', year: 'numeric' });
+            html += `<h3 style="color:#4A5568;margin-top:1.5em;">${monthName}</h3><div style="margin-bottom:1.5em;">`;
+            months[monthKey].sort((a, b) => b.date.localeCompare(a.date));
+            for (const post of months[monthKey]) {
+                html += `
+                <div class="post-list-item" style="
+                    border:2px solid #FF6B00;
+                    border-radius:1.1em;
+                    margin-bottom:1.2em;
+                    padding:1.1em 1.2em;
+                    background:#fff;
+                    box-shadow:0 2px 12px 0 rgba(255,107,0,0.06);
+                    display:flex;
+                    flex-direction:column;
+                    gap:0.5em;
+                ">
+                    <div style="display:flex;align-items:center;gap:0.7em;">
+                        <a href="/Posts/${post.category}/${post.filename}" target="_blank" style="font-weight:bold;color:#FF6B00;text-decoration:underline;font-size:1.15em;">${post.title}</a>
+                        <span style="color:#4A5568;margin-left:1em;">${post.date}</span>
+                        <span style="color:#888;margin-left:0.7em;font-size:0.95em;">[${post.category}]</span>
+                        <button class="edit-post-btn main-action-btn" data-category="${post.category}" data-filename="${post.filename}">Edit</button>
+                        <button class="delete-post-btn main-action-btn" data-category="${post.category}" data-filename="${post.filename}">Delete</button>
+                    </div>
+                    <div class="post-preview" style="font-size:0.93em;color:#4A5568;opacity:0.7;margin-top:0.2em;">
+                        <span>Preview: </span>
+                        <span id="preview-${post.category}-${post.filename.replace(/[^a-zA-Z0-9]/g,'')}">Loading...</span>
+                        <div id="section-${post.category}-${post.filename.replace(/[^a-zA-Z0-9]/g,'')}" style="margin-top:0.4em;font-size:0.98em;color:#23272f;opacity:0.95;"></div>
+                    </div>
+                </div>
+                `;
+            }
+            html += '</div>';
+        }
+        list.innerHTML = html;
+
+        // Pagination buttons
+        if (totalPages > 1) {
+            let pagHtml = '';
+            for (let i = 1; i <= totalPages; ++i) {
+                pagHtml += `<button class="all-posts-page-btn" data-page="${i}"${i===allPostsPage?' style="background:#FF6B00;color:#fff;"':''}>${i}</button> `;
+            }
+            pag.innerHTML = pagHtml;
+        } else {
+            pag.innerHTML = '';
+        }
+
+        // Add delete/edit/preview logic (reuse your previous logic)
+        // ...existing code for delete/edit/preview...
+        document.querySelectorAll('.delete-post-btn').forEach(btn => {
+            btn.onclick = async function() {
+                const category = btn.getAttribute('data-category');
+                const filename = btn.getAttribute('data-filename');
+                const confirmed = confirm(`Are you sure you want to delete "${filename}" from ${category}? This cannot be undone.`);
+                if (!confirmed) return;
+                const res = await fetch('delete-post', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ category, filename })
+                });
+                if (res.ok) {
+                    await loadPosts();
+                } else {
+                    alert('Failed to delete post.');
+                }
+            };
+        });
+        document.querySelectorAll('.edit-post-btn').forEach(btn => {
+            btn.onclick = async function() {
+                const category = btn.getAttribute('data-category');
+                const filename = btn.getAttribute('data-filename');
+                const confirmed = confirm(`Are you sure you want to edit "${filename}" from ${category}? This will load the post into the form for editing.`);
+                if (!confirmed) return;
+                const res = await fetch('get-post', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ category, filename })
+                });
+                if (!res.ok) {
+                    alert('Failed to load post for editing.');
+                    return;
+                }
+                const data = await res.json();
+                document.getElementById('category').value = category;
+                document.getElementById('title').value = data.title || '';
+                document.getElementById('body').value = data.rawBody || '';
+                document.getElementById('form-title').textContent = "Edit Post";
+                document.getElementById('submit-btn').textContent = "Edit Post";
+                editingPost = { category, filename };
+                document.getElementById('body').dispatchEvent(new Event('input'));
+                document.getElementById('cancel-edit-btn').style.display = '';
+                autosaveId = null;
+                lastAutosaveContent = '';
+            };
+        });
+        // Preview logic (reuse your previous code)
+        document.querySelectorAll('.post-preview span[id^="preview-"]').forEach(async function(span) {
+            const id = span.id;
+            const match = id.match(/^preview-(ComputerScience|Math)-(.+)$/);
+            if (!match) return;
+            const category = match[1];
+            const parent = span.closest('.post-list-item');
+            if (!parent) return;
+            const btn = parent.querySelector('.edit-post-btn');
+            if (!btn) return;
+            const filename = btn.getAttribute('data-filename');
+            // Fetch preview
+            const res = await fetch('get-post', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ category, filename })
+            });
+            if (!res.ok) {
+                span.textContent = 'Preview unavailable';
+                return;
+            }
+            const data = await res.json();
+            if (data.rawBody) {
+                let firstSection = data.rawBody.split(/(?:\r?\n)?\s*\/s\s*(?:\r?\n)?/g)[0] || '';
+                let plain = firstSection
+                    .replace(/\/l\s*((?:\/e\s*[^\/]+)+)\/\s*/g, '')
+                    .replace(/\/h\s*([^\n\/]+)\s*\//g, '$1')
+                    .replace(/\/b\s*([^\n\/]+)\s*\//g, '$1')
+                    .replace(/\/i\s*([^\n\/]+)\s*\//g, '$1')
+                    .replace(/\/u\s*([^\n\/]+)\s*\//g, '$1')
+                    .replace(/\n+/g, ' ')
+                    .trim();
+                if (plain.length > 40) plain = plain.slice(0, 40) + '...';
+                span.textContent = plain || '[Empty]';
+
+                // Show full first section (with markup rendered) under preview
+                const sectionDiv = document.getElementById(`section-${category}-${filename.replace(/[^a-zA-Z0-9]/g,'')}`);
+                if (sectionDiv) {
+                    let html = firstSection;
+                    html = html.replace(/\/l\s*((?:\/e\s*[^\/]+)+)\/\s*/g, (match, listContent) => {
+                        const items = [...listContent.matchAll(/\/e\s*([^\/\n]+)/g)].map(m => `<li>${m[1].trim()}</li>`);
+                        return `<ul>${items.join('')}</ul>`;
+                    });
+                    html = html.replace(/\/h\s*([^\n\/]+)\s*\//g, (match, headerText) => {
+                        return `<h2>${headerText.trim()}</h2>`;
+                    });
+                    html = html.replace(/\/b\s*([^\n\/]+)\s*\//g, (match, boldText) => {
+                        return `<b>${boldText.trim()}</b>`;
+                    });
+                    html = html.replace(/\/i\s*([^\n\/]+)\s*\//g, (match, italicText) => {
+                        return `<i>${italicText.trim()}</i>`;
+                    });
+                    html = html.replace(/\/u\s*([^\n\/]+)\s*\//g, (match, underlineText) => {
+                        return `<u>${underlineText.trim()}</u>`;
+                    });
+                    let parts = html.split(/\n{2,}/g).map(p => p.trim()).filter(p => p.length > 0);
+                    html = parts.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+                    sectionDiv.innerHTML = html;
+                }
+            } else {
+                span.textContent = '[No preview]';
+            }
+        });
+    }
+
+    // Pagination click for posts
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('all-posts-pagination').addEventListener('click', function(e) {
+            if (e.target.classList.contains('all-posts-page-btn')) {
+                allPostsPage = Number(e.target.getAttribute('data-page'));
+                renderAllPosts();
+            }
+        });
+        // Minimize/expand logic for posts section
+        const postsSection = document.getElementById('all-posts-section');
+        const postsToggleBtn = document.getElementById('toggle-posts-section');
+        if (postsToggleBtn && postsSection) {
+            postsToggleBtn.onclick = function() {
+                postsSection.classList.toggle('minimized');
+                postsToggleBtn.innerHTML = postsSection.classList.contains('minimized') ? '&#x25BC;' : '&#x25B2;';
+                document.getElementById('posts-filters').style.display = postsSection.classList.contains('minimized') ? 'none' : '';
+                document.getElementById('posts-list').style.display = postsSection.classList.contains('minimized') ? 'none' : '';
+                document.getElementById('all-posts-pagination').style.display = postsSection.classList.contains('minimized') ? 'none' : '';
+            };
+        }
+    });
+
+    // On load, fetch posts for pagination
+    if (window.location.pathname.endsWith('Poster.html')) {
+        loadPosts();
+        // ...existing code...
+    }
+
     </script>
+    <style>
+    /* ...existing code... */
+    #all-comments-section.minimized {
+        min-height: 0 !important;
+        max-height: 2.5em !important;
+        overflow: hidden !important;
+        padding-bottom: 0 !important;
+    }
+    #all-comments-section.minimized h2 {
+        margin-bottom: 0 !important;
+    }
+    #all-posts-section.minimized {
+        min-height: 0 !important;
+        max-height: 2.5em !important;
+        overflow: hidden !important;
+        padding-bottom: 0 !important;
+    }
+    #all-posts-section.minimized h2 {
+        margin-bottom: 0 !important;
+    }
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+    #poster-main-layout {
+        flex: 1 1 auto;
+    }
+    #footer-include {
+        flex-shrink: 0;
+        width: 100%;
+        margin-top: auto;
+    }
+    </style>
 </body>
 </html>
