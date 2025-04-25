@@ -1,5 +1,15 @@
 {
-  "rewrites": [
-    { "source": "/", "destination": "/homepage.html" }
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/static-build"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "server.js"
+    }
   ]
 }
