@@ -20,12 +20,17 @@ body {
     animation: animated-bg-gradient-gray 20s cubic-bezier(0.4, 0, 0.2, 1) infinite;
     color: #1A202C;
     display: flex;
+    max-width: 75%;
     flex-direction: column;
     min-height: 100vh;
     letter-spacing: 0.015em;
     /* Remove body-fadein animation */
+    padding-top: 0 !important; /* Ensure content is not hidden behind fixed header */
 }
-
+.main-header, footer {
+    width: 100vw !important;
+    box-sizing: border-box !important;
+}
 @keyframes animated-bg-gradient-gray {
     0% {
         background-position: top left, 0% 50%;
@@ -59,7 +64,11 @@ body {
 .main-header {
     position: sticky !important;
     top: 0;
+    left: 0;
+    width: 100vw;
     z-index: 1000;
+    background: linear-gradient(90deg, #FF6B00 96%, #F6E05E 100%);
+    box-shadow: 0 4px 24px 0 rgba(74,85,104,0.10);
 }
 
 .logo {
@@ -71,6 +80,27 @@ body {
     position: absolute;
     filter: drop-shadow(0 2px 8px rgba(74,85,104,0.13));
     transition: width 0.3s, min-width 0.3s;
+}
+
+header,
+.main-header {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    border-bottom-left-radius: 1.5rem;
+    border-bottom-right-radius: 1.5rem;
+    background: linear-gradient(90deg, #FF6B00 96%, #F6E05E 100%);
+    box-shadow: 0 4px 24px 0 rgba(74,85,104,0.10);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 40px;
+    border-radius: 0;
+    padding: 0;
 }
 
 header {
@@ -89,6 +119,8 @@ header {
     z-index: 1000;
     position: sticky !important;
     top: 0;
+    left: 0;
+    width: 100vw;
     border-bottom-left-radius: 1.5rem;
     border-bottom-right-radius: 1.5rem;
     /* Subtle gradient for header */
@@ -303,10 +335,10 @@ nav ul li.dropdown:hover > a::after {
 
 .sidebar {
     position: fixed;
-    top: 10%; /* or your header's height */
+    top: 0;
     left: 0;
     width: 260px;
-    height: 90%; /* fill below header */
+    height: 100vh;
     background: rgba(247,250,252,0.85);
     border-right: 2px solid #e2e8f0;
     padding: 2rem 1rem;
@@ -314,7 +346,7 @@ nav ul li.dropdown:hover > a::after {
     z-index: 100;
     overflow-y: auto;
     backdrop-filter: blur(6px);
-    border-radius: 1.2rem;
+    border-radius: 0; /* Remove rounding */
     box-shadow: 0 8px 32px 0 rgba(74,85,104,0.10);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -474,7 +506,14 @@ main {
         box-shadow 0.3s cubic-bezier(.4,0,.2,1),
         transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
         background 0.2s,
-        margin 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        width 0.3s,
+        font-size 0.3s;
+    max-width: 900px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 1.12rem;
 }
 
 .section:first-of-type {
@@ -679,6 +718,11 @@ html {
         width: 90vw;
         max-width: 700px;
     }
+    .section {
+        max-width: 700px;
+        font-size: 1.05rem;
+        padding: 1.5rem;
+    }
 }
 
 @media (max-width: 900px) {
@@ -698,6 +742,7 @@ html {
         border-bottom: 2px solid #e2e8f0;
         padding: 1rem 0.5rem;
         z-index: 10;
+        overflow-y: visible;
     }
     main {
         width: 98vw;
@@ -707,11 +752,8 @@ html {
     }
     .section {
         padding: 1rem;
-    }
-    .post-form {
-        width: 100%;
-        max-width: 100vw;
-        padding: 1rem;
+        max-width: 98vw;
+        font-size: 0.98rem;
     }
     #body, textarea#body {
         width: 100%;
@@ -726,7 +768,7 @@ html {
         font-size: 1em;
     }
     header {
-        min-height: 32px;
+        min-height: 48px;
         padding: 0.3em 0.5em;
     }
     header h1 {
@@ -743,6 +785,13 @@ html {
         min-width: 70px;
         margin-left: 0.5em;
     }
+    body {
+        padding-top: 60px !important;
+    }
+    header,
+    .main-header {
+        min-height: 48px;
+    }
 }
 
 @media (max-width: 600px) {
@@ -750,7 +799,7 @@ html {
         font-size: 13px;
     }
     header {
-        min-height: 24px;
+        min-height: 32px;
         padding: 0.2em 0.2em;
     }
     header h1 {
@@ -769,6 +818,8 @@ html {
     }
     .section {
         padding: 0.3rem;
+        max-width: 99vw;
+        font-size: 0.92rem;
     }
     .logo {
         width: 70px;
@@ -783,6 +834,13 @@ html {
     #body-preview {
         font-size: 0.92em;
     }
+    body {
+        padding-top: 38px !important;
+    }
+    header,
+    .main-header {
+        min-height: 32px;
+    }
 }
 
 @media (max-width: 450px) {
@@ -790,7 +848,7 @@ html {
         font-size: 11px;
     }
     header {
-        min-height: 18px;
+        min-height: 24px;
         padding: 0.1em 0.1em;
     }
     header h1 {
@@ -801,6 +859,11 @@ html {
         width: 45px;
         min-width: 35px;
     }
+    .section {
+        padding: 0.15rem;
+        max-width: 100vw;
+        font-size: 0.85rem;
+    }
     .post-form {
         padding: 0.1rem;
     }
@@ -809,6 +872,13 @@ html {
     }
     #body-preview {
         font-size: 0.85em;
+    }
+    body {
+        padding-top: 28px !important;
+    }
+    header,
+    .main-header {
+        min-height: 24px;
     }
 }
 
@@ -842,6 +912,10 @@ html {
     #body-preview {
         font-size: 0.95em;
     }
+    header,
+    .main-header {
+        min-height: 32px;
+    }
 }
 
 @media (max-width: 450px) {
@@ -863,6 +937,10 @@ html {
     }
     #body-preview {
         font-size: 0.9em;
+    }
+    header,
+    .main-header {
+        min-height: 24px;
     }
 }
 

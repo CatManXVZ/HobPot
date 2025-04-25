@@ -1,39 +1,197 @@
 <header class="main-header">
     <img src="/Assets/Fundementals/Logo.png" alt="Logo" class="logo">
-    <h1 style="font-size:200%;"><span id="header-title">Humanity is Obliviously Blinded to Powers of Ten</span></h1>
+    <h1 style="font-size:140%;"><span id="header-title">Humanity is Obliviously Blinded to Powers of Ten</span></h1>
+    <!-- Hamburger menu button for mobile -->
+    <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
     <nav class="main-nav">
         <ul>
-            <li><a href="Homepage.html" id="menu-homepage" class="">Homepage</a></li>
+            <li><a href="/Homepage.html" id="menu-homepage" class="">Homepage</a></li>
             <li class="dropdown">
                 <a href="#">Projects</a>
                 <div class="dropdown-content">
-                    <a href="#">Archived</a>
-                    <a href="#">Current</a>
+                    <a href="#">WIP</a>
+                    <a href="#">Work In progress</a>
                 </div>
             </li>
             <li class="dropdown">
                 <a href="#">Posts</a>
-                <div class="dropdown-content">
-                    <a href="#">Computer Science</a>
-                    <a href="#">Maths</a>
+                <div class="dropdown-content" id="posts-dropdown-categories">
+                    <a href="/Post%20page.html#all-posts">All Posts</a>
                 </div>
             </li>
             <li>
-                <a href="/login" class="login-btn" id="login-btn">Log In</a>
+                <a href="/devlogin" class="login-btn" id="login-btn">Log In</a>
             </li>
         </ul>
     </nav>
 </header>
 <style>
+    a{
+        color: yellow;
+    }
 .main-header {
     position: sticky !important;
     top: 0;
     z-index: 1000;
+    background: #FF6B00; /* restored background color */
+    display: flex;
+    align-items: center;
+    gap: 1em;
 }
-.main-nav {
-    position: sticky;
-    top: 0;
-    z-index: 1001;
+.menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 2002;
+    margin-left: auto;
+}
+.menu-toggle span {
+    display: block;
+    height: 4px;
+    width: 28px;
+    margin: 5px 0;
+    background: #F6E05E;
+    border-radius: 2px;
+    transition: 0.3s;
+}
+.main-nav ul {
+    display: flex;
+    gap: 1em;
+    align-items: center;
+    list-style: none;
+    padding: 0;
+    margin: 0;
     background: inherit;
 }
+/* Responsive header title */
+#header-title {
+    font-size: clamp(0.7rem, 2vw, 1.3rem);
+    font-weight: bold;
+    display: inline-block;
+    line-height: 1.1;
+}
+@media (max-width: 800px) {
+    .logo {
+        display: none; /* hide logo on mobile */
+    }
+    .menu-toggle {
+        display: flex;
+    }
+    .main-nav ul {
+        flex-direction: column;
+        gap: 0;
+        width: 100vw;
+        background: #222; /* ensure menu background on mobile */
+        position: absolute;
+        left: 0;
+        top: 100%;
+        display: none;
+        border-bottom: 1px solid #444;
+    }
+    .main-nav ul.show {
+        display: flex;
+    }
+    .main-nav ul li {
+        width: 100%;
+        text-align: left;
+        border-bottom: 1px solid #444;
+    }
+    .dropdown-content {
+        position: static;
+        box-shadow: none;
+        min-width: 0;
+        border-radius: 0;
+        background: #333;
+    }
+    .dropdown:hover .dropdown-content,
+    .dropdown:focus-within .dropdown-content {
+        display: none;
+    }
+    .dropdown.open .dropdown-content {
+        display: block;
+    }
+    #header-title {
+        font-size: clamp(0.6rem, 4vw, 1rem);
+    }
+}
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #222;
+    min-width: 180px;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+    border-radius: 0.7em;
+    z-index: 2000;
+    padding: 0.5em 0;
+}
+.dropdown-content a {
+    color: #F6E05E;
+    padding: 0.7em 1.2em;
+    text-decoration: none;
+    display: block;
+    font-weight: bold;
+    border-radius: 0.5em;
+    transition: background 0.2s, color 0.2s;
+}
+.dropdown-content a:hover {
+    background: #FF6B00;
+    color: #fff;
+}
+.dropdown:hover .dropdown-content {
+    display: block;
+}
 </style>
+<script>
+// Dynamically populate categories in the Posts dropdown
+fetch('/categories').then(res => res.json()).then(categories => {
+    const dropdown = document.getElementById('posts-dropdown-categories');
+    if (!dropdown) return;
+    dropdown.innerHTML = categories.map(cat => {
+        // Humanize category name for display
+        let label = cat.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim();
+        return `<a href="/Post%20page.html#${cat.toLowerCase()}-posts">${label}</a>`;
+    }).join('');
+});
+// Ensure Google login button always points to /auth/google
+function fixGoogleLoginBtn() {
+    document.querySelectorAll('.google-login-btn').forEach(btn => {
+        btn.setAttribute('href', '/auth/google');
+    });
+}
+document.addEventListener('DOMContentLoaded', fixGoogleLoginBtn);
+setTimeout(fixGoogleLoginBtn, 1000);
+
+// Hamburger menu toggle for mobile
+document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.getElementById('menu-toggle');
+    const navUl = document.querySelector('.main-nav ul');
+    if (menuToggle && navUl) { // Check if elements exist
+        menuToggle.addEventListener('click', function() {
+            navUl.classList.toggle('show');
+        });
+    }
+    // Dropdown open/close for mobile
+    document.querySelectorAll('.dropdown > a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            if (window.innerWidth <= 800) {
+                e.preventDefault();
+                const parent = link.parentElement;
+                parent.classList.toggle('open');
+            }
+        });
+    });
+});
+</script>

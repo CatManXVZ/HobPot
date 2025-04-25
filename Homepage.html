@@ -158,7 +158,7 @@
                 <p>
                     Feel free to reach out with your thoughts, feedback, or suggestions for future posts. We're always looking to expand our horizons and explore new ideas together.
                 </p>
-            </section>
+          </section>
         </main>
     </div>
     <div id="footer-include"></div>
@@ -170,12 +170,24 @@
           .then(html => {
               document.getElementById(id).innerHTML = html;
               if (cb) cb();
+              // Ensure scripts in sidebar partial are executed
+              if (id === 'sidebar-include') {
+                  var scripts = document.getElementById(id).querySelectorAll('script');
+                  scripts.forEach(function(oldScript) {
+                      var newScript = document.createElement('script');
+                      if (oldScript.src) {
+                          newScript.src = oldScript.src;
+                      } else {
+                          newScript.textContent = oldScript.textContent;
+                      }
+                      oldScript.parentNode.replaceChild(newScript, oldScript);
+                  });
+              }
           });
     }
     includeHTML('header-include', 'partials/header.html', function() {
         var homeMenu = document.getElementById('menu-homepage');
         if (homeMenu) homeMenu.classList.add('dulled');
-        // No modal logic here!
     });
     includeHTML('sidebar-include', 'partials/sidebar.html');
     includeHTML('footer-include', 'partials/footer.html');

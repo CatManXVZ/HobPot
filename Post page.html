@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>All Posts</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+    .all-posts-container {
+        display: flex;
+        gap: 2.5rem;
+        justify-content: center;
+        align-items: flex-start;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    .posts-col {
+        flex: 1 1 350px;
+        min-width: 300px;
+        background: rgba(255,255,255,0.92);
+        border-radius: 1.2rem;
+        box-shadow: 0 8px 32px 0 rgba(74,85,104,0.08);
+        padding: 2rem 1.5rem;
+        max-width: 500px;
+        margin: 0 0.5rem;
+        display: flex;
+        flex-direction: column;
+    }
+    .posts-col h2 {
+        color: #FF6B00;
+        text-align: center;
+        margin-bottom: 1.2em;
+        font-size: 2rem;
+        border-bottom: 2px solid #FF6B00;
+        padding-bottom: 0.5rem;
+    }
+    .posts-group-year {
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+        font-size: 1.3em;
+        color: #4A5568;
+        font-weight: bold;
+        border-bottom: 1.5px solid #F6E05E;
+        padding-bottom: 0.2em;
+    }
+    .posts-group-month {
+        margin-top: 1em;
+        margin-bottom: 0.3em;
+        font-size: 1.1em;
+        color: #FF6B00;
+        font-weight: bold;
+    }
+    .post-link-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 1em 0;
+    }
+    .post-link-list li {
+        margin-bottom: 0.7em;
+        padding: 0.5em 0.7em;
+        border-radius: 0.7em;
+        transition: background 0.2s;
+    }
+    .post-link-list li:hover {
+        background: #F6E05E22;
+    }
+    .post-link-list a {
+        color: #4A5568;
+        font-weight: bold;
+        text-decoration: underline;
+        font-size: 1.08em;
+        margin-right: 0.7em;
+        transition: color 0.2s;
+    }
+    .post-link-list a:hover {
+        color: #FF6B00;
+    }
+    .post-date {
+        color: #888;
+        font-size: 0.98em;
+        margin-left: 0.5em;
+    }
+    .all-posts-title {
+        text-align: center;
+        color: #FF6B00;
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+        font-size: 2.5em;
+        background: linear-gradient(90deg, #FF6B00 80%, #F6E05E 100%);
+        color: #fff;
+        border-radius: 1.2em;
+        padding: 0.7em 0.5em;
+        box-shadow: 0 4px 24px 0 rgba(74,85,104,0.10);
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+        letter-spacing: 0.04em;
+    }
+    @media (max-width: 900px) {
+        .all-posts-container {
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .posts-col {
+            max-width: 100vw;
+            margin: 0 auto;
+        }
+        .all-posts-title {
+            font-size: 2em;
+            padding: 0.5em 0.2em;
+        }
+    }
+    </style>
+</head>
+<body>
+    <div id="header-include"></div>
+    <div id="sidebar-include"></div>
+    <div class="content-layout" style="display:block;">
+        <main>
+            <h1 class="all-posts-title">All Posts</h1>
+            <div class="all-posts-container" id="all-posts-container">
+                <!-- Category columns will be loaded here -->
+            </div>
+        </main>
+    </div>
+    <div id="footer-include"></div>
+    <script>
+    function includeHTML(id, url, cb) {
+        fetch(url)
+          .then(res => res.text())
+          .then(html => {
+              document.getElementById(id).innerHTML = html;
+              if (cb) cb();
+              // Ensure scripts in sidebar partial are executed
+              if (id === 'sidebar-include') {
+                  var scripts = document.getElementById(id).querySelectorAll('script');
+                  scripts.forEach(function(oldScript) {
+                      var newScript = document.createElement('script');
+                      if (oldScript.src) {
+                          newScript.src = oldScript.src;
+                      } else {
+                          newScript.textContent = oldScript.textContent;
+                      }
+                      oldScript.parentNode.replaceChild(newScript, oldScript);
+                  });
+              }
+          });
+    }
+    includeHTML('header-include', 'partials/header.html');
+    includeHTML('sidebar-include', 'partials/sidebar.html');
+    includeHTML('footer-include', 'partials/footer.html');
+
+    // Helper to group posts by year and month
+    function groupPosts(posts) {
+        const grouped = {};
+        posts.forEach(post => {
+            const [day, month, year] = post.date.split('-');
+            if (!grouped[year]) grouped[year] = {};
+            const monthName = new Date(`${year}-${month}-01`).toLocaleString('default', { month: 'long' });
+            if (!grouped[year][monthName]) grouped[year][monthName] = [];
+            grouped[year][monthName].push(post);
+        });
+        return grouped;
+    }
+
+    // Render posts for a category
+    function renderPosts(posts, containerId, category) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        if (!posts || posts.length === 0) {
+            container.innerHTML = '<p style="color:#888;">No posts yet.</p>';
+            return;
+        }
+        // Group by year, then month
+        const grouped = groupPosts(posts);
+        // Sort years descending
+        const years = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+        let html = '';
+        years.forEach(year => {
+            html += `<div class="posts-group-year">${year}</div>`;
+            // Sort months descending by date
+            const months = Object.keys(grouped[year]).sort((a, b) => {
+                const dateA = new Date(`${year} ${a} 01`);
+                const dateB = new Date(`${year} ${b} 01`);
+                return dateB - dateA;
+            });
+            months.forEach(month => {
+                html += `<div class="posts-group-month">${month}</div>`;
+                html += `<ul class="post-link-list">`;
+                // Sort posts by date descending
+                grouped[year][month].sort((a, b) => b.date.localeCompare(a.date));
+                grouped[year][month].forEach(post => {
+                    html += `<li>
+                        <a href="/Posts/${category}/${post.filename}" target="_blank">${post.title}</a>
+                        <span class="post-date">${post.date}</span>
+                    </li>`;
+                });
+                html += `</ul>`;
+            });
+        });
+        container.innerHTML = html;
+    }
+
+    // Dynamically create columns for all categories
+    fetch('/categories').then(res => res.json()).then(categories => {
+        const container = document.getElementById('all-posts-container');
+        container.innerHTML = categories.map(cat => {
+            // Humanize category name for display
+            let label = cat.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim();
+            return `<div class="posts-col" id="${cat.toLowerCase()}-posts">
+                <h2>${label}</h2>
+                <div id="${cat.toLowerCase()}-posts-list"></div>
+            </div>`;
+        }).join('');
+        // Fetch and render posts for each category
+        fetch('/list-posts')
+            .then(res => res.json())
+            .then(posts => {
+                categories.forEach(cat => {
+                    const listId = `${cat.toLowerCase()}-posts-list`;
+                    renderPosts(posts[cat], listId, cat);
+                });
+            })
+            .catch(() => {
+                categories.forEach(cat => {
+                    const listId = `${cat.toLowerCase()}-posts-list`;
+                    document.getElementById(listId).innerHTML = '<p style="color:#a00;">Failed to load posts.</p>';
+                });
+            });
+    });
+    </script>
+</body>
+</html>

@@ -1,10 +1,8 @@
 <aside class="sidebar">
-    <h2>Posts</h2>
-    <ul>
-        <li><a href="#" class="sidebar-latest-project">Latest Project</a></li>
-        <li><a href="#">Why Powers of Ten Matter</a></li>
-        <li><a href="#">Design & Technology</a></li>
-        <li><a href="#">Reflections</a></li>
+    <br><br><br>
+    <h2>Latest Posts</h2>
+    <ul id="sidebar-latest-posts">
+        <!-- Latest posts will be loaded here -->
     </ul>
     <p>
         Explore a variety of posts covering technology, design, science, and the wonders of scale. Stay tuned for regular updates and deep dives into the powers of ten and their impact on our world.
@@ -12,4 +10,42 @@
     <p>
         More categories and featured articles coming soon. Use this sidebar to quickly navigate to topics that interest you most!
     </p>
+   
+    <script>
+
+
+    // Only run if loaded as a partial (not in Poster.html editor)
+    (function() {
+        fetch('/list-posts')
+            .then(res => res.json())
+            .then(posts => {
+                let allPosts = [];
+                for (const [cat, arr] of Object.entries(posts)) {
+                    arr.forEach(post => allPosts.push({ ...post, category: cat }));
+                }
+                allPosts.sort((a, b) => b.date.localeCompare(a.date) || b.filename.localeCompare(a.filename));
+                const latest = allPosts.slice(0, 3);
+                const ul = document.getElementById('sidebar-latest-posts');
+                if (!ul) return;
+                if (latest.length === 0) {
+                    ul.innerHTML = '<li style="color:#888;">No posts yet.</li>';
+                } else {
+                    ul.innerHTML = latest.map(post => {
+                        // Humanize category name for display
+                        let label = post.category.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim();
+                        return `<li>
+                            <a href="/Posts/${post.category}/${post.filename}" title="${post.title}">
+                                ${post.title}
+                            </a>
+                            <a href="/Post%20page.html#${post.category.toLowerCase()}-posts" style="color:#F6E05E;font-size:0.95em;margin-left:0.5em;">[${label}]</a>
+                        </li>`;
+                    }).join('');
+                }
+            })
+            .catch(() => {
+                const ul = document.getElementById('sidebar-latest-posts');
+                if (ul) ul.innerHTML = '<li style="color:#a00;">Failed to load posts.</li>';
+            });
+    })();
+    </script>
 </aside>
