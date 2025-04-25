@@ -1,7 +1,15 @@
 {
-  "name": "your-project-name",
-  "version": "1.0.0",
-  "scripts": {
-    "build": "node index.js"
-  }
+  "version": 2,
+  "builds": [
+    {
+      "src": "index.js",
+      "use": "@vercel/static-build"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "index.js"
+    }
+  ]
 }
