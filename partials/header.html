@@ -1,6 +1,9 @@
 <header class="main-header">
     <img src="/Assets/Fundementals/Logo.png" alt="Logo" class="logo">
-    <h1 style="font-size:140%;"><span id="header-title">Humanity is Obliviously Blinded to Powers of Ten</span></h1>
+    <h1 style="font-size:200%;">
+        <span id="header-title" class="header-title-desktop">HOBPOT</span>
+        <span id="header-title-mobile" class="header-title-mobile">Humanity is Obliviously Blinded to Powers of 10</span>
+    </h1>
     <!-- Hamburger menu button for mobile -->
     <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu">
         <span></span>
@@ -8,7 +11,7 @@
         <span></span>
     </button>
     <nav class="main-nav">
-        <ul>
+        <ul id="main-nav-list">
             <li><a href="/Homepage.html" id="menu-homepage" class="">Homepage</a></li>
             <li class="dropdown">
                 <a href="#">Projects</a>
@@ -20,6 +23,8 @@
             <li class="dropdown">
                 <a href="#">Posts</a>
                 <div class="dropdown-content" id="posts-dropdown-categories">
+                    <a href="/Post%20page.html#math-posts">Math</a>
+                    <a href="/Post%20page.html#computerscience-posts">Computer Science</a>
                     <a href="/Post%20page.html#all-posts">All Posts</a>
                 </div>
             </li>
@@ -28,6 +33,30 @@
             </li>
         </ul>
     </nav>
+    <!-- Mobile dropdown menu -->
+    <div id="mobile-menu-dropdown" class="mobile-menu-dropdown">
+        <ul>
+            <li><a href="/Homepage.html">Homepage</a></li>
+            <li class="dropdown">
+                <a href="#" class="mobile-dropdown-toggle" data-target="mobile-projects">Projects</a>
+                <ul class="mobile-dropdown-content" id="mobile-projects">
+                    <li><a href="#">WIP</a></li>
+                    <li><a href="#">Work In progress</a></li>
+                </ul>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="mobile-dropdown-toggle" data-target="mobile-posts">Posts</a>
+                <ul class="mobile-dropdown-content" id="mobile-posts">
+                    <li><a href="/Post%20page.html#math-posts">Math</a></li>
+                    <li><a href="/Post%20page.html#computerscience-posts">Computer Science</a></li>
+                    <li><a href="/Post%20page.html#all-posts">All Posts</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="/devlogin" class="login-btn">Log In</a>
+            </li>
+        </ul>
+    </div>
 </header>
 <style>
     a{
@@ -79,48 +108,120 @@
     display: inline-block;
     line-height: 1.1;
 }
+#header-title-mobile {
+    display: none;
+}
+#header-title {
+    display: inline-block;
+}
+.mobile-menu-dropdown {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    background: #222;
+    z-index: 3000;
+    border-bottom: 1px solid #444;
+    box-shadow: 0 8px 24px 0 rgba(0,0,0,0.13);
+    padding: 0.5em 0;
+}
+.mobile-menu-dropdown ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.mobile-menu-dropdown li {
+    border-bottom: 1px solid #444;
+    position: relative;
+}
+.mobile-menu-dropdown li:last-child {
+    border-bottom: none;
+}
+.mobile-menu-dropdown a {
+    color: #F6E05E;
+    display: block;
+    padding: 1em 2em;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.1em;
+    background: none;
+    border-radius: 0;
+    transition: background 0.2s, color 0.2s;
+}
+.mobile-menu-dropdown a:hover,
+.mobile-menu-dropdown a:focus {
+    background: #FF6B00;
+    color: #fff;
+}
+.mobile-dropdown-content {
+    display: none;
+    background: #333;
+    padding-left: 1em;
+}
+.mobile-dropdown-content li {
+    border-bottom: none;
+}
+.mobile-dropdown-content.show {
+    display: block;
+}
+.mobile-dropdown-toggle::after {
+    content: ' ▼';
+    font-size: 0.8em;
+    margin-left: 0.5em;
+}
 @media (max-width: 800px) {
     .logo {
-        display: none; /* hide logo on mobile */
+        max-height: 0px;
+    }
+    .main-header {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        z-index: 1000;
+        background: #FF6B00;
+        display: flex;
+        align-items: center;
+    }
+    #header-title {
+        display: none !important;
+    }
+    #header-title-mobile {
+        display: inline-block !important;
+        margin-left: 10%;
+        font-size: clamp(0.8rem, 3vw, 1.1rem); /* even smaller font on phone */
+        font-weight: bold;
+        line-height: 1.1;
     }
     .menu-toggle {
         display: flex;
     }
     .main-nav ul {
-        flex-direction: column;
-        gap: 0;
-        width: 100vw;
-        background: #222; /* ensure menu background on mobile */
-        position: absolute;
-        left: 0;
-        top: 100%;
-        display: none;
-        border-bottom: 1px solid #444;
+        display: none !important;
     }
-    .main-nav ul.show {
-        display: flex;
-    }
-    .main-nav ul li {
-        width: 100%;
-        text-align: left;
-        border-bottom: 1px solid #444;
-    }
-    .dropdown-content {
-        position: static;
-        box-shadow: none;
-        min-width: 0;
-        border-radius: 0;
-        background: #333;
-    }
-    .dropdown:hover .dropdown-content,
-    .dropdown:focus-within .dropdown-content {
+    .mobile-menu-dropdown {
         display: none;
     }
-    .dropdown.open .dropdown-content {
+    .mobile-menu-dropdown.open {
         display: block;
     }
-    #header-title {
-        font-size: clamp(0.6rem, 4vw, 1rem);
+}
+@media (min-width: 801px) {
+    .menu-toggle {
+        display: none !important;
+    }
+    .main-nav ul {
+        display: flex !important;
+        flex-direction: row;
+        gap: 1em;
+        position: static;
+        width: auto;
+        background: inherit;
+        border-bottom: none;
+    }
+    .mobile-menu-dropdown {
+        display: none !important;
     }
 }
 .dropdown {
@@ -155,43 +256,65 @@
 }
 </style>
 <script>
-// Dynamically populate categories in the Posts dropdown
-fetch('/categories').then(res => res.json()).then(categories => {
-    const dropdown = document.getElementById('posts-dropdown-categories');
-    if (!dropdown) return;
-    dropdown.innerHTML = categories.map(cat => {
-        // Humanize category name for display
-        let label = cat.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim();
-        return `<a href="/Post%20page.html#${cat.toLowerCase()}-posts">${label}</a>`;
-    }).join('');
-});
-// Ensure Google login button always points to /auth/google
-function fixGoogleLoginBtn() {
-    document.querySelectorAll('.google-login-btn').forEach(btn => {
-        btn.setAttribute('href', '/auth/google');
-    });
-}
-document.addEventListener('DOMContentLoaded', fixGoogleLoginBtn);
-setTimeout(fixGoogleLoginBtn, 1000);
-
-// Hamburger menu toggle for mobile
 document.addEventListener('DOMContentLoaded', function() {
-    const menuToggle = document.getElementById('menu-toggle');
-    const navUl = document.querySelector('.main-nav ul');
-    if (menuToggle && navUl) { // Check if elements exist
-        menuToggle.addEventListener('click', function() {
-            navUl.classList.toggle('show');
-        });
-    }
-    // Dropdown open/close for mobile
-    document.querySelectorAll('.dropdown > a').forEach(link => {
-        link.addEventListener('click', function(e) {
-            if (window.innerWidth <= 800) {
-                e.preventDefault();
-                const parent = link.parentElement;
-                parent.classList.toggle('open');
+    // Dynamically populate categories in the Posts dropdown
+    fetch('/categories')
+        .then(res => res.json())
+        .then(categories => {
+            const dropdown = document.getElementById('posts-dropdown-categories');
+            if (!dropdown || !Array.isArray(categories)) return;
+            dropdown.innerHTML = categories.map(cat => {
+                // Humanize category name for display
+                let label = cat.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim();
+                return `<a href="/Post%20page.html#${cat.toLowerCase()}-posts">${label}</a>`;
+            }).join('');
+        })
+        .catch(() => {
+            // Fallback if fetch fails
+            const dropdown = document.getElementById('posts-dropdown-categories');
+            if (dropdown) {
+                dropdown.innerHTML = `
+                    <a href="/Post%20page.html#computerscience-posts">Computer Science</a>
+                    <a href="/Post%20page.html#math-posts">Math</a>
+                    <a href="/Post%20page.html#arts-posts">Arts</a>
+                `;
             }
         });
+
+    // Hamburger menu toggle for mobile: show/hide dropdown
+    const menuToggle = document.getElementById('menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu-dropdown');
+    if (menuToggle && mobileMenu) {
+        menuToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            mobileMenu.classList.toggle('open');
+        });
+        // Close menu when clicking outside (mobile only)
+        document.addEventListener('click', function(e) {
+            if (window.innerWidth <= 800 && mobileMenu.classList.contains('open')) {
+                if (!mobileMenu.contains(e.target) && e.target !== menuToggle) {
+                    mobileMenu.classList.remove('open');
+                    // Also close all dropdowns
+                    document.querySelectorAll('.mobile-dropdown-content').forEach(el => el.classList.remove('show'));
+                }
+            }
+        });
+    }
+    // Dropdown open/close for mobile menu
+    document.querySelectorAll('.mobile-dropdown-toggle').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = link.getAttribute('data-target');
+            const dropdown = document.getElementById(targetId);
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+            }
+        });
+    });
+
+    // Ensure Google login button always points to /auth/google
+    document.querySelectorAll('.google-login-btn').forEach(btn => {
+        btn.setAttribute('href', '/auth/google');
     });
 });
 </script>

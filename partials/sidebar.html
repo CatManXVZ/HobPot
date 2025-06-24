@@ -1,51 +1,221 @@
-<aside class="sidebar">
-    <br><br><br>
-    <h2>Latest Posts</h2>
-    <ul id="sidebar-latest-posts">
-        <!-- Latest posts will be loaded here -->
-    </ul>
-    <p>
-        Explore a variety of posts covering technology, design, science, and the wonders of scale. Stay tuned for regular updates and deep dives into the powers of ten and their impact on our world.
-    </p>
-    <p>
-        More categories and featured articles coming soon. Use this sidebar to quickly navigate to topics that interest you most!
-    </p>
-   
-    <script>
-
-
-    // Only run if loaded as a partial (not in Poster.html editor)
+<div class="sidebar-container">
+    <aside class="sidebar closed">
+      <div class="sidebar-content">
+        <br><br><br>
+        <h2>Latest Posts</h2>
+        <ul id="sidebar-latest-posts">
+        </ul>
+        </p>
+        <p>
+          More categories and featured articles coming soon. Use this sidebar to quickly navigate to topics that interest you most!
+        </p>
+      </div>
+    </aside>
+    <div class="sidebar-toggle">
+      <button id="sidebar-toggle-button" aria-label="Toggle Sidebar">
+        ▶
+      </button>
+    </div>
+  </div>
+  <style>
+    .sidebar-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      z-index: 950; /* ensure above content, below header */
+      pointer-events: none;
+    }
+    .sidebar,
+    .sidebar-toggle {
+      pointer-events: auto;
+    }
+    .sidebar {
+      width: 250px;
+      max-width: 90vw;
+      height: 100%;
+      background: rgba(247,250,252,0.97);
+      border-right: 2px solid #e2e8f0;
+      box-shadow: 0 8px 32px 0 rgba(74,85,104,0.13);
+      border-top-right-radius: 1.2rem;
+      border-bottom-right-radius: 1.2rem;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: translateX(-100%);
+      position: relative;
+      z-index: 902;
+    }
+    .sidebar.open {
+      transform: translateX(0);
+      box-shadow: 0 12px 32px 0 rgba(74,85,104,0.18);
+    }
+    .sidebar.closed {
+      transform: translateX(-100%);
+    }
+    .sidebar-content {
+      padding: 20px 18px 20px 22px;
+      height: 100%;
+      overflow-y: auto;
+    }
+    .sidebar h2 {
+      margin-bottom: 10px;
+      font-size: 1.2em;
+      color: #FF6B00;
+      border-bottom: 2px solid #FF6B00;
+      padding-bottom: 0.3em;
+      letter-spacing: 0.03em;
+    }
+    #sidebar-latest-posts {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 20px;
+    }
+    #sidebar-latest-posts li {
+      margin-bottom: 5px;
+    }
+    #sidebar-latest-posts li a {
+      color: #4A5568;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1em;
+      border-radius: 0.5em;
+      padding: 0.1em 0.3em;
+      transition: background 0.2s, color 0.2s;
+    }
+    #sidebar-latest-posts li a:hover {
+      color: #FF6B00;
+      background: #f6e05e33;
+    }
+    .sidebar-toggle {
+      position: absolute;
+      top: 5% !important; /* move arrow a bit under the header */
+      left: 0;
+      background: #FF6B00;
+      border: none;
+      padding: 6px 8px;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+      box-shadow: 0 1px 6px rgba(74,85,104,0.13);
+      z-index: 1201; /* above header and sidebar */
+      display: flex;
+      align-items: center;
+    }
+    .sidebar-toggle button {
+      border: none;
+      background: transparent;
+      color: #fff;
+      font-size: 1.3em;
+      cursor: pointer;
+      transition: transform 0.3s;
+      outline: none;
+    }
+    .sidebar.open ~ .sidebar-toggle button {
+      transform: rotate(180deg);
+    }
+    /* Hide toggle button on desktop, show on mobile */
+    @media (min-width: 901px) {
+      .sidebar-toggle {
+        display: none !important;
+      }
+    }
+    /* Mobile Styles */
+    @media (max-width: 900px) {
+      .sidebar {
+        width: 80vw;
+        max-width: 95vw;
+        height: 100vh;
+        border-radius: 0 1.2rem 1.2rem 0;
+        left: 0;
+        top: 0;
+      }
+      .sidebar-toggle {
+        display: flex !important;
+        position: fixed;
+        left: 0;
+        top: 60px; /* move arrow a bit under the header */
+        margin-top: 0;
+        margin-left: 0;
+        z-index: 1201; /* ensure always visible */
+      }
+      .sidebar-content {
+        padding-top: 50px;
+        height: calc(100vh - 50px);
+        overflow-y: auto;
+      }
+    }
+  </style>
+  <script>
     (function() {
-        fetch('/list-posts')
-            .then(res => res.json())
-            .then(posts => {
-                let allPosts = [];
-                for (const [cat, arr] of Object.entries(posts)) {
-                    arr.forEach(post => allPosts.push({ ...post, category: cat }));
-                }
-                allPosts.sort((a, b) => b.date.localeCompare(a.date) || b.filename.localeCompare(a.filename));
-                const latest = allPosts.slice(0, 3);
-                const ul = document.getElementById('sidebar-latest-posts');
-                if (!ul) return;
-                if (latest.length === 0) {
-                    ul.innerHTML = '<li style="color:#888;">No posts yet.</li>';
-                } else {
-                    ul.innerHTML = latest.map(post => {
-                        // Humanize category name for display
-                        let label = post.category.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim();
-                        return `<li>
-                            <a href="/Posts/${post.category}/${post.filename}" title="${post.title}">
-                                ${post.title}
-                            </a>
-                            <a href="/Post%20page.html#${post.category.toLowerCase()}-posts" style="color:#F6E05E;font-size:0.95em;margin-left:0.5em;">[${label}]</a>
-                        </li>`;
-                    }).join('');
-                }
-            })
-            .catch(() => {
-                const ul = document.getElementById('sidebar-latest-posts');
-                if (ul) ul.innerHTML = '<li style="color:#a00;">Failed to load posts.</li>';
-            });
+      const sidebar = document.querySelector('.sidebar');
+      const sidebarToggle = document.querySelector('.sidebar-toggle');
+      const sidebarToggleButton = document.getElementById('sidebar-toggle-button');
+
+      if (!sidebar || !sidebarToggleButton) return;
+
+      let isSidebarOpen = false;
+
+      function setSidebarState(open) {
+        isSidebarOpen = open;
+        sidebar.classList.toggle('open', open);
+        sidebar.classList.toggle('closed', !open);
+      }
+
+      function toggleSidebar() {
+        setSidebarState(!isSidebarOpen);
+      }
+
+      sidebarToggleButton.addEventListener('click', toggleSidebar);
+
+      // Only close sidebar on outside click for mobile
+      document.addEventListener('click', (event) => {
+        if (
+          isSidebarOpen &&
+          window.innerWidth <= 900 &&
+          !sidebar.contains(event.target) &&
+          !sidebarToggle.contains(event.target)
+        ) {
+          setSidebarState(false);
+        }
+      });
+
+      // Open sidebar by default on desktop
+      if (window.innerWidth > 900) {
+        setSidebarState(true);
+      }
+
+      fetch('/list-posts')
+        .then(res => res.json())
+        .then(posts => {
+          let allPosts = [];
+          for (const [cat, arr] of Object.entries(posts)) {
+            arr.forEach(post => allPosts.push({
+              ...post,
+              category: cat
+            }));
+          }
+          allPosts.sort((a, b) => b.date.localeCompare(a.date) || b.filename.localeCompare(a.filename));
+          const latest = allPosts.slice(0, 3);
+          const ul = document.getElementById('sidebar-latest-posts');
+          if (!ul) return;
+          if (latest.length === 0) {
+            ul.innerHTML = '<li style="color:#888;">No posts yet.</li>';
+          } else {
+            ul.innerHTML = latest.map(post => {
+              let label = post.category.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim();
+              return `<li>
+                                <a href="/Posts/${post.category}/${post.filename}" title="${post.title}">
+                                    ${post.title}
+                                </a>
+                                <a href="/Post%20page.html#${post.category.toLowerCase()}-posts" style="color:#F6E05E;font-size:0.95em;margin-left:0.5em;">[${label}]</a>
+                            </li>`;
+            }).join('');
+          }
+        })
+        .catch(() => {
+          const ul = document.getElementById('sidebar-latest-posts');
+          if (ul) ul.innerHTML = '<li style="color:#a00;">Failed to load posts.</li>';
+        });
     })();
-    </script>
-</aside>
+  </script>

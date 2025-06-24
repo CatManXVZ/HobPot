@@ -1,0 +1,37 @@
+<header class="main-header">
+    <img src="/Assets/Fundementals/Logo.png" alt="Logo" class="logo">
+    <h1 style="font-size:200%;"><span id="header-title">Humanity is Obliviously Blinded to Powers of Ten</span></h1>
+    <nav class="main-nav">
+        <ul>
+            <li><a href="Homepage.html" id="menu-homepage" class="">Homepage</a></li>
+            <li class="dropdown">
+                <a href="#">Projects</a>
+                <div class="dropdown-content">
+                    <a href="#">WIP</a>
+                    <a href="#">Work In progress</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#">Posts</a>
+                <div class="dropdown-content" id="posts-dropdown-categories">
+                    <!-- Categories will be loaded here -->
+                </div>
+            </li>
+            <li>
+                <a href="/login" class="login-btn" id="login-btn">Log In</a>
+            </li>
+        </ul>
+    </nav>
+    <script>
+    // Dynamically populate categories in the Posts dropdown
+    fetch('/categories').then(res => res.json()).then(categories => {
+        const dropdown = document.getElementById('posts-dropdown-categories');
+        if (!dropdown) return;
+        dropdown.innerHTML = categories.map(cat => {
+            // Humanize category name for display
+            let label = cat.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim();
+            return `<a href="/Post%20page.html#${cat.toLowerCase()}-posts">${label}</a>`;
+        }).join('');
+    });
+    </script>
+</header>

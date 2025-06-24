@@ -88,7 +88,7 @@ header,
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 1000;
+    z-index: 1200 !important;
     border-bottom-left-radius: 1.5rem;
     border-bottom-right-radius: 1.5rem;
     background: linear-gradient(90deg, #FF6B00 96%, #F6E05E 100%);
@@ -348,12 +348,12 @@ nav ul li.dropdown:hover > a::after {
     backdrop-filter: blur(6px);
     border-radius: 0; /* Remove rounding */
     box-shadow: 0 8px 32px 0 rgba(74,85,104,0.10);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar:hover {
-    transform: translateX(4px);
-    width: 290px;
+    transform: translateX(4px) scale(1.01);
+    box-shadow: 0 12px 32px 0 rgba(74,85,104,0.18);
 }
 
 .sidebar h2 {
