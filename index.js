@@ -87,17 +87,35 @@ app.use(passport.session());
 
 // New Google OAuth routes
 app.get('/auth/google', (req, res, next) => {
-    // Save the referrer (post page) before redirecting to Google
-    let redirectTo = req.get('Referer') || '/';
-    req.session.lastPostUrl = redirectTo;
     passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
 });
 
 app.get('/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/' }),
     (req, res) => {
-        // Redirect back to the last visited page or homepage
-        const redirectTo = req.session.lastPostUrl || '/';
+        // Use the stored returnTo URL, or fallback to homepage
+        const redirectTo = req.session.returnTo || '/';
+        delete req.session.returnTo;
+        // Notify user if redirected to homepage
+        if (redirectTo === '/' || redirectTo === '/Homepage.html') {
+            return res.send(`
+                <html>
+                <head>
+                    <meta http-equiv="refresh" content="2;url=/" />
+                    <style>
+                        body { font-family: sans-serif; background: #f7fafc; color: #23272f; text-align: center; padding-top: 10vh; }
+                        .notice { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; display: inline-block; padding: 2em 3em; border-radius: 1em; font-size: 1.3em; }
+                    </style>
+                </head>
+                <body>
+                    <div class="notice">
+                        You have been redirected to the homepage after login.<br>
+                        <small>If you expected to return to a specific page, please navigate there again.</small>
+                    </div>
+                </body>
+                </html>
+            `);
+        }
         res.redirect(redirectTo);
     }
 );
@@ -263,7 +281,7 @@ app.post('/post-website', (req, res) => {
             code = parseInt(code, 10);
             if (!images[code - 1]) return '';
             // FIX: Correct image URL path
-            const url = `/HumanityIsObliviouslyBlindedToPowersOfTen/Assets/Uploads/${images[code - 1]}`;
+            const url = `/HumanityIsObliviouslyBlindedToPowers/Assets/Uploads/${images[code - 1]}`;
             let attrs = '';
             if (h) attrs += ` height="${h}"`;
             if (w) attrs += ` width="${w}"`;
@@ -336,29 +354,19 @@ app.post('/post-website', (req, res) => {
     <link
         href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="/HumanityIsObliviouslyBlindedToPowersOfTen/style.css">
+    <link rel="stylesheet" href="/HumanityIsObliviouslyBlindedToPowers/style.css">
 </head>
 <body>
     <div id="header-include"></div>
-    <script>
-    function includeHTML(id, url, cb) {
-        fetch('/HumanityIsObliviouslyBlindedToPowersOfTen/partials/' + url)
-          .then(res => res.text())
-          .then(html => {
-              document.getElementById(id).innerHTML = html;
-              if (cb) cb();
-          });
-    }
-    includeHTML('header-include', 'header.html');
-    </script>
+    <div id="sidebar-include"></div>
     <div class="content-layout" style="display:flex;align-items:flex-start;position:relative;">
         <main style="flex:1;">
             ${rawMarkupComment}
             ${sections}
         </main>
     </div>
-    <section id="comments-section" class="comments-section">
-      <h3>Comments</h3>
+    <section id="comments-section" class="comments-section" style="margin-left:40% !important;">
+      <h3> <span class="comments-tag">Comments</span></h3>
       <div id="google-login-prompt" style="display:none;margin-bottom:1em;">
         <a href="/auth/google" class="google-login-btn">Sign in with Google to comment</a>
       </div>
@@ -373,7 +381,7 @@ app.post('/post-website', (req, res) => {
     <div id="footer-include"></div>
     <script>
     function includeHTML(id, url, cb) {
-        fetch('/HumanityIsObliviouslyBlindedToPowersOfTen/partials/' + url)
+        fetch('/HumanityIsObliviouslyBlindedToPowers/partials/' + url)
           .then(res => res.text())
           .then(html => {
               document.getElementById(id).innerHTML = html;
@@ -878,11 +886,11 @@ removeRawBodyFromAllPosts();
 app.use(express.static(__dirname));
 
 // Serve partials for posts and all pages
-app.use('/HumanityIsObliviouslyBlindedToPowersOfTen/partials', express.static(path.join(__dirname, 'partials')));
+app.use('/HumanityIsObliviouslyBlindedToPowers/partials', express.static(path.join(__dirname, 'partials')));
 
 // Serve CSS and assets for posts and all pages
-app.use('/HumanityIsObliviouslyBlindedToPowersOfTen/style.css', express.static(path.join(__dirname, 'style.css')));
-app.use('/HumanityIsObliviouslyBlindedToPowersOfTen/Assets', express.static(path.join(__dirname, 'Assets')));
+app.use('/HumanityIsObliviouslyBlindedToPowers/style.css', express.static(path.join(__dirname, 'style.css')));
+app.use('/HumanityIsObliviouslyBlindedToPowers/Assets', express.static(path.join(__dirname, 'Assets')));
 
 // DRAFT SYSTEM
 const DRAFTS_ROOT = path.join(__dirname, 'Posts', 'Drafts');
@@ -996,7 +1004,7 @@ app.get('/list-images', requireAuth, (req, res) => {
         );
         const images = files.map(f => ({
             filename: f,
-            url: `/HumanityIsObliviouslyBlindedToPowersOfTen/Assets/Uploads/${f}`
+            url: `/HumanityIsObliviouslyBlindedToPowers/Assets/Uploads/${f}`
         }));
         res.json(images);
     } catch (e) {
@@ -1029,7 +1037,7 @@ app.post('/delete-image', requireAuth, (req, res) => {
     }
 });
 
-app.use('/HumanityIsObliviouslyBlindedToPowersOfTen/Assets/Uploads', express.static(IMAGES_ROOT));
+app.use('/HumanityIsObliviouslyBlindedToPowers/Assets/Uploads', express.static(IMAGES_ROOT));
 
 const COMMENTS_ROOT = path.join(__dirname, 'Comments');
 if (!fs.existsSync(COMMENTS_ROOT)) fs.mkdirSync(COMMENTS_ROOT, { recursive: true });
@@ -1158,3 +1166,24 @@ For most developer/admin tools, HTTPS, strong passwords, session security, and l
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });
+
+// Add this route BEFORE /auth/google
+app.get('/login', (req, res) => {
+    // Get the URL from the query parameter. Default to homepage if not present.
+    const returnTo = req.query.returnTo || '/';
+    req.session.returnTo = returnTo;
+    res.redirect('/auth/google');
+});
+
+// Update your /auth/google to NOT set any session or lastPostUrl
+app.get('/auth/google', (req, res, next) => {
+    passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+});
+    // Get the URL from the query parameter. Default to homepage if not present.
+
+
+// Update your /auth/google to NOT set any session or lastPostUrl
+app.get('/auth/google', (req, res, next) => {
+    passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+});
+

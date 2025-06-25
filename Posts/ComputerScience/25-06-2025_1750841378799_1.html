@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>5</title>
+    <title>PSL WORK</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="/HumanityIsObliviouslyBlindedToPowersOfTen/style.css">
+    <link rel="stylesheet" href="/HumanityIsObliviouslyBlindedToPowers/style.css">
 </head>
 <body>
     <div id="header-include"></div>
@@ -15,12 +15,12 @@
         <main style="flex:1;">
             <div style="font-size:8px;opacity:0.1;user-select:none;pointer-events:none;max-height:1px;overflow:hidden;"></div>
             <section class="section">
-<p>55555</p>
+<p>koijoklmnhiopjmniuokn kiljiomk</p>
 </section>
         </main>
     </div>
-    <section id="comments-section" class="comments-section">
-      <h3>Comments</h3>
+    <section id="comments-section" class="comments-section" style="margin-left:20%;">
+      <h3>Comments <span class="comments-tag">Comments</span></h3>
       <div id="google-login-prompt" style="display:none;margin-bottom:1em;">
         <a href="/auth/google" class="google-login-btn">Sign in with Google to comment</a>
       </div>
@@ -35,7 +35,7 @@
     <div id="footer-include"></div>
     <script>
     function includeHTML(id, url, cb) {
-        fetch('/HumanityIsObliviouslyBlindedToPowersOfTen/partials/' + url)
+        fetch('/HumanityIsObliviouslyBlindedToPowers/partials/' + url)
           .then(res => res.text())
           .then(html => {
               document.getElementById(id).innerHTML = html;
@@ -57,7 +57,7 @@
     }
     includeHTML('header-include', 'header.html', function() {
         var titleSpan = document.getElementById('header-title');
-        if (titleSpan) titleSpan.textContent = "5";
+        if (titleSpan) titleSpan.textContent = "PSL WORK";
         var homeMenu = document.getElementById('menu-homepage');
         if (homeMenu) homeMenu.classList.remove('dulled');
     });
@@ -69,7 +69,7 @@
     let currentPage = 1;
     const COMMENTS_PER_PAGE = 8;
     const commentCategory = "ComputerScience";
-    const commentFilename = "22-04-2025_1745344521314_1.html";
+    const commentFilename = "25-06-2025_1750841378799_1.html";
     function renderCommentsPage(page) {
       const list = document.getElementById('comments-list');
       const pag = document.getElementById('comments-pagination');

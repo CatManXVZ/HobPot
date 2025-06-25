@@ -1,34 +1,21 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>i</title>
+    <title>aia</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="/HumanityIsObliviouslyBlindedToPowersOfTen/style.css">
+    <link rel="stylesheet" href="/HumanityIsObliviouslyBlindedToPowers/style.css">
 </head>
 <body>
     <div id="header-include"></div>
-    <script>
-    function includeHTML(id, url, cb) {
-        fetch('/HumanityIsObliviouslyBlindedToPowersOfTen/partials/' + url)
-          .then(res => res.text())
-          .then(html => {
-              document.getElementById(id).innerHTML = html;
-              if (cb) cb();
-          });
-    }
-    includeHTML('header-include', 'header.html');
-    </script>
+    <div id="sidebar-include"></div>
     <div class="content-layout" style="display:flex;align-items:flex-start;position:relative;">
         <main style="flex:1;">
-            <div style="font-size:8px;opacity:0.1;user-select:none;pointer-events:none;max-height:1px;overflow:hidden;"><!--RAW_BODY_START-->
-[hhhhh](https://google.com)
-<!--RAW_BODY_END--></div>
+            <div style="font-size:8px;opacity:0.1;user-select:none;pointer-events:none;max-height:1px;overflow:hidden;"></div>
             <section class="section">
-<p>[hhhhh](https://google.com)</p>
+<p>aiaiaia</p>
 </section>
         </main>
     </div>
@@ -48,7 +35,7 @@
     <div id="footer-include"></div>
     <script>
     function includeHTML(id, url, cb) {
-        fetch('/HumanityIsObliviouslyBlindedToPowersOfTen/partials/' + url)
+        fetch('/HumanityIsObliviouslyBlindedToPowers/partials/' + url)
           .then(res => res.text())
           .then(html => {
               document.getElementById(id).innerHTML = html;
@@ -70,7 +57,7 @@
     }
     includeHTML('header-include', 'header.html', function() {
         var titleSpan = document.getElementById('header-title');
-        if (titleSpan) titleSpan.textContent = "i";
+        if (titleSpan) titleSpan.textContent = "aia";
         var homeMenu = document.getElementById('menu-homepage');
         if (homeMenu) homeMenu.classList.remove('dulled');
     });
@@ -83,7 +70,6 @@
     const COMMENTS_PER_PAGE = 8;
     const commentCategory = "ComputerScience";
     const commentFilename = "25-06-2025.html";
-
     function renderCommentsPage(page) {
       const list = document.getElementById('comments-list');
       const pag = document.getElementById('comments-pagination');
@@ -129,7 +115,6 @@
         pag.innerHTML = '';
       }
     }
-
     function fetchComments() {
       fetch('/comments?category=' + encodeURIComponent(commentCategory) + '&filename=' + encodeURIComponent(commentFilename))
         .then(res => res.json())
@@ -138,7 +123,6 @@
           renderCommentsPage(currentPage);
         });
     }
-
     // Check login status for Google (by trying to fetch /user-info)
     fetch('/user-info').then(res => res.json()).then(data => {
       if (data && data.loggedIn) {
@@ -155,7 +139,6 @@
       document.getElementById('comment-form').style.display = 'none';
       document.getElementById('google-login-prompt').style.display = '';
     });
-
     document.getElementById('comment-form').onsubmit = function(e) {
       e.preventDefault();
       const text = document.getElementById('comment-text').value.trim();
@@ -179,7 +162,6 @@
         }
       });
     };
-
     // Pagination click
     document.addEventListener('click', function(e) {
       if (e.target.classList.contains('comment-page-btn')) {
@@ -235,7 +217,6 @@
         });
       }
     });
-
     fetchComments();
     // Style the comment button with the orange from the stylesheet
     document.addEventListener('DOMContentLoaded', function() {

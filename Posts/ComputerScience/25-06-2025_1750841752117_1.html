@@ -1,26 +1,35 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>9</title>
+    <title>kjhkjhkjh</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="/HumanityIsObliviouslyBlindedToPowersOfTen/style.css">
+    <link rel="stylesheet" href="/HumanityIsObliviouslyBlindedToPowers/style.css">
 </head>
 <body>
     <div id="header-include"></div>
     <div id="sidebar-include"></div>
     <div class="content-layout" style="display:flex;align-items:flex-start;position:relative;">
         <main style="flex:1;">
-            <div style="font-size:8px;opacity:0.1;user-select:none;pointer-events:none;max-height:1px;overflow:hidden;"></div>
+            <div style="font-size:8px;opacity:0.1;user-select:none;pointer-events:none;max-height:1px;overflow:hidden;"><!--RAW_BODY_START-->
+kjsfhwlskjcbiuqwefgqiacbiuewiuqg/b dciuWG /
+/l 
+/e e
+/e e
+/e e 
+/s
+/b jjj /
+<!--RAW_BODY_END--></div>
             <section class="section">
-<p>999</p>
+<p>kjsfhwlskjcbiuqwefgqiacbiuewiuqg<b>dciuWG</b><br><ul><li>e</li><li>e</li><li>e</li></ul>s<br><b>jjj</b></p>
 </section>
         </main>
     </div>
-    <section id="comments-section" class="comments-section">
-      <h3>Comments</h3>
+    <section id="comments-section" class="comments-section" style="margin-left:40% !important;">
+      <h3> <span class="comments-tag">Comments</span></h3>
       <div id="google-login-prompt" style="display:none;margin-bottom:1em;">
         <a href="/auth/google" class="google-login-btn">Sign in with Google to comment</a>
       </div>
@@ -35,7 +44,7 @@
     <div id="footer-include"></div>
     <script>
     function includeHTML(id, url, cb) {
-        fetch('/HumanityIsObliviouslyBlindedToPowersOfTen/partials/' + url)
+        fetch('/HumanityIsObliviouslyBlindedToPowers/partials/' + url)
           .then(res => res.text())
           .then(html => {
               document.getElementById(id).innerHTML = html;
@@ -57,7 +66,7 @@
     }
     includeHTML('header-include', 'header.html', function() {
         var titleSpan = document.getElementById('header-title');
-        if (titleSpan) titleSpan.textContent = "9";
+        if (titleSpan) titleSpan.textContent = "kjhkjhkjh";
         var homeMenu = document.getElementById('menu-homepage');
         if (homeMenu) homeMenu.classList.remove('dulled');
     });
@@ -69,7 +78,8 @@
     let currentPage = 1;
     const COMMENTS_PER_PAGE = 8;
     const commentCategory = "ComputerScience";
-    const commentFilename = "23-04-2025.html";
+    const commentFilename = "25-06-2025_1750841752117_1.html";
+
     function renderCommentsPage(page) {
       const list = document.getElementById('comments-list');
       const pag = document.getElementById('comments-pagination');
@@ -115,6 +125,7 @@
         pag.innerHTML = '';
       }
     }
+
     function fetchComments() {
       fetch('/comments?category=' + encodeURIComponent(commentCategory) + '&filename=' + encodeURIComponent(commentFilename))
         .then(res => res.json())
@@ -123,6 +134,7 @@
           renderCommentsPage(currentPage);
         });
     }
+
     // Check login status for Google (by trying to fetch /user-info)
     fetch('/user-info').then(res => res.json()).then(data => {
       if (data && data.loggedIn) {
@@ -139,6 +151,7 @@
       document.getElementById('comment-form').style.display = 'none';
       document.getElementById('google-login-prompt').style.display = '';
     });
+
     document.getElementById('comment-form').onsubmit = function(e) {
       e.preventDefault();
       const text = document.getElementById('comment-text').value.trim();
@@ -162,6 +175,7 @@
         }
       });
     };
+
     // Pagination click
     document.addEventListener('click', function(e) {
       if (e.target.classList.contains('comment-page-btn')) {
@@ -217,6 +231,7 @@
         });
       }
     });
+
     fetchComments();
     // Style the comment button with the orange from the stylesheet
     document.addEventListener('DOMContentLoaded', function() {
