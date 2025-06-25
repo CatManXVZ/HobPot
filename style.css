@@ -4,6 +4,10 @@
 /* White #FFFFFF */
 /* Yellow #F6E05E */
 /* Very Light Gray #F7FAFC */
+::selection {
+  background-color: #F6E05E; /* Your chosen yellow color */
+  color: #2D3748;           /* A dark text color for good readability */
+}
 
 body {
     font-family: "Roboto Condensed", sans-serif;
