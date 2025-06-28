@@ -350,11 +350,12 @@ app.post('/post-website', (req, res) => {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${title}</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="/HumanityIsObliviouslyBlindedToPowers/style.css">
+    <link rel="stylesheet" href="/HumanityIsObliviouslyBlindedToPowersTen/style.css">
 </head>
 <body>
     <div id="header-include"></div>
@@ -365,7 +366,7 @@ app.post('/post-website', (req, res) => {
             ${sections}
         </main>
     </div>
-    <section id="comments-section" class="comments-section" style="margin-left:40% !important;">
+    <section id="comments-section" class="comments-section" style="margin-left:25% !important;">
       <h3> <span class="comments-tag">Comments</span></h3>
       <div id="google-login-prompt" style="display:none;margin-bottom:1em;">
         <a href="/auth/google" class="google-login-btn">Sign in with Google to comment</a>
@@ -379,9 +380,12 @@ app.post('/post-website', (req, res) => {
       <div id="comments-pagination" style="text-align:center;margin-top:1em;"></div>
     </section>
     <div id="footer-include"></div>
+    <script src="/HumanityIsObliviouslyBlindedToPowersOfTen/partials/code/header.js"></script>
+    <script src="/HumanityIsObliviouslyBlindedToPowersOfTen/partials/code/sidebar.js"></script>
+    <script src="/HumanityIsObliviouslyBlindedToPowersOfTen/partials/code/footer.js"></script>
     <script>
     function includeHTML(id, url, cb) {
-        fetch('/HumanityIsObliviouslyBlindedToPowers/partials/' + url)
+        fetch('/HumanityIsObliviouslyBlindedToPowersTen/partials/' + url)
           .then(res => res.text())
           .then(html => {
               document.getElementById(id).innerHTML = html;
@@ -398,6 +402,12 @@ app.post('/post-website', (req, res) => {
                       }
                       oldScript.parentNode.replaceChild(newScript, oldScript);
                   });
+                  // Open sidebar by default on desktop
+                  var sidebar = document.querySelector('#sidebar-include .sidebar');
+                  if (sidebar) {
+                      sidebar.classList.remove('closed');
+                      sidebar.classList.add('open');
+                  }
               }
           });
     }
@@ -584,109 +594,6 @@ app.post('/post-website', (req, res) => {
       }
     });
     </script>
-    <style>
-    .content-layout {
-      display: flex;
-      align-items: flex-start;
-      position: relative;
-    }
-    section.comments-section {
-      background: var(--background, #f7fafc);
-      border-radius: 1em;
-      box-shadow: 0 2px 8px #0001;
-      margin: 2em auto 3em auto;
-      padding: 1em 2em;
-      max-width: 700px;
-      min-width: 240px;
-      width: 100%;
-      align-self: flex-start;
-      z-index: 10;
-      position: static;
-    }
-    main {
-      flex: 1;
-      min-width: 0;
-    }
-    @media (max-width: 1200px) {
-      .content-layout {
-        flex-direction: column !important;
-      }
-      section.comments-section {
-        max-width: 98vw;
-        min-width: 0;
-      }
-    }
-    .comment {
-      margin-bottom: 1em;
-      padding-bottom: 0.5em;
-      border-bottom: 1px solid #eee;
-    }
-    .comment-meta {
-      color: var(--primary, #222);
-      font-size: 1em;
-      margin-bottom: 0.2em;
-    }
-    .comment-name {
-      color: #F6E05E;
-      font-weight: bold;
-    }
-    .comment-date {
-      color: #888;
-      font-size: 0.9em;
-      margin-left: 0.5em;
-    }
-    .comment-edited {
-      color: #888;
-      font-size: 0.85em;
-      margin-left: 0.5em;
-      font-style: italic;
-    }
-    .comment-body {
-      white-space: pre-line;
-      color: var(--text, #222);
-      font-size: 1.3em;
-      margin: 0.2em 0 0.5em 0;
-      font-family: inherit;
-      font-weight: 600;
-    }
-    .comment-actions button {
-      background: #FF6B00;
-      color: #fff;
-      border: none;
-      border-radius: 0.5em;
-      padding: 0.2em 0.8em;
-      margin-right: 0.5em;
-      font-size: 1em;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background 0.2s;
-    }
-    .comment-actions button:hover {
-      background: #e65c00;
-    }
-    .comment-empty {
-      color: #888;
-      font-style: italic;
-      margin: 1em 0;
-    }
-    .google-login-btn {
-      display: inline-block;
-      background: #fff;
-      color: #444;
-      border: 1px solid #ccc;
-      border-radius: 0.5em;
-      padding: 0.5em 1.2em;
-      font-weight: bold;
-      text-decoration: none;
-      box-shadow: 0 2px 4px #0001;
-      transition: background 0.2s;
-    }
-    .google-login-btn:hover {
-      background: #f6f6f6;
-      color: #222;
-      border-color: #888;
-    }
-    </style>
 </body>
 </html>
 `;
@@ -725,10 +632,19 @@ app.get('/list-posts', (req, res) => {
             if (fs.existsSync(catDir)) {
                 const files = fs.readdirSync(catDir).filter(f => f.endsWith('.html'));
                 for (const file of files) {
-                    // Accept filenames like dd-mm-yyyy.html or dd-mm-yyyy_TIMESTAMP_COUNTER.html
-                    const dateMatch = file.match(/^\d{2}-\d{2}-\d{4}(?:_\d+_\d+)?\.html$/);
-                    if (!dateMatch) continue;
-                    const date = dateMatch[0].slice(0, 10);
+                    // Accept any .html file as a post
+                    // Try to extract date from filename (dd-mm-yyyy or dd-mm-yyyy_*) else fallback to file mtime
+                    let date = '';
+                    const dateMatch = file.match(/^(\d{2}-\d{2}-\d{4})/);
+                    if (dateMatch) {
+                        date = dateMatch[1];
+                    } else {
+                        // fallback: use file modified time
+                        try {
+                            const stat = fs.statSync(path.join(catDir, file));
+                            date = stat.mtime.toISOString().slice(0, 10).split('-').reverse().join('-');
+                        } catch { date = ''; }
+                    }
                     // Try to extract title from file
                     let title = file;
                     try {
@@ -886,11 +802,12 @@ removeRawBodyFromAllPosts();
 app.use(express.static(__dirname));
 
 // Serve partials for posts and all pages
-app.use('/HumanityIsObliviouslyBlindedToPowers/partials', express.static(path.join(__dirname, 'partials')));
-
+app.use('/HumanityIsObliviouslyBlindedToPowersOfTen/partials', express.static(path.join(__dirname, 'partials')));
+// Serve partials/code for all pages
+app.use('/HumanityIsObliviouslyBlindedToPowersOfTen/partials/code', express.static(path.join(__dirname, 'partials', 'code')));
 // Serve CSS and assets for posts and all pages
-app.use('/HumanityIsObliviouslyBlindedToPowers/style.css', express.static(path.join(__dirname, 'style.css')));
-app.use('/HumanityIsObliviouslyBlindedToPowers/Assets', express.static(path.join(__dirname, 'Assets')));
+app.use('/HumanityIsObliviouslyBlindedToPowersOfTen/style.css', express.static(path.join(__dirname, 'style.css')));
+app.use('/HumanityIsObliviouslyBlindedToPowersOfTen/Assets', express.static(path.join(__dirname, 'Assets')));
 
 // DRAFT SYSTEM
 const DRAFTS_ROOT = path.join(__dirname, 'Posts', 'Drafts');

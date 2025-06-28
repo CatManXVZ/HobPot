@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Post Builder</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+
     <style>
     section{
         margin-left: 30% !important;
@@ -70,6 +72,7 @@
     </style>
 </head>
 <body>
+
     <div style="background:#ffdddd;color:#a00;padding:1em 2em;font-weight:bold;text-align:center;border-bottom:2px solid #a00;">
         Developer Access Only: This page is private and restricted to authorized developers. Unauthorized access is prohibited.
     </div>
@@ -107,6 +110,14 @@
                                 <button type="button" id="list-dropdown-btn" style="background:#F6E05E;color:#4A5568;border:1px solid #4A5568;border-radius:0.5em;padding:0.2em 0.7em;font-size:1.1em;font-family:inherit;cursor:pointer;">+ List Item</button>
                             </div>
                             <button type="button" id="img-insert-btn" title="Insert Image" style="background:#F6E05E;color:#4A5568;border:1px solid #4A5568;border-radius:0.5em;padding:0.2em 0.7em;font-size:1.1em;font-family:inherit;cursor:pointer;">Insert Image</button>
+                            <div id="special-char-dropdown" style="position:relative;">
+                                <button type="button" id="special-char-btn" title="Insert Special Character" style="background:#F6E05E;color:#4A5568;border:1px solid #4A5568;border-radius:0.5em;padding:0.2em 0.7em;font-size:1.1em;font-family:inherit;cursor:pointer;">Ω</button>
+                                <div id="special-char-list" style="display:none;position:absolute;z-index:10;top:110%;left:0;background:#fff;border:1px solid #ccc;border-radius:0.7em;box-shadow:0 2px 8px rgba(0,0,0,0.08);padding:0.5em 0;min-width:180px;max-height:220px;overflow-y:auto;">
+                                    <input type="text" id="special-char-search" placeholder="Search..." style="width:90%;margin:0.3em 5%;padding:0.3em 0.7em;border-radius:0.5em;border:1px solid #ccc;font-size:1em;outline:none;">
+                                    <div id="special-char-buttons"></div>
+                                </div>
+                            </div>
+                            <button type="button" id="code-btn" title="Code" style="font-family:monospace;font-size:1.1em;">{<b>&lt;/&gt;</b>}</button>
                         </div>
                         <textarea id="body" name="body" rows="8" required></textarea>
                         <label id="preview-label" style="display:block; margin-top:1em; font-weight:bold; color:#4A5568;">Preview:</label>
@@ -303,6 +314,11 @@
                     // /u text / → <u>text</u>
                     html = html.replace(/\/u\s*([^\n\/]+)\s*\//g, (match, underlineText) => {
                         return `<u>${underlineText.trim()}</u>`;
+                    });
+
+                    // /c ... / → <pre><code>...</code></pre>
+                    html = html.replace(/\/c\s*([^\n\/]+)\s*\//g, (match, codeText) => {
+                        return `<pre><code>${codeText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
                     });
 
                     // /s → split into sections for preview
@@ -841,6 +857,161 @@
                             }).join('');
                     }
                 });
+
+                // Special Character Button Logic
+                const specialChars = [
+                    { char: 'Ω', name: 'omega' },
+                    { char: 'π', name: 'pi' },
+                    { char: '∞', name: 'infinity' },
+                    { char: '≈', name: 'approximately equal' },
+                    { char: '≠', name: 'not equal' },
+                    { char: '≤', name: 'less than or equal' },
+                    { char: '≥', name: 'greater than or equal' },
+                    { char: '±', name: 'plus minus' },
+                    { char: '√', name: 'square root' },
+                    { char: '∑', name: 'summation' },
+                    { char: '∏', name: 'product' },
+                    { char: '∫', name: 'integral' },
+                    { char: '∂', name: 'partial derivative' },
+                    { char: '∆', name: 'delta' },
+                    { char: '∇', name: 'nabla' },
+                    { char: '∈', name: 'element of' },
+                    { char: '∉', name: 'not element of' },
+                    { char: '∅', name: 'empty set' },
+                    { char: '∃', name: 'there exists' },
+                    { char: '∀', name: 'for all' },
+                    { char: '∧', name: 'logical and' },
+                    { char: '∨', name: 'logical or' },
+                    { char: '¬', name: 'not' },
+                    { char: '⇒', name: 'implies' },
+                    { char: '⇔', name: 'if and only if' },
+                    { char: '→', name: 'right arrow' },
+                    { char: '←', name: 'left arrow' },
+                    { char: '↑', name: 'up arrow' },
+                    { char: '↓', name: 'down arrow' },
+                    { char: '↔', name: 'left right arrow' },
+                    { char: '↕', name: 'up down arrow' },
+                    { char: '⊂', name: 'subset' },
+                    { char: '⊃', name: 'superset' },
+                    { char: '⊆', name: 'subset or equal' },
+                    { char: '⊇', name: 'superset or equal' },
+                    { char: '⊕', name: 'direct sum' },
+                    { char: '⊗', name: 'tensor product' },
+                    { char: '⊥', name: 'perpendicular' },
+                    { char: '∝', name: 'proportional to' },
+                    { char: '∴', name: 'therefore' },
+                    { char: '∵', name: 'because' },
+                    { char: '∠', name: 'angle' },
+                    { char: '∟', name: 'right angle' },
+                    { char: '⊿', name: 'triangle' },
+                    { char: '∥', name: 'parallel' },
+                    { char: '∩', name: 'intersection' },
+                    { char: '∪', name: 'union' },
+                    { char: '∗', name: 'asterisk operator' },
+                    { char: '≅', name: 'congruent' },
+                    { char: '≡', name: 'identical' },
+                    { char: '⋅', name: 'dot operator' },
+                    { char: '°', name: 'degree' },
+                    { char: '′', name: 'prime' },
+                    { char: '″', name: 'double prime' },
+                    { char: '‴', name: 'triple prime' },
+                    { char: '…', name: 'ellipsis' },
+                    { char: '§', name: 'section' },
+                    { char: '¶', name: 'paragraph' },
+                    { char: '†', name: 'dagger' },
+                    { char: '‡', name: 'double dagger' },
+                    { char: '•', name: 'bullet' },
+                    { char: '✓', name: 'check mark' },
+                    { char: '✔', name: 'heavy check mark' },
+                    { char: '✕', name: 'multiplication x' },
+                    { char: '✖', name: 'multiplication sign' },
+                    { char: '✗', name: 'ballot x' },
+                    { char: '✘', name: 'heavy ballot x' },
+                    { char: '★', name: 'star' },
+                    { char: '☆', name: 'star outline' },
+                    { char: '♠', name: 'spade' },
+                    { char: '♣', name: 'club' },
+                    { char: '♥', name: 'heart' },
+                    { char: '♦', name: 'diamond' },
+                    { char: '↑', name: 'up arrow' },
+                    { char: '↓', name: 'down arrow' },
+                    { char: '→', name: 'right arrow' },
+                    { char: '←', name: 'left arrow' },
+                    { char: '↔', name: 'left right arrow' },
+                    { char: '↕', name: 'up down arrow' },
+                    { char: '♩', name: 'quarter note' },
+                    { char: '♪', name: 'eighth note' },
+                    { char: '♫', name: 'beamed eighth notes' },
+                    { char: '♬', name: 'beamed sixteenth notes' },
+                    { char: '♭', name: 'flat' },
+                    { char: '♯', name: 'sharp' },
+                    { char: '♮', name: 'natural' },
+                    { char: '●', name: 'black circle' },
+                    { char: '○', name: 'white circle' },
+                    { char: '■', name: 'black square' },
+                    { char: '□', name: 'white square' },
+                    { char: '▲', name: 'black up triangle' },
+                    { char: '△', name: 'white up triangle' },
+                    { char: '▼', name: 'black down triangle' },
+                    { char: '▽', name: 'white down triangle' },
+                    { char: '◆', name: 'black diamond' },
+                    { char: '◇', name: 'white diamond' },
+                    { char: '◈', name: 'diamond with dot' },
+                    { char: '◉', name: 'bullseye' },
+                    { char: '◊', name: 'lozenge' },
+                    { char: '◎', name: 'bullseye circle' },
+                    { char: '☀', name: 'sun' },
+                    { char: '☁', name: 'cloud' },
+                    { char: '☂', name: 'umbrella' },
+                    { char: '☃', name: 'snowman' },
+                    { char: '☄', name: 'comet' },
+                    { char: '☾', name: 'moon' },
+                    { char: '☽', name: 'moon outline' },
+                    { char: '♀', name: 'female' },
+                    { char: '♂', name: 'male' },
+                    { char: '♁', name: 'earth' },
+                    { char: '♃', name: 'jupiter' },
+                    { char: '♄', name: 'saturn' },
+                    { char: '♅', name: 'uranus' },
+                    { char: '♆', name: 'neptune' },
+                    { char: '♇', name: 'pluto' },
+                    // ...add more as needed...
+                ];
+                const specialCharBtn = document.getElementById('special-char-btn');
+                const specialCharList = document.getElementById('special-char-list');
+                const specialCharButtons = document.getElementById('special-char-buttons');
+                const specialCharSearch = document.getElementById('special-char-search');
+
+                function renderSpecialCharButtons(filter = '') {
+                    const filtered = filter
+                        ? specialChars.filter(c => c.char.toLowerCase().includes(filter.toLowerCase()) || c.name.toLowerCase().includes(filter.toLowerCase()))
+                        : specialChars;
+                    specialCharButtons.innerHTML = filtered.map(obj => `<button type=\"button\" class=\"special-char-insert-btn\" style=\"background:none;border:none;font-size:1.3em;padding:0.2em 0.7em;cursor:pointer;\" title=\"${obj.name}\">${obj.char}</button>`).join('');
+                }
+                renderSpecialCharButtons();
+
+                specialCharSearch.addEventListener('input', function() {
+                    renderSpecialCharButtons(this.value);
+                });
+
+                specialCharBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    specialCharList.style.display = specialCharList.style.display === 'block' ? 'none' : 'block';
+                    if (specialCharList.style.display === 'block') {
+                        specialCharSearch.value = '';
+                        renderSpecialCharButtons();
+                        specialCharSearch.focus();
+                    }
+                };
+                document.addEventListener('click', function() {
+                    specialCharList.style.display = 'none';
+                });
+                specialCharButtons.onclick = function(e) {
+                    if (e.target.classList.contains('special-char-insert-btn')) {
+                        insertAtCursor(document.getElementById('body'), e.target.textContent);
+                        specialCharList.style.display = 'none';
+                    }
+                };
                 </script>
                 <style>
                 .section-preview {
@@ -1014,7 +1185,9 @@
         <div id="all-comments-list" style="max-height:500px;overflow-y:auto;"></div>
         <div id="all-comments-pagination" style="text-align:center;margin-top:1em;"></div>
     </section>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
     <script>
     function includeHTML(id, url, cb) {
         fetch(url)
@@ -1276,12 +1449,6 @@
             }
             ul.innerHTML += `
                 <li style="margin-bottom:1em;">
-                    <span style="font-weight:bold;color:#FF6B00;">${draft.title}</span>
-                    <span style="color:#4A5568;margin-left:0.7em;">${draft.date}</span>
-                    ${label}
-                    <button class="edit-draft-btn main-action-btn" data-filename="${draft.filename}">Edit</button>
-                    <button class="delete-draft-btn main-action-btn" data-filename="${draft.filename}">Delete</button>
-                    <div class="draft-preview" id="draft-preview-${draft.filename.replace(/[^a-zA-Z0-9]/g,'')}" style="font-size:0.93em;color:#4A5568;opacity:0.7;margin-top:0.2em;"></div>
                 </li>
             `;
         }

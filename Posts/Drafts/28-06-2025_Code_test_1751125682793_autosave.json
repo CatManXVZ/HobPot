@@ -1,0 +1,6 @@
+{
+  "category": "ComputerScience",
+  "title": "Code test",
+  "body": "<pre><code class=\"language-javascript\">\nfunction includeHTML(id, url, cb) {\n        fetch(url)\n          .then(res => res.text())\n          .then(html => {\n              // Patch homepage link for Poster.html only\n              if (id === 'header-include') {\n                  // Always use absolute path from site root for homepage\n                  html = html.replace(\n                      /(<a[^>]+id=[\"']menu-homepage[\"'][^>]+href=[\"'])[^\"']+([\"'])/i,\n                      '$1/HumanityIsObliviouslyBlindedToPowersOfTen/Homepage.html$2'\n                  );\n              }\n              document.getElementById(id).innerHTML = html;\n              if (cb) cb();\n          });\n    }\n</code></pre>",
+  "date": "2025-06-28T15:48:03.624Z"
+}

@@ -705,9 +705,95 @@ footer .footer-links a:hover {
     color: #fff;
 }
 
-/* Responsive typography and layout */
-html {
-    font-size: 18px;
+/* --- Comments Section Styles (moved from post HTML) --- */
+.comments-section {
+  background: var(--background, #f7fafc);
+  border-radius: 1em;
+  box-shadow: 0 2px 8px #0001;
+  margin: 2em auto 3em auto;
+  padding: 1em 2em;
+  max-width: 700px;
+  min-width: 240px;
+  width: 100%;
+  align-self: flex-start;
+  z-index: 10;
+  position: static;
+}
+.comment {
+  margin-bottom: 1em;
+  padding-bottom: 0.5em;
+  border-bottom: 1px solid #eee;
+}
+.comment-meta {
+  color: var(--primary, #222);
+  font-size: 1em;
+  margin-bottom: 0.2em;
+}
+.comment-name {
+  color: #F6E05E;
+  font-weight: bold;
+}
+.comment-date {
+  color: #888;
+  font-size: 0.9em;
+  margin-left: 0.5em;
+}
+.comment-edited {
+  color: #888;
+  font-size: 0.85em;
+  margin-left: 0.5em;
+  font-style: italic;
+}
+.comment-body {
+  white-space: pre-line;
+  color: var(--text, #222);
+  font-size: 1.3em;
+  margin: 0.2em 0 0.5em 0;
+  font-family: inherit;
+  font-weight: 600;
+}
+.comment-actions button {
+  background: #FF6B00;
+  color: #fff;
+  border: none;
+  border-radius: 0.5em;
+  padding: 0.2em 0.8em;
+  margin-right: 0.5em;
+  font-size: 1em;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+.comment-actions button:hover {
+  background: #e65c00;
+}
+.comment-empty {
+  color: #888;
+  font-style: italic;
+  margin: 1em 0;
+}
+.google-login-btn {
+  display: inline-block;
+  background: #fff;
+  color: #444;
+  border: 1px solid #ccc;
+  border-radius: 0.5em;
+  padding: 0.5em 1.2em;
+  font-weight: bold;
+  text-decoration: none;
+  box-shadow: 0 2px 4px #0001;
+  transition: background 0.2s;
+}
+.google-login-btn:hover {
+  background: #f6f6f6;
+  color: #222;
+  border-color: #888;
+}
+@media (max-width: 1200px) {
+  .comments-section {
+    max-width: 98vw;
+    min-width: 0;
+  }
 }
 
 @media (max-width: 1200px) {
@@ -799,6 +885,9 @@ html {
 }
 
 @media (max-width: 600px) {
+    .section:first-of-type {
+    margin-top: 6% !important;
+  }
     html {
         font-size: 13px;
     }
@@ -887,67 +976,88 @@ html {
 }
 
 @media (max-width: 600px) {
-    html {
-        font-size: 14px;
-    }
-    header h1 {
-        font-size: 2rem;
-        margin-left: 2.5rem;
-    }
-    nav > ul > li > a {
-        padding: 0.5rem 1rem;
-        font-size: 1.1rem;
-    }
-    .sidebar h2 {
-        font-size: 1.1rem;
-    }
-    .sidebar {
-        padding: 0.5rem 0.2rem;
-    }
-    .section {
-        padding: 0.5rem;
-    }
-    .post-form {
-        padding: 0.5rem;
-    }
-    #body, textarea#body {
-        font-size: 0.95em;
-    }
-    #body-preview {
-        font-size: 0.95em;
-    }
-    header,
-    .main-header {
-        min-height: 32px;
-    }
+  .comments-section {
+    margin-left: 0.2em;
+    margin-right: 0.2em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+  main > .section:first-of-type {
+    margin-top: 2.5em;
+  }
 }
 
 @media (max-width: 450px) {
-    html {
-        font-size: 12px;
-    }
-    header h1 {
-        font-size: 1.2rem;
-        margin-left: 1rem;
-    }
-    .logo {
-        width: 80px;
-    }
-    .post-form {
-        padding: 0.2rem;
-    }
-    #body, textarea#body {
-        font-size: 0.9em;
-    }
-    #body-preview {
-        font-size: 0.9em;
-    }
-    header,
-    .main-header {
-        min-height: 24px;
-    }
+  .comments-section {
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0.2em;
+    padding-right: 0.2em;
+  }
+}
+pre {
+    background-color: #f4f4f4; /* Light grey background */
+    padding: 1em;
+    border-radius: 8px; /* Rounded corners */
+    overflow-x: auto; /* Horizontal scroll for long lines */
+    font-family: 'Courier New', Courier, monospace; /* Monospace font */
+    font-size: 0.9em;
+    line-height: 1.5;
+    border: 1px solid #ddd;
 }
 
+pre code {
+    /* Ensures code inside pre doesn't break formatting */
+    display: block;
+    white-space: pre-wrap; /* Keeps long lines from overflowing */
+    word-wrap: break-word; /* Breaks words if necessary */
+}
+/* === DARK MODE SECTION STYLES === */
+.dark-mode .section,
+.dark-mode .sidebar,
+.dark-mode .sidebar *,
+.dark-mode .comments-section {
+  background: #23272f !important;
+  color: #f7fafc !important;
+}
+.dark-mode .section h2,
+.dark-mode .section p,
+.dark-mode .section ul,
+.dark-mode .section li {
+  color: #f7fafc !important;
+}
+.dark-mode .comments-section .comment-name {
+  color: #F6E05E !important;
+}
+.dark-mode .comments-section .comment-date,
+.dark-mode .comments-section .comment-edited {
+  color: #bbb !important;
+}
+.dark-mode .comments-section .comment-body {
+  color: #f7fafc !important;
+}
+.dark-mode .all-posts-container {
+  background: none !important;
+}
+.dark-mode .posts-col {
+  background: #23272f !important;
+  color: #f7fafc !important;
+  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.45);
+}
+.dark-mode .posts-col h2,
+.dark-mode .posts-group-year,
+.dark-mode .posts-group-month,
+.dark-mode .post-link-list a,
+.dark-mode .post-date {
+  color: #f7fafc !important;
+}
+.dark-mode .post-link-list li:hover {
+  background: #333a44 !important;
+}
+.dark-mode .all-posts-title {
+  background: linear-gradient(90deg, #23272f 80%, #181a20 100%) !important;
+  color: #F6E05E !important;
+}
 
 ::-webkit-scrollbar {
     width: 10px;
@@ -959,6 +1069,16 @@ html {
 }
 ::-webkit-scrollbar-thumb:hover {
     background: #FF6B00;
+}
+
+.dark-mode ::-webkit-scrollbar {
+  background: #181a20 !important;
+}
+.dark-mode ::-webkit-scrollbar-thumb {
+  background: #23272f !important;
+}
+.dark-mode ::-webkit-scrollbar-thumb:hover {
+  background: #444 !important;
 }
 
 .post-form {
@@ -1021,5 +1141,50 @@ html {
 .post-form button[type="submit"]:focus {
     background: #F6E05E;
     color: #23272f;
+}
+
+@media (max-width: 900px) {
+  .comments-section {
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    padding-left: 0.7em;
+    padding-right: 0.7em;
+  }
+}
+
+@media (max-width: 600px) {
+  .comments-section {
+    margin-left: 0.2em;
+    margin-right: 0.2em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+}
+
+@media (max-width: 450px) {
+  .comments-section {
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0.2em;
+    padding-right: 0.2em;
+  }
+}
+
+@media (max-width: 800px) {
+  #mobile-darkmode-label {
+    color: #222;
+    font-weight: bold;
+    font-size: 1.1em;
+    padding-bottom: 0.5em;
+    padding-top: 0.5em;
+    margin-bottom: 0.5em;
+    margin-top: 0.5em;
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+  }
 }
 
