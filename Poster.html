@@ -117,6 +117,17 @@
                                     <div id="special-char-buttons"></div>
                                 </div>
                             </div>
+                            <div id="code-dropdown" style="position:relative;">
+                                <button type="button" id="code-btn" title="Code" style="font-family:monospace;font-size:1.1em;">{<b>&lt;/&gt;</b>}</button>
+                                <div id="code-dropdown-list" style="display:none;position:absolute;z-index:10;top:110%;left:0;background:#fff;border:1px solid #ccc;border-radius:0.7em;box-shadow:0 2px 8px rgba(0,0,0,0.08);padding:0.5em 0;min-width:120px;">
+                                    <button type="button" class="code-lang-btn" data-lang="python">Python</button>
+                                    <button type="button" class="code-lang-btn" data-lang="javascript">JavaScript</button>
+                                    <button type="button" class="code-lang-btn" data-lang="java">Java</button>
+                                    <button type="button" class="code-lang-btn" data-lang="lua">Lua</button>
+                                    <button type="button" class="code-lang-btn" data-lang="c">C</button>
+                                    <button type="button" class="code-lang-btn" data-lang="cpp">C++</button>
+                                </div>
+                            </div>
                             <button type="button" id="code-btn" title="Code" style="font-family:monospace;font-size:1.1em;">{<b>&lt;/&gt;</b>}</button>
                         </div>
                         <textarea id="body" name="body" rows="8" required></textarea>
@@ -1012,6 +1023,58 @@
                         specialCharList.style.display = 'none';
                     }
                 };
+
+                // Code button logic
+                const codeBtn = document.getElementById('code-btn');
+                const codeDropdown = document.getElementById('code-dropdown-list');
+                const codeLangBtns = codeDropdown.querySelectorAll('.code-lang-btn');
+
+                codeBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    codeDropdown.style.display = codeDropdown.style.display === 'block' ? 'none' : 'block';
+                };
+                document.addEventListener('click', function() {
+                    codeDropdown.style.display = 'none';
+                });
+                codeLangBtns.forEach(btn => {
+                    btn.onclick = function(e) {
+                        const lang = btn.getAttribute('data-lang');
+                        const textarea = document.getElementById('body');
+                        const start = textarea.selectionStart;
+                        const end = textarea.selectionEnd;
+                        const value = textarea.value;
+                        const selected = value.substring(start, end);
+                        let markup;
+                        if (selected.length > 0) {
+                            markup = `/c ${lang} ${selected} /`;
+                        } else {
+                            markup = `/c ${lang}  /`;
+                        }
+                        textarea.value = value.substring(0, start) + markup + value.substring(end);
+                        // Set cursor after language (if no selection) or after inserted markup
+                        if (selected.length === 0) {
+                            textarea.selectionStart = textarea.selectionEnd = start + 4 + lang.length;
+                        } else {
+                            textarea.selectionStart = start + markup.length;
+                            textarea.selectionEnd = textarea.selectionStart;
+                        }
+                        textarea.dispatchEvent(new Event('input'));
+                        textarea.focus();
+                        codeDropdown.style.display = 'none';
+                    };
+                });
+
+                // Update preview rendering for code blocks with language
+                bodyInput.addEventListener('input', function() {
+                    let html = bodyInput.value;
+                    // ...existing markup replacements...
+                    // /c language code / → <pre><code class="language-language">code</code></pre>
+                    html = html.replace(/\/c\s*(python|javascript|java|lua|c|cpp)\s+([\s\S]*?)\s*\//g, (match, lang, code) => {
+                        return `<pre><code class="language-${lang}">${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+                    });
+                    // ...existing section splitting and preview logic...
+                    // ...existing code...
+                });
                 </script>
                 <style>
                 .section-preview {
@@ -1414,10 +1477,6 @@
                 span.textContent = '[No preview]';
             }
         });
-    }
-
-    if (window.location.pathname.endsWith('Poster.html')) {
-        loadPosts();
     }
 
     // Sidebar for drafts (override only in Poster.html)
