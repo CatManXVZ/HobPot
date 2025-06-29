@@ -1,6 +1,0 @@
-{
-  "category": "ComputerScience",
-  "title": "hhh",
-  "body": "hhh\n<pre><code class=\"language-javascript\">\n    includeHTML('header-include', 'partials/header.html', function() {\n        var loginBtn = document.getElementById('login-btn');\n        if (loginBtn) loginBtn.classList.add('dulled');\n        var homeMenu = document.getElementById('menu-homepage');\n        if (homeMenu) homeMenu.classList.remove('dulled');\n    });\n</code></pre>",
-  "date": "2025-06-28T15:44:22.358Z"
-}

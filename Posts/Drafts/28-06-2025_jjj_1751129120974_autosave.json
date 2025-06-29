@@ -1,6 +1,0 @@
-{
-  "category": "ComputerScience",
-  "title": "jjj",
-  "body": "/c javascript \n app.get('/user-info', (req, res) => {\n    if (req.user && req.user.displayName) {\n        res.json({ loggedIn: true, name: req.user.displayName });\n    } else {\n        res.json({ loggedIn: false });\n    }\n});\n /",
-  "date": "2025-06-28T16:45:20.974Z"
-}

@@ -1031,8 +1031,24 @@ app.post('/edit-comment', (req, res) => {
     res.json({ success: true });
 });
 
-// Delete a comment (Google login required)
+// Delete a comment (admin: allow from Poster.html session)
 app.post('/delete-comment', (req, res) => {
+    // Allow if admin session (Poster.html access)
+    if (req.session && req.session.loggedIn) {
+        const { category, filename, index } = req.body;
+        if (!category || !filename || typeof index !== 'number') return res.status(400).json({ error: 'Missing data.' });
+        const commentsFile = path.join(COMMENTS_ROOT, `${category}__${filename}.json`);
+        if (!fs.existsSync(commentsFile)) return res.status(404).json({ error: 'Comment not found.' });
+        let comments = [];
+        try {
+            comments = JSON.parse(fs.readFileSync(commentsFile, 'utf8'));
+        } catch {}
+        if (!comments[index]) return res.status(404).json({ error: 'Comment not found.' });
+        comments.splice(index, 1);
+        fs.writeFileSync(commentsFile, JSON.stringify(comments, null, 2));
+        return res.json({ success: true });
+    }
+    // Otherwise, require Google login and author match
     if (!req.user || !req.user.displayName) {
         return res.status(401).json({ error: 'Google login required.' });
     }
@@ -1045,7 +1061,6 @@ app.post('/delete-comment', (req, res) => {
         comments = JSON.parse(fs.readFileSync(commentsFile, 'utf8'));
     } catch {}
     if (!comments[index]) return res.status(404).json({ error: 'Comment not found.' });
-    // Only allow deleting if user is the author
     if (comments[index].name !== String(req.user.displayName).slice(0, 32).replace(/[<>]/g, '')) {
         return res.status(403).json({ error: 'Not your comment.' });
     }
