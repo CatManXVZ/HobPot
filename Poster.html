@@ -1015,8 +1015,6 @@
                     }
                 };
 
-               
-
                 // Update preview rendering for code blocks with language
                 bodyInput.addEventListener('input', function() {
                     let html = bodyInput.value;
@@ -1415,8 +1413,6 @@ codedd.querySelectorAll('.code-lang-btn').forEach(btn => {
             // Fetch preview
             const res = await fetch('get-post', {
                 method: 'POST',
-               
-               
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ category, filename })
             });
@@ -1471,132 +1467,132 @@ codedd.querySelectorAll('.code-lang-btn').forEach(btn => {
     }
 
     // Sidebar for drafts (override only in Poster.html)
-    function renderDraftSidebar(drafts) {
-        let html = `<aside class="sidebar"><h2>Drafts</h2><ul id="drafts-list"></ul></aside>`;
-        document.getElementById('sidebar-include').innerHTML = html;
-        const ul = document.getElementById('drafts-list');
-        if (!drafts || drafts.length === 0) {
-            ul.innerHTML = '<li style="color:#888;">No drafts saved.</li>';
-            return;
-        }
-        for (const draft of drafts) {
-            // Label "auto" for autosave drafts, "old" for drafts not edited in 24h
-            let label = '';
-            if (/_autosave\.json$/.test(draft.filename)) {
-                label = `<span style="color:#0077cc;font-size:0.95em;margin-left:0.5em;">[auto]</span>`;
-            } else {
-                // Check if draft is "old" (not edited in 24h)
-                try {
-                    const now = Date.now();
-                    const m = draft.filename.match(/_(\d+)(?:_autosave)?\.json$/);
-                    if (m && m[1]) {
-                        const ts = parseInt(m[1], 10);
-                        if (!isNaN(ts) && now - ts > 24 * 60 * 60 * 1000) {
-                            label = `<span style="color:#a00;font-size:0.95em;margin-left:0.5em;">[old]</span>`;
-                        }
+  function renderDraftSidebar(drafts) {
+    let html = `<aside class="sidebar"><h2>Drafts</h2><ul id="drafts-list"></ul></aside>`;
+    document.getElementById('sidebar-include').innerHTML = html;
+    const ul = document.getElementById('drafts-list');
+    if (!drafts || drafts.length === 0) {
+        ul.innerHTML = '<li style="color:#888;">No drafts saved.</li>';
+        return;
+    }
+    ul.innerHTML = '';
+    for (const draft of drafts) {
+        // Label "auto" for autosave drafts, "old" for drafts not edited in 24h
+        let label = '';
+        if (/_autosave\.json$/.test(draft.filename)) {
+            label = `<span style="color:#0077cc;font-size:0.95em;margin-left:0.5em;">[auto]</span>`;
+        } else {
+            try {
+                const now = Date.now();
+                const m = draft.filename.match(/_(\d+)(?:_autosave)?\.json$/);
+                if (m && m[1]) {
+                    const ts = parseInt(m[1], 10);
+                    if (!isNaN(ts) && now - ts > 24 * 60 * 60 * 1000) {
+                        label = `<span style="color:#a00;font-size:0.95em;margin-left:0.5em;">[old]</span>`;
                     }
-                } catch {}
-            }
-            ul.innerHTML += `
-                <li style="margin-bottom:1em;">
-                </li>
-            `;
+                }
+            } catch {}
         }
-        // Add edit/delete logic for drafts
-        document.querySelectorAll('.edit-draft-btn').forEach(btn => {
-            btn.onclick = async function() {
-                const filename = btn.getAttribute('data-filename');
-                const confirmed = confirm(`Edit draft "${filename}"?`);
-                if (!confirmed) return;
-                const res = await fetch('get-draft', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ filename })
-                });
-                if (!res.ok) {
-                    alert('Failed to load draft.');
-                    return;
-                }
-                const data = await res.json();
-                document.getElementById('category').value = data.category || '';
-                document.getElementById('title').value = data.title || '';
-                document.getElementById('body').value = data.rawBody || '';
-                document.getElementById('form-title').textContent = "Edit Draft";
-                document.getElementById('submit-btn').textContent = "Save as Post";
-                document.getElementById('save-draft-btn').textContent = "Keep as draft";
-                editingPost = null;
-                editingDraft = { filename };
-                document.getElementById('body').dispatchEvent(new Event('input'));
-                document.getElementById('cancel-edit-btn').style.display = '';
-                autosaveId = btn.getAttribute('data-filename');
-                lastAutosaveContent = '';
-            };
-        });
-        document.querySelectorAll('.delete-draft-btn').forEach(btn => {
-            btn.onclick = async function() {
-                const filename = btn.getAttribute('data-filename');
-                const confirmed = confirm(`Delete draft "${filename}"?`);
-                if (!confirmed) return;
-                const res = await fetch('delete-draft', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ filename })
-                });
-                if (res.ok) {
-                    btn.closest('li').remove();
-                } else {
-                    alert('Failed to delete draft.');
-                }
-            };
-        });
+        ul.innerHTML += `
+            <li style="margin-bottom:1em;">
+                <span style="font-weight:bold;">${draft.title || draft.filename}</span> ${label}<br>
+                <button class="edit-draft-btn" data-filename="${draft.filename}" style="margin-right:0.5em;">Edit</button>
+                <button class="delete-draft-btn" data-filename="${draft.filename}">Delete</button>
+                <span id="draft-preview-${draft.filename.replace(/[^a-zA-Z0-9]/g,'')}"></span>
+            </li>
+        `;
+    }
 
-        // Fetch and show preview for each draft (parsed, 40 chars max)
-        drafts.forEach(async function(draft) {
-            const previewId = `draft-preview-${draft.filename.replace(/[^a-zA-Z0-9]/g,'')}`;
-            const span = document.getElementById(previewId);
-            if (!span) return;
-            // Fetch draft content
+    // Add edit/delete logic for drafts
+    document.querySelectorAll('.edit-draft-btn').forEach(btn => {
+        btn.onclick = async function() {
+            const filename = btn.getAttribute('data-filename');
+            const confirmed = confirm(`Edit draft "${filename}"?`);
+            if (!confirmed) return;
             const res = await fetch('get-draft', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ filename: draft.filename })
+                body: JSON.stringify({ filename })
             });
             if (!res.ok) {
-                span.textContent = 'Preview unavailable';
+                alert('Failed to load draft.');
                 return;
             }
             const data = await res.json();
-            if (data.rawBody) {
-                // Show first section (up to /s or end), parse markup for preview
-                let firstSection = data.rawBody.split(/(?:\r?\n)?\s*\/s\s*(?:\r?\n)?/g)[0] || '';
-                // Remove markup for preview
-                let plain = firstSection
-                    .replace(/\/l\s*((?:\/e\s*[^\/]+)+)\/\s*/g, '')
-                    .replace(/\/h\s*([^\n\/]+)\s*\//g, '$1')
-                    .replace(/\/b\s*([^\n\/]+)\s*\//g, '$1')
-                    .replace(/\/i\s*([^\n\/]+)\s*\//g, '$1')
-                    .replace(/\/u\s*([^\n\/]+)\s*\//g, '$1')
-                    .replace(/\n+/g, ' ')
-                    .trim();
-                if (plain.length > 40) plain = plain.slice(0, 40) + '...';
-                span.textContent = "Preview: " + (plain || '[Empty]');
+            document.getElementById('category').value = data.category || '';
+            document.getElementById('title').value = data.title || '';
+            document.getElementById('body').value = data.rawBody || '';
+            document.getElementById('form-title').textContent = "Edit Draft";
+            document.getElementById('submit-btn').textContent = "Save as Post";
+            document.getElementById('save-draft-btn').textContent = "Keep as draft";
+            editingPost = null;
+            editingDraft = { filename };
+            document.getElementById('body').dispatchEvent(new Event('input'));
+            document.getElementById('cancel-edit-btn').style.display = '';
+            autosaveId = btn.getAttribute('data-filename');
+            lastAutosaveContent = '';
+        };
+    });
+    document.querySelectorAll('.delete-draft-btn').forEach(btn => {
+        btn.onclick = async function() {
+            const filename = btn.getAttribute('data-filename');
+            const confirmed = confirm(`Delete draft "${filename}"?`);
+            if (!confirmed) return;
+            const res = await fetch('delete-draft', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename })
+            });
+            if (res.ok) {
+                btn.closest('li').remove();
             } else {
-                span.textContent = 'Preview: [No preview]';
+                alert('Failed to delete draft.');
             }
-        });
-    }
+        };
+    });
 
-    // Fetch drafts for sidebar
-    async function loadDrafts() {
-        const res = await fetch('list-drafts');
+    // Fetch and show preview for each draft (parsed, 40 chars max)
+    drafts.forEach(async function(draft) {
+        const previewId = `draft-preview-${draft.filename.replace(/[^a-zA-Z0-9]/g,'')}`;
+        const span = document.getElementById(previewId);
+        if (!span) return;
+        const res = await fetch('get-draft', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: draft.filename })
+        });
         if (!res.ok) {
-            renderDraftSidebar([]);
+            span.textContent = 'Preview unavailable';
             return;
         }
-        const drafts = await res.json();
-        renderDraftSidebar(drafts);
+        const data = await res.json();
+        if (data.rawBody) {
+            let firstSection = data.rawBody.split(/(?:\r?\n)?\s*\/s\s*(?:\r?\n)?/g)[0] || '';
+            let plain = firstSection
+                .replace(/\/l\s*((?:\/e\s*[^\/]+)+)\/\s*/g, '')
+                .replace(/\/h\s*([^\n\/]+)\s*\//g, '$1')
+                .replace(/\/b\s*([^\n\/]+)\s*\//g, '$1')
+                .replace(/\/i\s*([^\n\/]+)\s*\//g, '$1')
+                .replace(/\/u\s*([^\n\/]+)\s*\//g, '$1')
+                .replace(/\n+/g, ' ')
+                .trim();
+            if (plain.length > 40) plain = plain.slice(0, 40) + '...';
+            span.textContent = "Preview: " + (plain || '[Empty]');
+        } else {
+            span.textContent = 'Preview: [No preview]';
+        }
+    });
+}
+    // Fetch drafts for sidebar
+async function loadDrafts() {
+    const res = await fetch('list-drafts');
+    if (!res.ok) {
+        renderDraftSidebar([]);
+        return;
     }
-
+    const drafts = await res.json();
+    renderDraftSidebar(drafts);
+}
     // Draft system state
 
     // Save Draft button logic
