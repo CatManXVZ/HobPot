@@ -1665,7 +1665,7 @@ codedd.querySelectorAll('.code-lang-btn').forEach(btn => {
             try {
                 const res = await fetch(`/comments?category=${encodeURIComponent(post.category)}&filename=${encodeURIComponent(post.filename)}`);
                 if (!res.ok) continue;
-                const comments = await res.json();
+                const comments = await res.json(); 
                 comments.forEach((comment, idx) => {
                     // Attach post info and index to each comment
                     allComments.push({
@@ -2073,7 +2073,12 @@ codedd.querySelectorAll('.code-lang-btn').forEach(btn => {
         loadPosts();
         // ...existing code...
     }
-
+document.getElementById('post-search').addEventListener('input', filterAllPosts);
+document.getElementById('post-filter').addEventListener('change', filterAllPosts);
+document.getElementById('comment-search').addEventListener('input', filterAllComments);
+document.getElementById('comments-filter-year').addEventListener('change', filterAllComments);
+document.getElementById('comments-filter-month').addEventListener('change', filterAllComments);
+document.getElementById('comments-filter-category').addEventListener('change', filterAllComments);
     </script>
     <style>
     /* ...existing code... */
