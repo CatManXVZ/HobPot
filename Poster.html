@@ -72,6 +72,7 @@
     </style>
 </head>
 <body>
+
     <div style="background:#ffdddd;color:#a00;padding:1em 2em;font-weight:bold;text-align:center;border-bottom:2px solid #a00;">
         Developer Access Only: This page is private and restricted to authorized developers. Unauthorized access is prohibited.
     </div>
@@ -1014,71 +1015,73 @@
                     }
                 };
 
+               
+
+                // Update preview rendering for code blocks with language
+                bodyInput.addEventListener('input', function() {
+                    let html = bodyInput.value;
+                    // ...existing markup replacements...
+                    // /c language code / → <pre><code class="language-language">code</code></pre>
+                    html = html.replace(/\/c\s*(python|javascript|java|lua|c|cpp)\s+([\s\S]*?)\s*\//g, (match, lang, code) => {
+                        return `<pre><code class="language-${lang}">${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+                    });
+                    // ...existing section splitting and preview logic...
+                    // ...existing code...
+                });
                 // Code button logic
-                const codeBtn = document.getElementById('code-btn');
-                const codeDropdown = document.getElementById('code-dropdown-list');
+const codeBtn = document.getElementById('code-btn');
+let codedd = document.getElementById('code-dropdown-list');
 
-                // If dropdown doesn't exist, create it
-                if (!codeDropdown) {
-                    const dropdown = document.createElement('div');
-                    dropdown.id = 'code-dropdown-list';
-                    dropdown.style.display = 'none';
-                    dropdown.style.position = 'absolute';
-                    dropdown.style.background = '#fff';
-                    dropdown.style.border = '1.5px solid #FF6B00';
-                    dropdown.style.borderRadius = '0.7em';
-                    dropdown.style.boxShadow = '0 2px 12px 0 rgba(255,107,0,0.08)';
-                    dropdown.style.zIndex = '1000';
-                    dropdown.innerHTML = `
-                        <button type="button" class="code-lang-btn" data-lang="javascript" style="display:block;width:100%;padding:0.7em 1.2em;background:none;border:none;text-align:left;font-size:1.1em;cursor:pointer;">JavaScript</button>
-                        <button type="button" class="code-lang-btn" data-lang="python" style="display:block;width:100%;padding:0.7em 1.2em;background:none;border:none;text-align:left;font-size:1.1em;cursor:pointer;">Python</button>
-                    `;
-                    codeBtn.parentNode.appendChild(dropdown);
-                }
+if (!codedd) {
+    codedd = document.createElement('div');
+    codedd.id = 'code-dropdown-list';
+    codedd.style.display = 'none';
+    codedd.style.position = 'absolute';
+    codedd.style.background = '#fff';
+    codedd.style.border = '1.5px solid #FF6B00';
+    codedd.style.borderRadius = '0.7em';
+    codedd.style.boxShadow = '0 2px 12px 0 rgba(255,107,0,0.08)';
+    codedd.style.zIndex = '1000';
+    codedd.innerHTML = `
+        <button type="button" class="code-lang-btn" data-lang="javascript" style="display:block;width:100%;padding:0.7em 1.2em;background:none;border:none;text-align:left;font-size:1.1em;cursor:pointer;">JavaScript</button>
+        <button type="button" class="code-lang-btn" data-lang="python" style="display:block;width:100%;padding:0.7em 1.2em;background:none;border:none;text-align:left;font-size:1.1em;cursor:pointer;">Python</button>
+    `;
+    // Ensure parent is position:relative for correct absolute positioning
+    codeBtn.parentNode.style.position = 'relative';
+    codeBtn.parentNode.appendChild(codedd);
+}
 
-                const codeDropdownList = document.getElementById('code-dropdown-list');
-
-                codeBtn.onclick = function(e) {
-                    e.stopPropagation();
-                    // Position dropdown below the button
-                    const rect = codeBtn.getBoundingClientRect();
-                    codeDropdownList.style.left = rect.left + 'px';
-                    codeDropdownList.style.top = (rect.bottom + window.scrollY) + 'px';
-                    codeDropdownList.style.display = codeDropdownList.style.display === 'block' ? 'none' : 'block';
-                };
-                document.addEventListener('click', function() {
-                    codeDropdownList.style.display = 'none';
-                });
-
-                codeDropdownList.querySelectorAll('.code-lang-btn').forEach(btn => {
-                    btn.onclick = function(e) {
-                        e.stopPropagation();
-                        const lang = btn.getAttribute('data-lang');
-                        const textarea = document.getElementById('body');
-                        if (!textarea) return;
-                        const start = textarea.selectionStart;
-                        const end = textarea.selectionEnd;
-                        const selected = textarea.value.substring(start, end);
-                        if (selected) {
-                            // Replace selected text with /c language selected /
-                            const before = textarea.value.substring(0, start);
-                            const after = textarea.value.substring(end);
-                            textarea.value = before + `/c ${lang} ${selected} /` + after;
-                            // Move cursor to after the inserted code
-                            textarea.selectionStart = textarea.selectionEnd = before.length + (`/c ${lang} ${selected} /`).length;
-                        } else {
-                            // Insert /c language  /
-                            const before = textarea.value.substring(0, start);
-                            const after = textarea.value.substring(end);
-                            textarea.value = before + `/c ${lang}  /` + after;
-                            textarea.selectionStart = textarea.selectionEnd = before.length + (`/c ${lang} `.length);
-                        }
-                        textarea.focus();
-                        codeDropdownList.style.display = 'none';
-                        // Trigger input event for live preview
-                        textarea.dispatchEvent(new Event('input'));
-                    };
-                });
+codeBtn.onclick = function(e) {
+    e.stopPropagation();
+    // Position dropdown directly below the button, relative to parent
+    codedd.style.left = codeBtn.offsetLeft + 'px';
+    codedd.style.top = (codeBtn.offsetTop + codeBtn.offsetHeight) + 'px';
+    codedd.style.display = codedd.style.display === 'block' ? 'none' : 'block';
+};
+document.addEventListener('click', function() {
+    codedd.style.display = 'none';
+});
+codedd.querySelectorAll('.code-lang-btn').forEach(btn => {
+    btn.onclick = function(e) {
+        e.stopPropagation();
+        const lang = btn.getAttribute('data-lang');
+        const textarea = document.getElementById('body');
+        if (!textarea) return;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const before = textarea.value.substring(0, start);
+        const selected = textarea.value.substring(start, end);
+        const after = textarea.value.substring(end);
+        if (selected) {
+            textarea.value = before + `/c ${lang} ${selected} /` + after;
+            textarea.selectionStart = textarea.selectionEnd = before.length + (`/c ${lang} ${selected} /`).length;
+        }
+        textarea.focus();
+        codedd.style.display = 'none';
+        // Trigger input event for live preview
+        textarea.dispatchEvent(new Event('input'));
+    };
+});
                 </script>
                 <style>
                 .section-preview {
@@ -1412,12 +1415,13 @@
             // Fetch preview
             const res = await fetch('get-post', {
                 method: 'POST',
+               
+               
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ category, filename })
             });
             if (!res.ok) {
                 span.textContent = 'Preview unavailable';
-                              
                 return;
             }
             const data = await res.json();
@@ -1434,7 +1438,7 @@
                 if (plain.length > 40) plain = plain.slice(0, 40) + '...';
                 span.textContent = plain || '[Empty]';
 
-                // Show full first section (with markup rendered) under preview
+                // Show full first section (with markup rendered) under
                 const sectionDiv = document.getElementById(`section-${category}-${filename.replace(/[^a-zA-Z0-9]/g,'')}`);
                 if (sectionDiv) {
                     // Render markup for first section
@@ -1466,10 +1470,6 @@
         });
     }
 
-    if (window.location.pathname.endsWith('Poster.html')) {
-        loadPosts();
-    }
-
     // Sidebar for drafts (override only in Poster.html)
     function renderDraftSidebar(drafts) {
         let html = `<aside class="sidebar"><h2>Drafts</h2><ul id="drafts-list"></ul></aside>`;
@@ -1499,12 +1499,6 @@
             }
             ul.innerHTML += `
                 <li style="margin-bottom:1em;">
-                    <span style="font-weight:bold;color:#FF6B00;">${draft.title}</span>
-                    <span style="color:#4A5568;margin-left:0.7em;">${draft.date}</span>
-                    ${label}
-                    <button class="edit-draft-btn main-action-btn" data-filename="${draft.filename}">Edit</button>
-                    <button class="delete-draft-btn main-action-btn" data-filename="${draft.filename}">Delete</button>
-                    <div class="draft-preview" id="draft-preview-${draft.filename.replace(/[^a-zA-Z0-9]/g,'')}" style="font-size:0.93em;color:#4A5568;opacity:0.7;margin-top:0.2em;"></div>
                 </li>
             `;
         }
@@ -1648,7 +1642,7 @@
         renderDraftSidebar([]);
     });
 
-    // --- All Comments Section Logic ---
+                // --- All Comments Section Logic ---
     let allCommentsData = [];
     let allCommentsFiltered = [];
     let allCommentsPage = 1;
@@ -1716,12 +1710,22 @@
         const year = document.getElementById('comments-filter-year').value;
         const month = document.getElementById('comments-filter-month').value;
         const category = document.getElementById('comments-filter-category').value;
+        const search = document.getElementById('comment-search').value.trim().toLowerCase();
         allCommentsFiltered = allCommentsData.filter(c => {
             const d = new Date(c.date || c.postDate);
             let match = true;
             if (year !== 'all') match = match && d.getFullYear().toString() === year;
             if (month !== 'all') match = match && (d.getMonth() + 1).toString() === month;
             if (category !== 'all') match = match && c.postCategory === category;
+            if (search) {
+                match = match && (
+                    (c.name && c.name.toLowerCase().includes(search)) ||
+                    (c.text && c.text.toLowerCase().includes(search)) ||
+                    (c.postTitle && c.postTitle.toLowerCase().includes(search)) ||
+                    (c.postCategory && c.postCategory.toLowerCase().includes(search)) ||
+                    (c.postDate && c.postDate.toLowerCase().includes(search))
+                );
+            }
             return match;
         });
         allCommentsPage = 1;
@@ -1834,34 +1838,22 @@
     let allPostsPage = 1;
     const ALL_POSTS_PER_PAGE = 3;
 
-    async function loadPosts() {
-        const res = await fetch('list-posts');
-        if (!res.ok) {
-            document.getElementById('posts-list').innerHTML = '<p style="color:#a00;">Could not load posts.</p>';
-            return;
-        }
-        const posts = await res.json();
-        // Flatten posts for pagination
-        let flatPosts = [];
-        for (const [cat, arr] of Object.entries(posts)) {
-            arr.forEach(post => {
-                flatPosts.push({ ...post, category: cat });
-            });
-        }
-        // Sort by date descending, then filename
-        flatPosts.sort((a, b) => b.date.localeCompare(a.date) || b.filename.localeCompare(a.filename));
-        allPostsData = flatPosts;
-        filterAllPosts();
-        document.getElementById('post-filter').onchange = filterAllPosts;
-    }
-
     function filterAllPosts() {
         const filter = document.getElementById('post-filter').value;
-        if (filter === 'all') {
-            allPostsFiltered = allPostsData.slice();
-        } else {
-            allPostsFiltered = allPostsData.filter(p => p.category === filter);
+        const search = document.getElementById('post-search').value.trim().toLowerCase();
+        let filtered = allPostsData;
+        if (filter !== 'all') {
+            filtered = filtered.filter(p => p.category === filter);
         }
+        if (search) {
+            filtered = filtered.filter(p =>
+                (p.title && p.title.toLowerCase().includes(search)) ||
+                (p.body && p.body.toLowerCase().includes(search)) ||
+                (p.date && p.date.toLowerCase().includes(search)) ||
+                (p.category && p.category.toLowerCase().includes(search))
+            );
+        }
+        allPostsFiltered = filtered;
         allPostsPage = 1;
         renderAllPosts();
     }
@@ -2025,6 +2017,7 @@
                 // Show full first section (with markup rendered) under preview
                 const sectionDiv = document.getElementById(`section-${category}-${filename.replace(/[^a-zA-Z0-9]/g,'')}`);
                 if (sectionDiv) {
+                    // Render markup for first section
                     let html = firstSection;
                     html = html.replace(/\/l\s*((?:\/e\s*[^\/]+)+)\/\s*/g, (match, listContent) => {
                         const items = [...listContent.matchAll(/\/e\s*([^\/\n]+)/g)].map(m => `<li>${m[1].trim()}</li>`);
@@ -2042,6 +2035,7 @@
                     html = html.replace(/\/u\s*([^\n\/]+)\s*\//g, (match, underlineText) => {
                         return `<u>${underlineText.trim()}</u>`;
                     });
+                    // Paragraphs: split by double newlines or single newlines, wrap in <p>
                     let parts = html.split(/\n{2,}/g).map(p => p.trim()).filter(p => p.length > 0);
                     html = parts.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
                     sectionDiv.innerHTML = html;
