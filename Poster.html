@@ -318,11 +318,6 @@
                         return `<u>${underlineText.trim()}</u>`;
                     });
 
-                    // /c ... / → <pre><code>...</code></pre>
-                    html = html.replace(/\/c\s*([^\n\/]+)\s*\//g, (match, codeText) => {
-                        return `<pre><code>${codeText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
-                    });
-
                     // /s → split into sections for preview
                     const sectionParts = html.split(/(?:\r?\n)?\s*\/s\s*(?:\r?\n)?/g);
                     html = sectionParts.map(part => {
@@ -343,6 +338,7 @@
                     }).join('');
 
                     preview.innerHTML = html;
+                    if (window.Prism && Prism.highlightAll) Prism.highlightAll();
                 });
 
                 // Insert markup at selection or cursor
@@ -680,6 +676,7 @@
                     }).join('');
 
                     preview.innerHTML = html;
+                    if (window.Prism && Prism.highlightAll) Prism.highlightAll();
                 });
 
                 // IMAGE PREVIEW: Render /pic code height width style caption/ as <figure><img ...><figcaption>...</figcaption></figure>
@@ -1015,6 +1012,8 @@
                     }
                 };
 
+               
+
                 // Update preview rendering for code blocks with language
                 bodyInput.addEventListener('input', function() {
                     let html = bodyInput.value;
@@ -1022,6 +1021,10 @@
                     // /c language code / → <pre><code class="language-language">code</code></pre>
                     html = html.replace(/\/c\s*(python|javascript|java|lua|c|cpp)\s+([\s\S]*?)\s*\//g, (match, lang, code) => {
                         return `<pre><code class="language-${lang}">${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+                    });
+                    // /c code / → <pre><code>code</code></pre> (no language)
+                    html = html.replace(/\/c\s+([\s\S]*?)\s*\//g, (match, code) => {
+                        return `<pre><code>${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
                     });
                     // ...existing section splitting and preview logic...
                     // ...existing code...
@@ -2075,6 +2078,65 @@ document.getElementById('comment-search').addEventListener('input', filterAllCom
 document.getElementById('comments-filter-year').addEventListener('change', filterAllComments);
 document.getElementById('comments-filter-month').addEventListener('change', filterAllComments);
 document.getElementById('comments-filter-category').addEventListener('change', filterAllComments);
+    bodyInput.addEventListener('input', function() {
+    let html = bodyInput.value;
+
+    // /c language code / → <pre><code class="language-language">code</code></pre>
+    html = html.replace(/\/c\s*(python|javascript|java|lua|c|cpp)\s+([\s\S]*?)\s*\//g, (match, lang, code) => {
+        return `<pre><code class="language-${lang}">${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+    });
+    // /c code / → <pre><code>code</code></pre> (no language)
+    html = html.replace(/\/c\s+([\s\S]*?)\s*\//g, (match, code) => {
+        return `<pre><code>${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+    });
+
+    // /l /e item /e item/ → <ul><li>item</li><li>item</li></ul>
+    html = html.replace(/\/l\s*((?:\/e\s*[^\/]+)+)\/\s*/g, (match, listContent) => {
+        const items = [...listContent.matchAll(/\/e\s*([^\/\n]+)/g)].map(m => `<li>${m[1].trim()}</li>`);
+        return `<ul>${items.join('')}</ul>`;
+    });
+
+    // /h text / → <h2>text</h2>
+    html = html.replace(/\/h\s*([^\n\/]+)\s*\//g, (match, headerText) => {
+        return `|||H2|||${headerText.trim()}|||H2|||`;
+    });
+
+    // /b text / → <b>text</b>
+    html = html.replace(/\/b\s*([^\n\/]+)\s*\//g, (match, boldText) => {
+        return `<b>${boldText.trim()}</b>`;
+    });
+
+    // /i text / → <i>text</i>
+    html = html.replace(/\/i\s*([^\n\/]+)\s*\//g, (match, italicText) => {
+        return `<i>${italicText.trim()}</i>`;
+    });
+
+    // /u text / → <u>text</u>
+    html = html.replace(/\/u\s*([^\n\/]+)\s*\//g, (match, underlineText) => {
+        return `<u>${underlineText.trim()}</u>`;
+    });
+
+    // /s → split into sections for preview
+    const sectionParts = html.split(/(?:\r?\n)?\s*\/s\s*(?:\r?\n)?/g);
+    html = sectionParts.map(part => {
+        // Split by our fake H2 marker
+        let parts = part.split('|||H2|||');
+        let result = '';
+        for (let i = 0; i < parts.length; i++) {
+            if (i % 2 === 1) {
+                // Heading
+                result += `<h2>${parts[i]}</h2>`;
+            } else {
+                // Paragraphs: split by double newlines or single newlines, wrap in <p>
+                let paras = parts[i].split(/\n{2,}/g).map(p => p.trim()).filter(p => p.length > 0);
+                result += paras.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+            }
+        }
+        return `<div class="section-preview">${result}</div>`;
+    }).join('');
+
+    preview.innerHTML = html;
+});
     </script>
     <style>
     /* ...existing code... */
