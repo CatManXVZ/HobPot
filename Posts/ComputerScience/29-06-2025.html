@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,9 +14,7 @@
     <div id="sidebar-include"></div>
     <div class="content-layout" style="display:flex;align-items:flex-start;position:relative;">
         <main style="flex:1;">
-            <div style="font-size:8px;opacity:0.1;user-select:none;pointer-events:none;max-height:1px;overflow:hidden;"><!--RAW_BODY_START-->
-ttttttttttttttt
-<!--RAW_BODY_END--></div>
+            <div style="font-size:8px;opacity:0.1;user-select:none;pointer-events:none;max-height:1px;overflow:hidden;"></div>
             <section class="section">
 <p>ttttttttttttttt</p>
 </section>
@@ -83,7 +80,6 @@ ttttttttttttttt
     const COMMENTS_PER_PAGE = 8;
     const commentCategory = "ComputerScience";
     const commentFilename = "29-06-2025.html";
-
     function renderCommentsPage(page) {
       const list = document.getElementById('comments-list');
       const pag = document.getElementById('comments-pagination');
@@ -129,7 +125,6 @@ ttttttttttttttt
         pag.innerHTML = '';
       }
     }
-
     function fetchComments() {
       fetch('/comments?category=' + encodeURIComponent(commentCategory) + '&filename=' + encodeURIComponent(commentFilename))
         .then(res => res.json())
@@ -138,7 +133,6 @@ ttttttttttttttt
           renderCommentsPage(currentPage);
         });
     }
-
     // Check login status for Google (by trying to fetch /user-info)
     fetch('/user-info').then(res => res.json()).then(data => {
       if (data && data.loggedIn) {
@@ -155,7 +149,6 @@ ttttttttttttttt
       document.getElementById('comment-form').style.display = 'none';
       document.getElementById('google-login-prompt').style.display = '';
     });
-
     document.getElementById('comment-form').onsubmit = function(e) {
       e.preventDefault();
       const text = document.getElementById('comment-text').value.trim();
@@ -179,7 +172,6 @@ ttttttttttttttt
         }
       });
     };
-
     // Pagination click
     document.addEventListener('click', function(e) {
       if (e.target.classList.contains('comment-page-btn')) {
@@ -235,7 +227,6 @@ ttttttttttttttt
         });
       }
     });
-
     fetchComments();
     // Style the comment button with the orange from the stylesheet
     document.addEventListener('DOMContentLoaded', function() {

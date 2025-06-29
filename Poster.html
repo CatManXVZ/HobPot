@@ -738,6 +738,7 @@
                     }).join('');
 
                     preview.innerHTML = html;
+                    if (window.Prism && Prism.highlightAll) Prism.highlightAll();
                 });
 
                 // IMAGE PREVIEW: Render /pic code height width style caption/ as <figure class="float-img-container"><img ... class="float-img"><figcaption>...</figcaption></figure>
@@ -1021,10 +1022,6 @@
                     // /c language code / → <pre><code class="language-language">code</code></pre>
                     html = html.replace(/\/c\s*(python|javascript|java|lua|c|cpp)\s+([\s\S]*?)\s*\//g, (match, lang, code) => {
                         return `<pre><code class="language-${lang}">${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
-                    });
-                    // /c code / → <pre><code>code</code></pre> (no language)
-                    html = html.replace(/\/c\s+([\s\S]*?)\s*\//g, (match, code) => {
-                        return `<pre><code>${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
                     });
                     // ...existing section splitting and preview logic...
                     // ...existing code...
@@ -1416,6 +1413,8 @@ codedd.querySelectorAll('.code-lang-btn').forEach(btn => {
             // Fetch preview
             const res = await fetch('get-post', {
                 method: 'POST',
+               
+               
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ category, filename })
             });
@@ -2078,13 +2077,14 @@ document.getElementById('comment-search').addEventListener('input', filterAllCom
 document.getElementById('comments-filter-year').addEventListener('change', filterAllComments);
 document.getElementById('comments-filter-month').addEventListener('change', filterAllComments);
 document.getElementById('comments-filter-category').addEventListener('change', filterAllComments);
-    bodyInput.addEventListener('input', function() {
+    bodyInput.addEventListener('input', async function() {
     let html = bodyInput.value;
 
     // /c language code / → <pre><code class="language-language">code</code></pre>
     html = html.replace(/\/c\s*(python|javascript|java|lua|c|cpp)\s+([\s\S]*?)\s*\//g, (match, lang, code) => {
         return `<pre><code class="language-${lang}">${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
     });
+
     // /c code / → <pre><code>code</code></pre> (no language)
     html = html.replace(/\/c\s+([\s\S]*?)\s*\//g, (match, code) => {
         return `<pre><code>${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
@@ -2137,6 +2137,15 @@ document.getElementById('comments-filter-category').addEventListener('change', f
 
     preview.innerHTML = html;
 });
+(function foreverPreviewReload() {
+    try {
+        if (typeof bodyInput !== 'undefined' && bodyInput && typeof bodyInput.dispatchEvent === 'function') {
+            bodyInput.dispatchEvent(new Event('input'));
+        }
+    } catch (e) {}
+    requestAnimationFrame(foreverPreviewReload);
+})();
+
     </script>
     <style>
     /* ...existing code... */
