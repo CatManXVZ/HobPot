@@ -1187,4 +1187,42 @@ pre code {
     gap: 0.7em;
   }
 }
+.frac { display: inline-block; vertical-align: middle; }
+.frac .num { display: inline-block; border-bottom: 1px solid #333; padding: 0 2px; }
+.frac .den { display: inline-block; padding: 0 2px; font-size: 0.9em; }
+math .frac {
+    display: inline-block;
+    vertical-align: middle;
+    text-align: center;
+    margin: 0 0.15em;
+}
+math .frac .num {
+    display: block;
+    padding: 0 0.2em;
+}
+math .frac .frac-line {
+    display: block;
+    border-top: 2px solid #333;
+    height: 0;
+    margin: 0.1em 0;
+}
+math .frac .den {
+    display: block;
+    padding: 0 0.2em;
+}
+math {
+  font-family: 'Cambria Math', 'STIX Math', 'Latin Modern Math', 'Times New Roman', serif;
+  font-size: 1.18em;
+  font-style: italic;
+  color: #2D3748;
+  background: #f6e05e33;
+  padding: 0.12em 0.5em;
+  border-radius: 0.4em;
+  margin: 0 0.1em;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+  box-shadow: 0 1px 4px #ff6b0011;
+  border: 1px solid #f6e05e99;
+  display: inline-block;
+}
 
