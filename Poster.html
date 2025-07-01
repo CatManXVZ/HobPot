@@ -816,6 +816,82 @@
                     }).join('');
 
                     preview.innerHTML = html;
+                    if (window.Prism && Prism.highlightAll) Prism.highlightAll();
+                });
+
+                // IMAGE PREVIEW: Render /pic code height width style caption/ as <figure class="float-img-container"><img ... class="float-img"><figcaption>...</figcaption></figure>
+                function getImageUrlByCode(code, images) {
+                    code = parseInt(code, 10);
+                    if (!Array.isArray(images) || isNaN(code) || code < 1 || code > images.length) return '';
+                    return images[code-1].url;
+                }
+
+                bodyInput.addEventListener('input', async function() {
+                    let html = bodyInput.value;
+                    // ...markup replacements...
+                    html = html.replace(/\/l\s*((?:\/e\s*[^\/]+)+)\/\s*/g, (match, listContent) => {
+                        const items = [...listContent.matchAll(/\/e\s*([^\/\n]+)/g)].map(m => `<li>${m[1].trim()}</li>`);
+                        return `<ul>${items.join('')}</ul>`;
+                    });
+                    html = html.replace(/\/h\s*([^\n\/]+)\s*\//g, (match, headerText) => {
+                        return `|||H2|||${headerText.trim()}|||H2|||`;
+                    });
+                    html = html.replace(/\/b\s*([^\n\/]+)\s*\//g, (match, boldText) => {
+                        return `<b>${boldText.trim()}</b>`;
+                    });
+                    html = html.replace(/\/i\s*([^\n\/]+)\s*\//g, (match, italicText) => {
+                        return `<i>${italicText.trim()}</i>`;
+                    });
+                    html = html.replace(/\/u\s*([^\n\/]+)\s*\//g, (match, underlineText) => {
+                        return `<u>${underlineText.trim()}</u>`;
+                    });
+
+                    // Fetch images for /pic code/ rendering
+                    let images = [];
+                    try {
+                        const res = await fetch('/list-images');
+                        if (res.ok) images = await res.json();
+                    } catch {}
+
+                    // Replace /pic code height width style caption/ with <figure class="float-img-container"><img ... class="float-img"><figcaption>...</figcaption></figure>
+                    html = html.replace(
+                        /\/pic\s+(\d+)(?:\s+(\d+))?(?:\s+(\d+))?(?:\s+(wrap|block))?(?:\s+([^\/]+?))?\s*\//g,
+                        (match, code, h, w, style, caption) => {
+                            const url = getImageUrlByCode(code, images);
+                            if (!url) return '';
+                            let attrs = '';
+                            if (h) attrs += ` height="${h}"`;
+                            if (w) attrs += ` width="${w}"`;
+                            let figClass = '';
+                            let imgClass = '';
+                            if (style === 'wrap') {
+                                figClass = 'float-img-container';
+                                imgClass = 'float-img';
+                            }
+                            let imgTag = `<img src="${url}"${attrs} class="${imgClass}" style="max-width:100%;border-radius:0.4em;">`;
+                            let figcaption = caption ? `<figcaption>${caption.trim()}</figcaption>` : '';
+                            return `<figure${figClass ? ` class="${figClass}"` : ''}>${imgTag}${figcaption}</figure>`;
+                        }
+                    );
+
+                    // ...section splitting and preview logic...
+                    const sectionParts = html.split(/(?:\r?\n)?\s*\/s\s*(?:\r?\n)?/g);
+                    html = sectionParts.map(part => {
+                        let parts = part.split('|||H2|||');
+                        let result = '';
+                        for (let i = 0; i < parts.length; i++) {
+                            if (i % 2 === 1) {
+                                result += `<h2>${parts[i]}</h2>`;
+                            } else {
+                                let paras = parts[i].split(/\n{2,}/g).map(p => p.trim()).filter(p => p.length > 0);
+                                result += paras.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+                            }
+                        }
+                        return `<div class="section-preview">${result}</div>`;
+                    }).join('');
+
+                    preview.innerHTML = html;
+                    if (window.Prism && Prism.highlightAll) Prism.highlightAll();
                 });
 
                 // Minimize/expand image table
@@ -1024,11 +1100,16 @@
                     // ...existing markup replacements...
                     // /c language code / → <pre><code class="language-language">code</code></pre>
                     html = html.replace(/\/c\s*(python|javascript|java|lua|c|cpp)\s+([\s\S]*?)\s*\//g, (match, lang, code) => {
-                        return `<pre><code class="language-${lang}">${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+                        code = code.replace(/--/g, '/');
+                        code = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                        // Do NOT replace newlines with <br> for code blocks, let <pre> handle multiline
+                        return `<pre><code class="language-${lang}">${code}</code></pre>`;
                     });
                     // /c code / → <pre><code>code</code></pre> (no language)
                     html = html.replace(/\/c\s+([\s\S]*?)\s*\//g, (match, code) => {
-                        return `<pre><code>${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+                        code = code.replace(/--/g, '/');
+                        code = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                        return `<pre><code>${code}</code></pre>`;
                     });
                     // ...existing section splitting and preview logic...
                     // ...existing code...
@@ -1326,7 +1407,7 @@ codedd.querySelectorAll('.code-lang-btn').forEach(btn => {
             for (const post of months[monthKey]) {
                 html += `
                 <div class="post-list-item" style="
-                    border:2px solid #FF6B00;
+                    border:2px solid #F6E05E;
                     border-radius:1.1em;
                     margin-bottom:1.2em;
                     padding:1.1em 1.2em;
@@ -2085,16 +2166,19 @@ document.getElementById('comments-filter-category').addEventListener('change', f
     bodyInput.addEventListener('input', function() {
     let html = bodyInput.value;
 
-    // /c language code / → <pre><code class="language-language">code</code></pre>
+    // --- Mark code blocks and protect them from further processing ---
+    // Replace /c language ... / and /c ... / with placeholders
+    let codeBlocks = [];
     html = html.replace(/\/c\s*(python|javascript|java|lua|c|cpp)\s+([\s\S]*?)\s*\//g, (match, lang, code) => {
-        return `<pre><code class="language-${lang}">${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+        codeBlocks.push({ lang, code });
+        return `|||CODEBLOCK_LANG_${codeBlocks.length - 1}|||`;
     });
-
-    // /c code / → <pre><code>code</code></pre> (no language)
     html = html.replace(/\/c\s+([\s\S]*?)\s*\//g, (match, code) => {
-        return `<pre><code>${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+        codeBlocks.push({ lang: null, code });
+        return `|||CODEBLOCK_${codeBlocks.length - 1}|||`;
     });
 
+    // --- Process all other markup ---
     // /l /e item /e item/ → <ul><li>item</li><li>item</li></ul>
     html = html.replace(/\/l\s*((?:\/e\s*[^\/]+)+)\/\s*/g, (match, listContent) => {
         const items = [...listContent.matchAll(/\/e\s*([^\/\n]+)/g)].map(m => `<li>${m[1].trim()}</li>`);
@@ -2121,6 +2205,23 @@ document.getElementById('comments-filter-category').addEventListener('change', f
         return `<u>${underlineText.trim()}</u>`;
     });
 
+    // --- Now replace -- with / everywhere, including inside code blocks ---
+    html = html.replace(/--/g, '/');
+
+    // --- Restore code blocks, preserving line breaks and replacing -- with / inside code blocks ---
+    html = html.replace(/\|\|\|CODEBLOCK_LANG_(\d+)\|\|\|/g, (match, idx) => {
+        let { lang, code } = codeBlocks[Number(idx)];
+        code = code.replace(/--/g, '/');
+        code = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return `<pre><code class="language-${lang}">${code}</code></pre>`;
+    });
+    html = html.replace(/\|\|\|CODEBLOCK_(\d+)\|\|\|/g, (match, idx) => {
+        let { code } = codeBlocks[Number(idx)];
+        code = code.replace(/--/g, '/');
+        code = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return `<pre><code>${code}</code></pre>`;
+    });
+
     // /s → split into sections for preview
     const sectionParts = html.split(/(?:\r?\n)?\s*\/s\s*(?:\r?\n)?/g);
     html = sectionParts.map(part => {
@@ -2133,8 +2234,16 @@ document.getElementById('comments-filter-category').addEventListener('change', f
                 result += `<h2>${parts[i]}</h2>`;
             } else {
                 // Paragraphs: split by double newlines or single newlines, wrap in <p>
-                let paras = parts[i].split(/\n{2,}/g).map(p => p.trim()).filter(p => p.length > 0);
-                result += paras.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+                // But do NOT wrap <pre><code> blocks in <p>
+                let blocks = parts[i].split(/(<pre><code[\s\S]*?<\/code><\/pre>)/g);
+                for (let b = 0; b < blocks.length; b++) {
+                    if (/^<pre><code/.test(blocks[b])) {
+                        result += blocks[b];
+                    } else {
+                        let paras = blocks[b].split(/\n{2,}/g).map(p => p.trim()).filter(p => p.length > 0);
+                        result += paras.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+                    }
+                }
             }
         }
         return `<div class="section-preview">${result}</div>`;
