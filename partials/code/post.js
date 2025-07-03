@@ -1,86 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>jjj</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="/HumanityIsObliviouslyBlindedToPowersTen/style.css">
-</head>
-<body>
-    <div id="header-include"></div>
-    <div id="sidebar-include"></div>
-    <div class="content-layout" style="display:flex;align-items:flex-start;position:relative;">
-        <main style="flex:1;">
-            <div style="font-size:8px;opacity:0.1;user-select:none;pointer-events:none;max-height:1px;overflow:hidden;"></div>
-            <section class="section">
-<p>jjjjjjjjjjjjjjjjjj</p>
-</section>
-        </main>
-    </div>
-    <section id="comments-section" class="comments-section" style="margin-left:25% !important;">
-      <h3> <span class="comments-tag">Comments</span></h3>
-      <div id="google-login-prompt" style="display:none;margin-bottom:1em;">
-        <a href="/auth/google" class="google-login-btn">Sign in with Google to comment</a>
-      </div>
-      <form id="comment-form" style="margin-bottom:1.5em;display:none;">
-        <textarea id="comment-text" placeholder="Your comment" required maxlength="1000" style="width:100%;min-height:60px;margin-bottom:0.5em;"></textarea>
-        <button type="submit" id="comment-submit-btn" style="padding:0.5em 1.2em;">Post Comment</button>
-        <span id="comment-status" style="margin-left:1em;color:#a00;font-weight:bold;"></span>
-      </form>
-      <div id="comments-list"></div>
-      <div id="comments-pagination" style="text-align:center;margin-top:1em;"></div>
-    </section>
-    <div id="footer-include"></div>
-    <script src="/HumanityIsObliviouslyBlindedToPowersOfTen/partials/code/header.js"></script>
-    <script src="/HumanityIsObliviouslyBlindedToPowersOfTen/partials/code/sidebar.js"></script>
-    <script src="/HumanityIsObliviouslyBlindedToPowersOfTen/partials/code/footer.js"></script>
-    <script>
-    function includeHTML(id, url, cb) {
-        fetch('/HumanityIsObliviouslyBlindedToPowersTen/partials/' + url)
-          .then(res => res.text())
-          .then(html => {
-              document.getElementById(id).innerHTML = html;
-              if (cb) cb();
-              // Ensure scripts in sidebar partial are executed
-              if (id === 'sidebar-include') {
-                  var scripts = document.getElementById(id).querySelectorAll('script');
-                  scripts.forEach(function(oldScript) {
-                      var newScript = document.createElement('script');
-                      if (oldScript.src) {
-                          newScript.src = oldScript.src;
-                      } else {
-                          newScript.textContent = oldScript.textContent;
-                      }
-                      oldScript.parentNode.replaceChild(newScript, oldScript);
-                  });
-                  // Open sidebar by default on desktop
-                  var sidebar = document.querySelector('#sidebar-include .sidebar');
-                  if (sidebar) {
-                      sidebar.classList.remove('closed');
-                      sidebar.classList.add('open');
-                  }
-              }
-          });
-    }
-    includeHTML('header-include', 'header.html', function() {
-        var titleSpan = document.getElementById('header-title');
-        if (titleSpan) titleSpan.textContent = "jjj";
-        var homeMenu = document.getElementById('menu-homepage');
-        if (homeMenu) homeMenu.classList.remove('dulled');
-    });
-    includeHTML('sidebar-include', 'sidebar.html');
-    includeHTML('footer-include', 'footer.html');
-    // --- Comment Section JS ---
-    let currentUser = null;
-    let commentsData = [];
-    let currentPage = 1;
-    const COMMENTS_PER_PAGE = 8;
-    const commentCategory = "ComputerScience";
-    const commentFilename = "29-06-2025_1751224595660_1.html";
-    function renderCommentsPage(page) {
+ function renderCommentsPage(page) {
       const list = document.getElementById('comments-list');
       const pag = document.getElementById('comments-pagination');
       if (!Array.isArray(commentsData) || commentsData.length === 0) {
@@ -109,7 +27,7 @@
             '<span class="comment-date">' + (new Date(c.date).toLocaleString()) + '</span>' +
             (c.edited ? ' <span class="comment-edited">(edited)</span>' : '') +
             '</div>' +
-            '<h2 class="comment-body" id="comment-body-'+globalIdx+'">' + c.text.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>") + '</h2>' +
+            '<h2 class="comment-body" id="comment-body-'+globalIdx+'">' + c.text.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\\n/g,"<br>") + '</h2>' +
             (editDelete ? '<div class="comment-actions">'+editDelete+'</div>' : '') +
           '</div>'
         );
@@ -125,14 +43,16 @@
         pag.innerHTML = '';
       }
     }
-    function fetchComments() {
-      fetch('/comments?category=' + encodeURIComponent(commentCategory) + '&filename=' + encodeURIComponent(commentFilename))
-        .then(res => res.json())
-        .then(comments => {
-          commentsData = comments;
-          renderCommentsPage(currentPage);
-        });
-    }
+
+function fetchComments() {
+  fetch('/comments?category=' + encodeURIComponent(window.commentCategory) + '&filename=' + encodeURIComponent(window.commentFilename))
+    .then(res => res.json())
+    .then(comments => {
+      commentsData = comments;
+      renderCommentsPage(currentPage);
+    });
+}
+
     // Check login status for Google (by trying to fetch /user-info)
     fetch('/user-info').then(res => res.json()).then(data => {
       if (data && data.loggedIn) {
@@ -149,6 +69,7 @@
       document.getElementById('comment-form').style.display = 'none';
       document.getElementById('google-login-prompt').style.display = '';
     });
+
     document.getElementById('comment-form').onsubmit = function(e) {
       e.preventDefault();
       const text = document.getElementById('comment-text').value.trim();
@@ -157,8 +78,8 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          category: commentCategory,
-          filename: commentFilename,
+          category: window.commentCategory,
+          filename: window.commentFilename,
           text
         })
       }).then(res => res.json()).then(r => {
@@ -172,6 +93,7 @@
         }
       });
     };
+
     // Pagination click
     document.addEventListener('click', function(e) {
       if (e.target.classList.contains('comment-page-btn')) {
@@ -195,8 +117,8 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              category: commentCategory,
-              filename: commentFilename,
+              category: window.commentCategory,
+              filename: window.commentFilename,
               index: idx,
               text: newText
             })
@@ -217,8 +139,8 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            category: commentCategory,
-            filename: commentFilename,
+            category: window.commentCategory,
+            filename: window.commentFilename,
             index: idx
           })
         }).then(res => res.json()).then(r => {
@@ -227,6 +149,7 @@
         });
       }
     });
+
     fetchComments();
     // Style the comment button with the orange from the stylesheet
     document.addEventListener('DOMContentLoaded', function() {
@@ -241,6 +164,3 @@
         btn.style.cursor = 'pointer';
       }
     });
-    </script>
-</body>
-</html>

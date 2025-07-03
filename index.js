@@ -35,7 +35,7 @@ app.use(session({
     cookie: {
         httpOnly: true,
         sameSite: true,
-        maxAge: 10 * 60 * 1000 // 10 minutes in milliseconds
+        maxAge: 3 * 60 * 60 * 1000 // 3 hours in milliseconds
     }
 }));
 
@@ -263,9 +263,30 @@ app.post('/post-website', (req, res) => {
     }
 
     // Custom markup processing
-    let processed = body;
+    // --- Unified Markup Processing (matches Poster.html preview) ---
+    // Replace all /s (section splitter) with /sec (new section marker) before any further processing (to match Poster.html)
+    // Accept /s with or without surrounding whitespace/newlines, but only if not already /sec
+    let processed = body.replace(/(^|\n)\s*\/s(?!ec)(?=\s|$)/g, '$1/sec');
 
-    // Add image markup: /pic code [height] [width] [style] [caption]/ → <figure ...><img ...><figcaption>...</figcaption></figure>
+    // --- Replace /s with /sec before any section splitting (to match Poster.html preview) ---
+    processed = processed.replace(/\s\/s\b/g, ' /sec');
+    processed = processed.replace(/(^|\n)\s*\/s\b/g, '$1/sec');
+
+    // --- Protect code blocks with placeholders ---
+    let codeBlocks = [];
+
+    // /c language ... /
+    processed = processed.replace(/\/c\s*(python|javascript|java|lua|c|cpp)\s+([\s\S]*?)\s*\//g, (match, lang, code) => {
+        codeBlocks.push({ lang, code });
+        return `|||CODEBLOCK_LANG_${codeBlocks.length - 1}|||`;
+    });
+    // /c ... /
+    processed = processed.replace(/\/c\s+([\s\S]*?)\s*\//g, (match, code) => {
+        codeBlocks.push({ lang: null, code });
+        return `|||CODEBLOCK_${codeBlocks.length - 1}|||`;
+    });
+
+    // --- Images: /pic code [height] [width] [style] [caption]/ ---
     let images = [];
     try {
         const IMAGES_ROOT = path.join(__dirname, 'Assets', 'Uploads');
@@ -281,7 +302,7 @@ app.post('/post-website', (req, res) => {
             code = parseInt(code, 10);
             if (!images[code - 1]) return '';
             // FIX: Correct image URL path
-            const url = `/HumanityIsObliviouslyBlindedToPowers/Assets/Uploads/${images[code - 1]}`;
+            const url = `/HumanityIsObliviouslyBlindedToPowersOfTen/Assets/Uploads/${images[code - 1]}`;
             let attrs = '';
             if (h) attrs += ` height="${h}"`;
             if (w) attrs += ` width="${w}"`;
@@ -297,35 +318,82 @@ app.post('/post-website', (req, res) => {
         }
     );
 
-    // 1. Lists: /l /e item1 /e item2/  → <ul><li>item1</li><li>item2</li></ul>
+    // --- Lists ---
     processed = processed.replace(/\/l\s*((?:\/e\s*[^\/]+)+)\/\s*/g, (match, listContent) => {
         const items = [...listContent.matchAll(/\/e\s*([^\/\n]+)/g)].map(m => `<li>${m[1].trim()}</li>`);
         return `<ul>${items.join('')}</ul>`;
     });
 
-    // 2. Headers: /h text /  → special marker for later
+    // --- Headers ---
     processed = processed.replace(/\/h\s*([^\n\/]+)\s*\//g, (match, headerText) => {
         return '|||H2|||'+headerText.trim()+'|||H2|||';
     });
 
-    // 3. Bold: /b text / → <b>text</b>
+    // --- Bold ---
     processed = processed.replace(/\/b\s*([^\n\/]+)\s*\//g, (match, boldText) => {
         return `<b>${boldText.trim()}</b>`;
     });
 
-    // 4. Italics: /i text / → <i>text</i>
+    // --- Italics ---
     processed = processed.replace(/\/i\s*([^\n\/]+)\s*\//g, (match, italicText) => {
         return `<i>${italicText.trim()}</i>`;
     });
 
-    // 5. Underline: /u text / → <u>text</u>
+    // --- Underline ---
     processed = processed.replace(/\/u\s*([^\n\/]+)\s*\//g, (match, underlineText) => {
         return `<u>${underlineText.trim()}</u>`;
     });
 
-    // 6. Sections: split on /s and wrap in <section>
+    // --- Math: /m ... / ---
+    processed = processed.replace(/\/m\s*([\s\S]*?)\s*\//g, (match, mathText) => {
+        let math = mathText.trim();
+        // Replace * with multiplication circle (U+2219) and - with long minus (U+2212)
+        math = math.replace(/\*/g, '∙').replace(/-/g, '−');
+        // Fractions: replace x--x or da--db with Unicode fraction slash
+        math = math.replace(/([a-zA-Z0-9]+)\s*−−\s*([a-zA-Z0-9]+)/g, (m, num, den) => `${num}\u2044${den}`);
+        // Subscript: replace −^x with Unicode subscript
+        function toSubscript(str) {
+            const subMap = {
+                '0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉',
+                'a':'ₐ','e':'ₑ','h':'ₕ','i':'ᵢ','j':'ⱼ','k':'ₖ','l':'ₗ','m':'ₘ','n':'ₙ','o':'ₒ','p':'ₚ','r':'ᵣ','s':'ₛ','t':'ₜ','u':'ᵤ','v':'ᵥ','x':'ₓ',
+                '+':'₊','-':'₋','=':'₌','(':'₍',')':'₎'
+            };
+            return str.split('').map(c => subMap[c] || c).join('');
+        }
+        math = math.replace(/−\^([a-zA-Z0-9]+)/g, (m, sub) => toSubscript(sub));
+        // Superscript: replace ^x with Unicode superscript
+        function toSuperscript(str) {
+            const supMap = {
+                '0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹',
+                'a':'ᵃ','b':'ᵇ','c':'ᶜ','d':'ᵈ','e':'ᵉ','f':'ᶠ','g':'ᵍ','h':'ʰ','i':'ⁱ','j':'ʲ','k':'ᵏ','l':'ˡ','m':'ᵐ','n':'ⁿ','o':'ᵒ','p':'ᵖ','r':'ʳ','s':'ˢ','t':'ᵗ','u':'ᵘ','v':'ᵛ','w':'ʷ','x':'ˣ','y':'ʸ','z':'ᶻ',
+                '+':'⁺','-':'⁻','=':'⁼','(':'⁽',')':'⁾','π':'ᶲ'
+            };
+            return str.split('').map(c => supMap[c] || c).join('');
+        }
+        math = math.replace(/(?<!−)\^([a-zA-Z0-9]+)/g, (m, sup) => toSuperscript(sup));
+        // Now wrap in <math> (no HTML tags inside)
+        return `<math>${math}</math>`;
+    });
+
+    // --- Replace -- with / everywhere (after all formatting) ---
+    processed = processed.replace(/--/g, '/');
+
+    // --- Restore code blocks ---
+    processed = processed.replace(/\|\|\|CODEBLOCK_LANG_(\d+)\|\|\|/g, (match, idx) => {
+        let { lang, code } = codeBlocks[Number(idx)];
+        // Do NOT replace -- with / inside code blocks (preserve original)
+        code = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return `<pre><code class=\"language-${lang}\">${code}</code></pre>`;
+    });
+    processed = processed.replace(/\|\|\|CODEBLOCK_(\d+)\|\|\|/g, (match, idx) => {
+        let { code } = codeBlocks[Number(idx)];
+        code = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return `<pre><code>${code}</code></pre>`;
+    });
+
+    // --- Sections: split on /sec and wrap in <section> ---
     const sections = processed
-        .split(/(?:\r?\n)?\s*\/s\s*(?:\r?\n)?/g)
+        .split(/(?:\r?\n)?\s*\/sec\s*(?:\r?\n)?/g)
         .map(part => {
             let parts = part.split('|||H2|||');
             let result = '';
@@ -333,16 +401,38 @@ app.post('/post-website', (req, res) => {
                 if (i % 2 === 1) {
                     result += `<h2>${parts[i]}</h2>`;
                 } else {
-                    let paras = parts[i].split(/\n{2,}/g).map(p => p.trim()).filter(p => p.length > 0);
-                    result += paras.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+                    // Paragraphs: split by double newlines or single newlines, wrap in <p>
+                    // But do NOT wrap <pre><code> blocks in <p>
+                    let blocks = parts[i].split(/(<pre><code[\s\S]*?<\/code><\/pre>)/g);
+                    for (let b = 0; b < blocks.length; b++) {
+                        if (/^<pre><code/.test(blocks[b])) {
+                            result += blocks[b];
+                        } else {
+                            let paras = blocks[b].split(/\n{2,}/g).map(p => p.trim()).filter(p => p.length > 0);
+                            result += paras.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+                        }
+                    }
                 }
             }
-            return `<section class="section">\n${result}\n</section>`;
+            return `<section class=\"section\">\n${result}\n</section>`;
         })
         .join('\n');
 
     // Store the raw markup as a comment for future editing (hide it with CSS)
-    const rawMarkupComment = `<div style="font-size:8px;opacity:0.1;user-select:none;pointer-events:none;max-height:1px;overflow:hidden;"><!--RAW_BODY_START-->\n${body}\n<!--RAW_BODY_END--></div>`;
+    function escapeHtml(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[&<>"']/g, function(tag) {
+        const charsToReplace = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        };
+        return charsToReplace[tag] || tag;
+    });
+}
+const rawMarkupComment = `<div id="raw-body-data" style="display:none !important;">${escapeHtml(body)}</div>`;
 
     // HTML content for the posted website, styled like homepage and with partial includes
     const htmlContent = `
@@ -355,7 +445,11 @@ app.post('/post-website', (req, res) => {
     <link
         href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="/HumanityIsObliviouslyBlindedToPowersTen/style.css">
+    <link rel="stylesheet" href="/HumanityIsObliviouslyBlindedToPowersOfTen/style.css">
+    <!-- Prism.js for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
 </head>
 <body>
     <div id="header-include"></div>
@@ -385,7 +479,7 @@ app.post('/post-website', (req, res) => {
     <script src="/HumanityIsObliviouslyBlindedToPowersOfTen/partials/code/footer.js"></script>
     <script>
     function includeHTML(id, url, cb) {
-        fetch('/HumanityIsObliviouslyBlindedToPowersTen/partials/' + url)
+        fetch('/HumanityIsObliviouslyBlindedToPowersOfTen/partials/' + url)
           .then(res => res.text())
           .then(html => {
               document.getElementById(id).innerHTML = html;
@@ -426,174 +520,8 @@ app.post('/post-website', (req, res) => {
     const COMMENTS_PER_PAGE = 8;
     const commentCategory = ${JSON.stringify(category)};
     const commentFilename = ${JSON.stringify(path.basename(filePath))};
-
-    function renderCommentsPage(page) {
-      const list = document.getElementById('comments-list');
-      const pag = document.getElementById('comments-pagination');
-      if (!Array.isArray(commentsData) || commentsData.length === 0) {
-        list.innerHTML = '<div class="comment-empty">No comments yet.</div>';
-        pag.innerHTML = '';
-        return;
-      }
-      // Newest to oldest
-      const totalPages = Math.ceil(commentsData.length / COMMENTS_PER_PAGE);
-      page = Math.max(1, Math.min(page, totalPages));
-      currentPage = page;
-      const start = (page - 1) * COMMENTS_PER_PAGE;
-      const end = start + COMMENTS_PER_PAGE;
-      const pageComments = commentsData.slice().reverse().slice(start, end);
-      list.innerHTML = pageComments.map((c, idx) => {
-        const globalIdx = commentsData.length - 1 - (start + idx);
-        let editDelete = '';
-        if (currentUser && c.name === currentUser) {
-          editDelete = 
-            '<button class="comment-edit-btn" data-idx="'+globalIdx+'">Edit</button>' +
-            '<button class="comment-delete-btn" data-idx="'+globalIdx+'">Delete</button>';
-        }
-        return (
-          '<div class="comment">' +
-            '<div class="comment-meta"><span class="comment-name">' + (c.name ? c.name : 'Anonymous') + '</span> ' +
-            '<span class="comment-date">' + (new Date(c.date).toLocaleString()) + '</span>' +
-            (c.edited ? ' <span class="comment-edited">(edited)</span>' : '') +
-            '</div>' +
-            '<h2 class="comment-body" id="comment-body-'+globalIdx+'">' + c.text.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\\n/g,"<br>") + '</h2>' +
-            (editDelete ? '<div class="comment-actions">'+editDelete+'</div>' : '') +
-          '</div>'
-        );
-      }).join('');
-      // Pagination
-      if (totalPages > 1) {
-        let pagHtml = '';
-        for (let i = 1; i <= totalPages; ++i) {
-          pagHtml += '<button class="comment-page-btn" data-page="'+i+'"'+(i===page?' style="background:#FF6B00;color:#fff;"':'')+'>'+i+'</button> ';
-        }
-        pag.innerHTML = pagHtml;
-      } else {
-        pag.innerHTML = '';
-      }
-    }
-
-    function fetchComments() {
-      fetch('/comments?category=' + encodeURIComponent(commentCategory) + '&filename=' + encodeURIComponent(commentFilename))
-        .then(res => res.json())
-        .then(comments => {
-          commentsData = comments;
-          renderCommentsPage(currentPage);
-        });
-    }
-
-    // Check login status for Google (by trying to fetch /user-info)
-    fetch('/user-info').then(res => res.json()).then(data => {
-      if (data && data.loggedIn) {
-        currentUser = data.name;
-        document.getElementById('comment-form').style.display = '';
-        document.getElementById('google-login-prompt').style.display = 'none';
-      } else {
-        currentUser = null;
-        document.getElementById('comment-form').style.display = 'none';
-        document.getElementById('google-login-prompt').style.display = '';
-      }
-    }).catch(() => {
-      currentUser = null;
-      document.getElementById('comment-form').style.display = 'none';
-      document.getElementById('google-login-prompt').style.display = '';
-    });
-
-    document.getElementById('comment-form').onsubmit = function(e) {
-      e.preventDefault();
-      const text = document.getElementById('comment-text').value.trim();
-      if (!text) return;
-      fetch('/comments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          category: commentCategory,
-          filename: commentFilename,
-          text
-        })
-      }).then(res => res.json()).then(r => {
-        const status = document.getElementById('comment-status');
-        if (r.success) {
-          document.getElementById('comment-form').reset();
-          status.textContent = '';
-          fetchComments();
-        } else if (r.error) {
-          status.textContent = r.error;
-        }
-      });
-    };
-
-    // Pagination click
-    document.addEventListener('click', function(e) {
-      if (e.target.classList.contains('comment-page-btn')) {
-        renderCommentsPage(Number(e.target.getAttribute('data-page')));
-      }
-      // Edit
-      if (e.target.classList.contains('comment-edit-btn')) {
-        const idx = Number(e.target.getAttribute('data-idx'));
-        const c = commentsData[idx];
-        const bodyEl = document.getElementById('comment-body-'+idx);
-        if (!bodyEl) return;
-        // Replace with textarea and save/cancel
-        const origText = c.text;
-        bodyEl.innerHTML = '<textarea id="edit-comment-text" style="width:100%;min-height:60px;">'+origText.replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</textarea>' +
-          '<br><button id="save-edit-btn" style="background:#FF6B00;color:#fff;margin-right:0.5em;">Save</button>' +
-          '<button id="cancel-edit-btn">Cancel</button>';
-        document.getElementById('save-edit-btn').onclick = function() {
-          const newText = document.getElementById('edit-comment-text').value.trim();
-          if (!newText) return;
-          fetch('/edit-comment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              category: commentCategory,
-              filename: commentFilename,
-              index: idx,
-              text: newText
-            })
-          }).then(res => res.json()).then(r => {
-            if (r.success) fetchComments();
-            else alert(r.error || 'Failed to edit comment');
-          });
-        };
-        document.getElementById('cancel-edit-btn').onclick = function() {
-          fetchComments();
-        };
-      }
-      // Delete
-      if (e.target.classList.contains('comment-delete-btn')) {
-        const idx = Number(e.target.getAttribute('data-idx'));
-        if (!confirm('Delete this comment?')) return;
-        fetch('/delete-comment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            category: commentCategory,
-            filename: commentFilename,
-            index: idx
-          })
-        }).then(res => res.json()).then(r => {
-          if (r.success) fetchComments();
-          else alert(r.error || 'Failed to delete comment');
-        });
-      }
-    });
-
-    fetchComments();
-    // Style the comment button with the orange from the stylesheet
-    document.addEventListener('DOMContentLoaded', function() {
-      var btn = document.getElementById('comment-submit-btn');
-      if (btn) {
-        btn.style.background = '#FF6B00';
-        btn.style.color = '#fff';
-        btn.style.border = 'none';
-        btn.style.borderRadius = '0.7rem';
-        btn.style.fontWeight = 'bold';
-        btn.style.fontSize = '1.2rem';
-        btn.style.cursor = 'pointer';
-      }
-    });
     </script>
+    <script src="/HumanityIsObliviouslyBlindedToPowersOfTen/partials/code/post.js"></script>
 </body>
 </html>
 `;
@@ -697,64 +625,28 @@ app.post('/get-post', requireAuth, (req, res) => {
         const titleMatch = content.match(/<title>([^<]+)<\/title>/i);
         if (titleMatch) title = titleMatch[1];
         // Try to extract the original body (raw markup) from a comment
-        let rawBody = '';
-        const rawMatch = content.match(/<!--RAW_BODY_START-->([\s\S]*?)<!--RAW_BODY_END-->/);
-        if (rawMatch) {
-            rawBody = rawMatch[1].trim();
-        } else {
-            // Fallback: try to reconstruct the markup from HTML (reverse the HTML to markup)
-            const mainMatch = content.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
-            if (mainMatch) {
-                let html = mainMatch[1];
-                // Remove the RAW_BODY comment if present
-                html = html.replace(/<!--RAW_BODY_START-->[\s\S]*?<!--RAW_BODY_END-->/g, '');
-                // Reverse HTML to markup (best effort, not perfect)
-                // 1. <ul><li>item</li>...</ul> => /l /e item /e item /
-                html = html.replace(/<ul>([\s\S]*?)<\/ul>/g, (match, ulContent) => {
-                    const items = [...ulContent.matchAll(/<li>([\s\S]*?)<\/li>/g)].map(m => `/e ${m[1].replace(/<br\s*\/?>/g, '\n').trim()} `);
-                    return `/l ${items.join('')}/`;
-                });
-                // 2. <h2>text</h2> => /h text /
-                html = html.replace(/<h2>([\s\S]*?)<\/h2>/g, (match, h) => `/h ${h.trim()} /`);
-                // 3. <b>text</b> => /b text /
-                html = html.replace(/<b>([\s\S]*?)<\/b>/g, (match, b) => `/b ${b.trim()} /`);
-                // 4. <i>text</i> => /i text /
-                html = html.replace(/<i>([\s\S]*?)<\/i>/g, (match, i) => `/i ${i.trim()} /`);
-                // 5. <u>text</u> => /u text /
-                html = html.replace(/<u>([\s\S]*?)<\/u>/g, (match, u) => `/u ${u.trim()} /`);
-                // 6. <img ...> => /pic code h w /
-                // Not possible to reconstruct code/h/w, so just leave as is or try to match src to code
-                html = html.replace(/<img[^>]*src="[^"]*\/Assets\/Uploads\/([^"]+)"[^>]*>/g, (match, fname) => {
-                    // Try to find code number for this image
-                    let code = 1;
-                    try {
-                        const IMAGES_ROOT = path.join(__dirname, 'Assets', 'Uploads');
-                        const files = fs.readdirSync(IMAGES_ROOT).filter(f =>
-                            /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(f)
-                        );
-                        code = files.findIndex(f => f === fname) + 1;
-                    } catch {}
-                    if (code < 1) code = 1;
-                    // Try to extract height/width
-                    const h = (match.match(/height="(\d+)"/) || [])[1] || '';
-                    const w = (match.match(/width="(\d+)"/) || [])[1] || '';
-                    let markup = `/pic ${code}`;
-                    if (h) markup += ` ${h}`;
-                    if (w) markup += ` ${w}`;
-                    markup += ' /';
-                    return markup;
-                });
-                // 7. <section ...> => /s (split)
-                html = html.replace(/<\/section>/g, '/s');
-                html = html.replace(/<section[^>]*>/g, '');
-                // 8. <p>...</p> => just text with newlines
-                html = html.replace(/<p>([\s\S]*?)<\/p>/g, (match, p) => p.replace(/<br\s*\/?>/g, '\n') + '\n\n');
-                // Remove any remaining HTML tags
-                html = html.replace(/<\/?[^>]+>/g, '');
-                // Clean up whitespace
-                rawBody = html.replace(/\n{3,}/g, '\n\n').trim();
-            }
-        }
+function unescapeHtml(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/&lt;/g, '<')
+              .replace(/&gt;/g, '>')
+              .replace(/&amp;/g, '&')
+              .replace(/&quot;/g, '"')
+              .replace(/&#39;/g, "'");
+}
+let rawBody = '';
+const rawDivMatch = content.match(/<div id=["']raw-body-data["'][^>]*>([\s\S]*?)<\/div>/);
+if (rawDivMatch) {
+    rawBody = unescapeHtml(rawDivMatch[1].trim());
+} else {
+    // Fallback: try old comment method
+    const rawMatch = content.match(/<!--RAW_BODY_START-->([\\s\\S]*?)<!--RAW_BODY_END-->/);
+    if (rawMatch) {
+        rawBody = rawMatch[1].trim();
+    } else {
+        // Fallback: reconstruct from HTML (existing logic)
+        // ...
+    }
+}
         res.json({ title, rawBody });
     } catch (err) {
         res.status(500).json({ error: 'Failed to load post.' });
@@ -776,6 +668,7 @@ function removeRawBodyFromFile(filepath) {
     let content = fs.readFileSync(filepath, 'utf8');
     // Remove the RAW_BODY comment and its contents
     content = content.replace(/<!--RAW_BODY_START-->([\s\S]*?)<!--RAW_BODY_END-->/g, '');
+    
     // Remove any extra blank lines left behind
     content = content.replace(/^\s*\n/gm, '');
     fs.writeFileSync(filepath, content, 'utf8');

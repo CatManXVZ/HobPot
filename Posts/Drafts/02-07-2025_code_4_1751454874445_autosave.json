@@ -1,0 +1,6 @@
+{
+  "category": "ComputerScience",
+  "title": "code 4",
+  "body": "/h Hello /Voici un peu de /b code/program /\n\nfunction foreverPreviewReload() {\n    try {  -- Ω\n        if (typeof bodyInput !== 'undefined' && bodyInput && typeof bodyInput.dispatchEvent === 'function') { \n            bodyInput.dispatchEvent(new Event('input'));\n        }\n    } catch (e) {}\n/sec\n\nec\n/u also / here is /i aisa/map /\n  /pic 1 200 400 /ah\n\n/sec\n\n/h MATH /1 ∙ 1 − 2 ∙ 2 \n/m  b₇\n35⁄224 hey jja⁄db h\neⁱπ + 1 = 0\n\n/sec",
+  "date": "2025-07-02T11:14:34.445Z"
+}
