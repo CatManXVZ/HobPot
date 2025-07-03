@@ -450,7 +450,9 @@ const rawMarkupComment = `<div id="raw-body-data" style="display:none !important
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css">
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
-</head>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7840248288117001"
+     crossorigin="anonymous"></script>
+    </head>
 <body>
     <div id="header-include"></div>
     <div id="sidebar-include"></div>
