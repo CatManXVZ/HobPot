@@ -1,6 +1,0 @@
-{
-  "category": "ComputerScience",
-  "title": "jjj",
-  "body": "/c javascript   \n        function foreverPreviewReload() {\n    try {\n        if (typeof bodyInput !== 'undefined' && bodyInput && typeof bodyInput.dispatchEvent === 'function') {\n            bodyInput.dispatchEvent(new Event('input'));\n        }\n    } catch (e) {}    \n/  ",
-  "date": "2025-07-01T18:09:12.676Z"
-}

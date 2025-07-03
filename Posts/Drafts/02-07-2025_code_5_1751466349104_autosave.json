@@ -1,6 +1,0 @@
-{
-  "category": "Physics",
-  "title": "code 5",
-  "body": "/h Hello /Voici un peu de /b code--program /\n/c javascript function foreverPreviewReload() {\n    try {  -- Ω\n        if (typeof bodyInput !== 'undefined' && bodyInput && typeof bodyInput.dispatchEvent === 'function') { \n            bodyInput.dispatchEvent(new Event('input'));\n        }\n    } catch (e) {} /\n\n/sec\n/u also / here is /i aisa--map /\n/pic 1 200 400 wrap ASIA/\n\n/sec\n\n/h MATH //m 1 * 1 - 2 * 2/ \n/m a ^3 /\n/m da--db /",
-  "date": "2025-07-02T14:37:12.117Z"
-}

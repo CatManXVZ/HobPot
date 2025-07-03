@@ -288,11 +288,11 @@
                     }
                 });
 
-                // Unified live preview for all markup including /pic
+                // Live preview for /s, /h, /l, /b, /i, /u as described
                 const bodyInput = document.getElementById('body');
                 const preview = document.getElementById('body-preview');
-                bodyInput.addEventListener('input', async function() {
-                    let html = bodyInput.value;
+                bodyInput.addEventListener('input', function() {
+                                        let html = bodyInput.value;
 
                     // Replace -- with /
                     html = html.replace(/--/g, '/');
@@ -323,30 +323,6 @@
                         return `<u>${underlineText.trim()}</u>`;
                     });
 
-                    // --- /pic code height width style caption/ → <figure><img ...><figcaption>...</figcaption></figure> ---
-                    let images = [];
-                    try {
-                        const res = await fetch('/list-images');
-                        if (res.ok) images = await res.json();
-                    } catch {}
-                    html = html.replace(/\/pic\s+(\d+)(?:\s+(\d+))?(?:\s+(\d+))?(?:\s+(wrap|block))?(?:\s+([^\/]+?))?\s*\//g, (match, code, h, w, style, caption) => {
-                        code = parseInt(code, 10);
-                        if (!images[code - 1]) return '';
-                        const url = images[code - 1].url;
-                        let attrs = '';
-                        if (h) attrs += ` height="${h}"`;
-                        if (w) attrs += ` width="${w}"`;
-                        let figClass = '';
-                        let imgClass = '';
-                        if (style === 'wrap') {
-                            figClass = 'float-img-container';
-                            imgClass = 'float-img';
-                        }
-                        let imgTag = `<img src="${url}"${attrs}${imgClass ? ` class="${imgClass}"` : ''} style="max-width:100%;border-radius:0.4em;">`;
-                        let figcaption = caption ? `<figcaption>${caption.trim()}</figcaption>` : '';
-                        return `<figure${figClass ? ` class="${figClass}"` : ''}>${imgTag}${figcaption}</figure>`;
-                    });
-
                     // /s → split into sections for preview
                     const sectionParts = html.split(/(?:\r?\n)?\s*\/s\s*(?:\r?\n)?/g);
                     html = sectionParts.map(part => {
@@ -368,6 +344,7 @@
 
                     preview.innerHTML = html;
                     if (window.Prism && Prism.highlightAll) Prism.highlightAll();
+
                 });
 
                 // Insert markup at selection or cursor
@@ -2121,11 +2098,10 @@ document.getElementById('comments-filter-category').addEventListener('change', f
             const supMap = {
                 '0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹',
                 'a':'ᵃ','b':'ᵇ','c':'ᶜ','d':'ᵈ','e':'ᵉ','f':'ᶠ','g':'ᵍ','h':'ʰ','i':'ⁱ','j':'ʲ','k':'ᵏ','l':'ˡ','m':'ᵐ','n':'ⁿ','o':'ᵒ','p':'ᵖ','r':'ʳ','s':'ˢ','t':'ᵗ','u':'ᵘ','v':'ᵛ','w':'ʷ','x':'ˣ','y':'ʸ','z':'ᶻ',
-                '+':'⁺','-':'⁻','=':'⁼','(':'⁽',')':'⁾','π':'ᶲ'
+                '+':'⁺','-':'⁻','=':'⁼','(':'⁽',')':'⁾'
             };
             return str.split('').map(c => supMap[c] || c).join('');
         }
-                    { char: '≡', name: 'equivalent' },
         math = math.replace(/(?<!−)\^([a-zA-Z0-9]+)/g, (m, sup) => toSuperscript(sup));
         // Now wrap in <math> (no HTML tags inside)
         return `<math>${math}</math>`;

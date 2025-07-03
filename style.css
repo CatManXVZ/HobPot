@@ -964,7 +964,7 @@ footer .footer-links a:hover {
     .section {
         padding: 0.3rem;
         max-width: 99vw;
-        font-size: 0.92rem;
+        font-size: 1.08rem;
     }
     .logo {
         width: 70px;
@@ -1007,7 +1007,7 @@ footer .footer-links a:hover {
     .section {
         padding: 0.15rem;
         max-width: 100vw;
-        font-size: 0.85rem;
+        font-size: 1rem;
     }
     .post-form {
         padding: 0.1rem;
