@@ -62,16 +62,18 @@ app.use(express.json()); // Needed for JSON POST body
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
+
 // === GOOGLE OAUTH CONFIG ===
 const GOOGLE_CLIENT_ID = '14757875584-bel60fo55e6bu2u1rjg5jpe8983kgasu.apps.googleusercontent.com';
 const GOOGLE_CLIENT_SECRET = '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';
-const GOOGLE_CALLBACK_URL = 'http://localhost:3000/auth/google/callback';
+// We'll set callbackURL dynamically per request
 
 passport.use(new GoogleStrategy({
     clientID: GOOGLE_CLIENT_ID,
     clientSecret: GOOGLE_CLIENT_SECRET,
-    callbackURL: GOOGLE_CALLBACK_URL
-}, (accessToken, refreshToken, profile, done) => {
+    callbackURL: '/auth/google/callback', // This will be overridden per request
+    passReqToCallback: true
+}, (req, accessToken, refreshToken, profile, done) => {
     done(null, {
         id: profile.id,
         displayName: profile.displayName,
@@ -86,39 +88,37 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // New Google OAuth routes
+
+// Helper to get full URL for callback
+function getFullCallbackUrl(req) {
+    // Use protocol and host from request
+    return req.protocol + '://' + req.get('host') + '/auth/google/callback';
+}
+
 app.get('/auth/google', (req, res, next) => {
-    passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+    // Save the page the user was on (referer or query param)
+    let returnTo = req.query.returnTo || req.get('referer') || req.session.returnTo || '/';
+    req.session.returnTo = returnTo;
+    // Dynamically set callbackURL for this request
+    passport.authenticate('google', {
+        scope: ['profile', 'email'],
+        callbackURL: getFullCallbackUrl(req)
+    })(req, res, next);
 });
 
-app.get('/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: '/' }),
-    (req, res) => {
-        // Use the stored returnTo URL, or fallback to homepage
-        const redirectTo = req.session.returnTo || '/';
-        delete req.session.returnTo;
-        // Notify user if redirected to homepage
-        if (redirectTo === '/' || redirectTo === '/Homepage.html') {
-            return res.send(`
-                <html>
-                <head>
-                    <meta http-equiv="refresh" content="2;url=/" />
-                    <style>
-                        body { font-family: sans-serif; background: #f7fafc; color: #23272f; text-align: center; padding-top: 10vh; }
-                        .notice { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; display: inline-block; padding: 2em 3em; border-radius: 1em; font-size: 1.3em; }
-                    </style>
-                </head>
-                <body>
-                    <div class="notice">
-                        You have been redirected to the homepage after login.<br>
-                        <small>If you expected to return to a specific page, please navigate there again.</small>
-                    </div>
-                </body>
-                </html>
-            `);
-        }
-        res.redirect(redirectTo);
-    }
-);
+
+app.get('/auth/google/callback', (req, res, next) => {
+    // Dynamically set callbackURL for this request
+    passport.authenticate('google', {
+        failureRedirect: '/',
+        callbackURL: getFullCallbackUrl(req)
+    })(req, res, next);
+}, (req, res) => {
+    // Use the stored returnTo URL, or fallback to homepage
+    const redirectTo = req.session.returnTo || '/';
+    delete req.session.returnTo;
+    res.redirect(redirectTo);
+});
 
 app.get('/logout-google', (req, res) => {
     req.logout(() => {
@@ -214,6 +214,8 @@ app.get('/logout', (req, res) => {
 });
 
 // Protect poster page only, homepage is public
+
+// Homepage
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'Homepage.html'));
 });
@@ -222,6 +224,42 @@ app.get('/Homepage.html', (req, res) => {
 });
 app.get('/Poster.html', requireAuth, (req, res) => {
     res.sendFile(path.join(__dirname, 'Poster.html'));
+});
+
+// --- Friendly post URL redirect: /post-title-here ---
+app.get(/^\/([a-zA-Z0-9\-]+)$/, (req, res, next) => {
+    const slug = req.params[0];
+    // Convert hyphens to spaces for title search (case-insensitive)
+    const title = slug.replace(/-/g, ' ').toLowerCase();
+    const POSTS_ROOT = path.join(__dirname, 'Posts');
+    let found = false;
+    // Search all categories for a post with a matching title
+    try {
+        const categories = fs.readdirSync(POSTS_ROOT).filter(f => fs.statSync(path.join(POSTS_ROOT, f)).isDirectory());
+        for (const cat of categories) {
+            const catDir = path.join(POSTS_ROOT, cat);
+            const files = fs.readdirSync(catDir).filter(f => f.endsWith('.html'));
+            for (const file of files) {
+                const filePath = path.join(catDir, file);
+                let content = '';
+                try {
+                    content = fs.readFileSync(filePath, 'utf8');
+                } catch {}
+                const match = content.match(/<title>([^<]+)<\/title>/i);
+                if (match) {
+                    // Normalize title: remove extra spaces, lowercase, hyphens to spaces
+                    let fileTitle = match[1].replace(/\s+/g, ' ').trim().toLowerCase();
+                    if (fileTitle.replace(/\s+/g, '-') === slug.toLowerCase()) {
+                        // Redirect to the actual post URL (relative to site root)
+                        const relPath = path.relative(__dirname, filePath).replace(/\\/g, '/');
+                        return res.redirect('/HumanityIsObliviouslyBlindedToPowersOfTen/' + relPath);
+                    }
+                }
+            }
+        }
+    } catch {}
+    // Not found, continue to next handler (404 or other routes)
+    next();
 });
 
 // When creating or editing a post, store the raw markup as a comment in the HTML for future editing
