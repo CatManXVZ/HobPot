@@ -229,11 +229,9 @@ app.get('/Poster.html', requireAuth, (req, res) => {
 // --- Friendly post URL redirect: /post-title-here ---
 app.get(/^\/([a-zA-Z0-9\-]+)$/, (req, res, next) => {
     const slug = req.params[0];
-    // Convert hyphens to spaces for title search (case-insensitive)
-    const title = slug.replace(/-/g, ' ').toLowerCase();
+    // Split slug into words (hyphens as separator), ignore case
+    const slugWords = slug.toLowerCase().split('-').filter(Boolean);
     const POSTS_ROOT = path.join(__dirname, 'Posts');
-    let found = false;
-    // Search all categories for a post with a matching title
     try {
         const categories = fs.readdirSync(POSTS_ROOT).filter(f => fs.statSync(path.join(POSTS_ROOT, f)).isDirectory());
         for (const cat of categories) {
@@ -247,9 +245,12 @@ app.get(/^\/([a-zA-Z0-9\-]+)$/, (req, res, next) => {
                 } catch {}
                 const match = content.match(/<title>([^<]+)<\/title>/i);
                 if (match) {
-                    // Normalize title: remove extra spaces, lowercase, hyphens to spaces
+                    // Normalize title: remove extra spaces, lowercase
                     let fileTitle = match[1].replace(/\s+/g, ' ').trim().toLowerCase();
-                    if (fileTitle.replace(/\s+/g, '-') === slug.toLowerCase()) {
+                    // Split title into words using both spaces and hyphens
+                    const titleWords = fileTitle.split(/[-\s]+/).filter(Boolean);
+                    // Check if all slug words are present in the title (any order)
+                    if (slugWords.length > 0 && slugWords.every(word => titleWords.includes(word))) {
                         // Redirect to the actual post URL (relative to site root)
                         const relPath = path.relative(__dirname, filePath).replace(/\\/g, '/');
                         return res.redirect('/HumanityIsObliviouslyBlindedToPowersOfTen/' + relPath);
