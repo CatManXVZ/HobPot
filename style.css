@@ -1,3 +1,16 @@
+/* Dark mode for Google login button */
+.dark-mode .google-login-btn {
+  background: #23272f !important;
+  color: #F6E05E !important;
+  border: 1px solid #FF6B00 !important;
+  box-shadow: 0 2px 8px #FF6B0022 !important;
+}
+
+.dark-mode .google-login-btn:hover {
+  background: #FF6B00 !important;
+  color: #23272f !important;
+  border-color: #F6E05E !important;
+}
 /* Palette: */
 /* Vibrant Orange #FF6B00 */
 /* Dark Gray #4A5568 */
@@ -1047,6 +1060,7 @@ footer .footer-links a:hover {
     padding-right: 0.2em;
   }
 }
+
 pre {
     background-color: #f4f4f4; /* Light grey background */
     padding: 1em;
@@ -1056,6 +1070,19 @@ pre {
     font-size: 0.9em;
     line-height: 1.5;
     border: 1px solid #ddd;
+    color: #222;
+    transition: background 0.3s, color 0.3s;
+}
+.dark-mode pre {
+
+    background-color: rgba(119, 72, 39,0.8) !important; /* Semi-transparent dark orange */
+    color: #F6E05E !important;
+    border: 1px solid #FF6B00 !important;
+    box-shadow: 0 1px 8px 0 rgba(255,107,0,0.10);
+}
+
+.dark-mode pre code {
+    color: #d8cbc2 !important;
 }
 
 pre code {
@@ -1292,5 +1319,28 @@ math {
   box-shadow: 0 1px 4px #ff6b0011;
   border: 1px solid #f6e05e99;
   display: inline-block;
+}
+
+h1:not(.header-title-desktop) {
+  font-family: 'Roboto Condensed', Arial, sans-serif;
+  color: #FF6B00;
+  font-size: 2.3em;
+  font-weight: 900;
+  margin-top: 0.5em;
+  margin-bottom: 0.6em;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  text-shadow: 0 2px 8px rgba(246, 224, 94, 0.08);
+  border-bottom: 2.5px solid #F6E05E;
+  padding-bottom: 0.18em;
+  background: linear-gradient(90deg, #FFF6E5 0%, #FFF3E0 100%); /* Very light orange gradient */
+  border-radius: 0.3em 0.3em 0 0;
+}
+
+.dark-mode h1:not(.header-title-desktop) {
+  color: #F6E05E;
+  background: linear-gradient(90deg, #23272f 0%, #181a20 100%);
+  border-bottom: 2.5px solid #FF6B00;
+  text-shadow: 0 2px 8px rgba(255, 107, 0, 0.13);
 }
 

@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7840248288117001"
      crossorigin="anonymous"></script>
     <meta charset="UTF-8">
@@ -100,31 +102,66 @@
                         <input type="text" id="title" name="title" required>
                     </div>
                     <div class="form-group">
+                        <label for="keywords">Keywords (comma-separated):</label>
+                        <input type="text" id="keywords" name="keywords" placeholder="e.g. math, algebra, calculus">
+                    </div>
+                    <div class="form-group">
                         <label for="body">Body:</label>
-                        <div style="display:flex; gap:0.5em; margin-bottom:0.5em;">
-                            <button type="button" id="bold-btn" title="Bold"><b>B</b></button>
-                            <button type="button" id="underline-btn" title="Underline"><u>U</u></button>
-                            <button type="button" id="italic-btn" title="Italics"><i>I</i></button>
-                            <button type="button" id="subheading-btn" title="Subheading">H2</button>
+                        <div class="toolbar">
+                            <div class="toolbar-dropdown" id="heading-dropdown" style="position:relative;">
+                                <button type="button" id="heading-dropdown-btn" title="Headings">H ▼</button>
+                                <div class="toolbar-dropdown-list" id="heading-dropdown-list" style="display:none;position:absolute;left:0;top:110%;background:#fffbe6;border:1.5px solid #F6E05E;border-radius:0.7em;box-shadow:0 2px 12px 0 rgba(255,107,0,0.08);z-index:1000;min-width:90px;">
+                                    <button type="button" id="subheading-btn" title="Subheading" style="display:block;width:100%;padding:0.5em 1.2em;background:none;border:none;text-align:left;font-size:1.1em;cursor:pointer;">H2</button>
+                                    <button type="button" id="h3-btn" title="H3 Heading" style="display:block;width:100%;padding:0.5em 1.2em;background:none;border:none;text-align:left;font-size:1.1em;cursor:pointer;">H3</button>
+                                </div>
+                            </div>
+                            <div class="toolbar-dropdown" id="format-dropdown" style="position:relative;">
+                                <button type="button" id="format-dropdown-btn" title="Formatting">A ▼</button>
+                                <div class="toolbar-dropdown-list" id="format-dropdown-list" style="display:none;position:absolute;left:0;top:110%;background:#fffbe6;border:1.5px solid #F6E05E;border-radius:0.7em;box-shadow:0 2px 12px 0 rgba(255,107,0,0.08);z-index:1000;min-width:90px;">
+                                    <button type="button" id="bold-btn" title="Bold" style="display:block;width:100%;padding:0.5em 1.2em;background:none;border:none;text-align:left;font-size:1.1em;cursor:pointer;"><b>B</b></button>
+                                    <button type="button" id="italic-btn" title="Italics" style="display:block;width:100%;padding:0.5em 1.2em;background:none;border:none;text-align:left;font-size:1.1em;cursor:pointer;"><i>I</i></button>
+                                    <button type="button" id="underline-btn" title="Underline" style="display:block;width:100%;padding:0.5em 1.2em;background:none;border:none;text-align:left;font-size:1.1em;cursor:pointer;"><u>U</u></button>
+                                </div>
+                            </div>
+                <script>
+                // Dropdown logic for toolbar
+                function setupToolbarDropdown(dropdownBtnId, dropdownListId) {
+                    const btn = document.getElementById(dropdownBtnId);
+                    const list = document.getElementById(dropdownListId);
+                    btn.onclick = function(e) {
+                        e.stopPropagation();
+                        list.style.display = list.style.display === 'block' ? 'none' : 'block';
+                    };
+                    document.addEventListener('click', function() {
+                        list.style.display = 'none';
+                    });
+                }
+                setupToolbarDropdown('heading-dropdown-btn', 'heading-dropdown-list');
+                setupToolbarDropdown('format-dropdown-btn', 'format-dropdown-list');
+                </script>
+                            <button type="button" id="math-btn" title="Math">𝑓(x)</button>
                             <button type="button" id="section-btn" title="Section">/sec</button>
                             <button type="button" id="list-btn" title="List">/l</button>
                             <div id="list-dropdown" style="display:none;position:relative;">
-                                <button type="button" id="list-dropdown-btn" style="background:#F6E05E;color:#4A5568;border:1px solid #4A5568;border-radius:0.5em;padding:0.2em 0.7em;font-size:1.1em;font-family:inherit;cursor:pointer;">+ List Item</button>
+                                <button type="button" id="list-dropdown-btn">+ List Item</button>
                             </div>
-                            <button type="button" id="img-insert-btn" title="Insert Image" style="background:#F6E05E;color:#4A5568;border:1px solid #4A5568;border-radius:0.5em;padding:0.2em 0.7em;font-size:1.1em;font-family:inherit;cursor:pointer;">Insert Image</button>
+                            <button type="button" id="img-insert-btn" title="Insert Image">Insert Image</button>
                             <div id="special-char-dropdown" style="position:relative;">
-                                <button type="button" id="special-char-btn" title="Insert Special Character" style="background:#F6E05E;color:#4A5568;border:1px solid #4A5568;border-radius:0.5em;padding:0.2em 0.7em;font-size:1.1em;font-family:inherit;cursor:pointer;">Ω</button>
+                                <button type="button" id="special-char-btn" title="Insert Special Character">Ω</button>
                                 <div id="special-char-list" style="display:none;position:absolute;z-index:10;top:110%;left:0;background:#fff;border:1px solid #ccc;border-radius:0.7em;box-shadow:0 2px 8px rgba(0,0,0,0.08);padding:0.5em 0;min-width:180px;max-height:220px;overflow-y:auto;">
                                     <input type="text" id="special-char-search" placeholder="Search..." style="width:90%;margin:0.3em 5%;padding:0.3em 0.7em;border-radius:0.5em;border:1px solid #ccc;font-size:1em;outline:none;">
                                     <div id="special-char-buttons"></div>
                                 </div>
                             </div>
                             <div id="code-dropdown" style="position:relative;">
-                                <button id="code-btn" type="button" style="background:#F6E05E;color:#4A5568;border:1px solid #4A5568;border-radius:0.5em;padding:0.2em 0.7em;font-size:1.1em;font-family:inherit;cursor:pointer;">Code</button>
+                                <button id="code-btn" type="button">Code</button>
                             </div>
                         </div>
                         <textarea id="body" name="body" rows="8" required></textarea>
-                        <label id="preview-label" style="display:block; margin-top:1em; font-weight:bold; color:#4A5568;">Preview:</label>
+                        <div style="display:flex;align-items:center;gap:1em;margin-top:0.5em;">
+                            <label id="preview-label" style="font-weight:bold; color:#4A5568;">Preview:</label>
+                            <span id="word-count" style="color:#888;font-size:0.98em;">0 words</span>
+                        </div>
                         <div id="body-preview" style="margin-top:0.3em; background:#f7fafc; border-radius:0.7rem; padding:1em; min-height:2em;"></div>
                     </div>
                     <div class="form-group" id="form-buttons" style="display:flex;flex-direction:row;gap:1em;align-items:stretch;">
@@ -258,6 +295,9 @@
                     if (autosaveId) {
                         params.append('autosave_id', autosaveId);
                     }
+                    // Add keywords
+                    const keywords = document.getElementById('keywords').value;
+                    if (keywords) params.set('keywords', keywords);
                     const res = await fetch(form.action, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -291,8 +331,21 @@
                 // Live preview for /s, /h, /l, /b, /i, /u as described
                 const bodyInput = document.getElementById('body');
                 const preview = document.getElementById('body-preview');
-                bodyInput.addEventListener('input', function() {
-                                        let html = bodyInput.value;
+                const wordCount = document.getElementById('word-count');
+                bodyInput.addEventListener('input', async function() {
+                    let html = bodyInput.value;
+
+                    // Word count logic
+                    let text = html.replace(/\s+/g, ' ').trim();
+                    // Remove markup commands (e.g. /b ... /, /h ... /, /l ... /, etc.)
+                    text = text.replace(/\/[a-z]+\b[^/]*\//g, ' ');
+                    // Remove any remaining slashes
+                    text = text.replace(/[\/]/g, ' ');
+                    // Remove HTML tags if any
+                    text = text.replace(/<[^>]+>/g, ' ');
+                    // Count words
+                    const count = text.length ? text.split(/\s+/).filter(Boolean).length : 0;
+                    wordCount.textContent = count + (count === 1 ? ' word' : ' words');
 
                     // Replace -- with /
                     html = html.replace(/--/g, '/');
@@ -323,6 +376,31 @@
                         return `<u>${underlineText.trim()}</u>`;
                     });
 
+                    // Fetch images for /pic code/ rendering
+                    let images = [];
+                    try {
+                        const res = await fetch('/list-images');
+                        if (res.ok) images = await res.json();
+                    } catch {}
+
+                    // Replace /pic code height width style caption/ with <figure> markup
+                    html = html.replace(
+                        /\/pic\s+(\d+)(?:\s+(\d+))?(?:\s+(\d+))?(?:\s+(wrap))?(?:\s+([^\/]+?))?\s*\//g,
+                        (match, code, h, w, style, caption) => {
+                            code = parseInt(code, 10);
+                            if (!images[code - 1]) return '';
+                            const url = images[code - 1].url;
+                            let attrs = '';
+                            if (h) attrs += ` height=\"${h}\"`;
+                            if (w) attrs += ` width=\"${w}\"`;
+                            let figClass = '';
+                            if (style === 'wrap') figClass = 'float-img-container';
+                            let imgTag = `<img src=\"${url}\"${attrs} style=\"max-width:100%;border-radius:0.4em;\">`;
+                            let figcaption = caption ? `<figcaption>${caption.trim()}</figcaption>` : '';
+                            return `<figure${figClass ? ` class=\"${figClass}\"` : ''}>${imgTag}${figcaption}</figure>`;
+                        }
+                    );
+
                     // /s → split into sections for preview
                     const sectionParts = html.split(/(?:\r?\n)?\s*\/s\s*(?:\r?\n)?/g);
                     html = sectionParts.map(part => {
@@ -339,12 +417,11 @@
                                 result += paras.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
                             }
                         }
-                        return `<div class="section-preview">${result}</div>`;
+                        return `<div class=\"section-preview\">${result}</div>`;
                     }).join('');
 
                     preview.innerHTML = html;
                     if (window.Prism && Prism.highlightAll) Prism.highlightAll();
-
                 });
 
                 // Insert markup at selection or cursor
@@ -387,6 +464,12 @@
                 };
                 document.getElementById('subheading-btn').onclick = function() {
                     wrapSelection(document.getElementById('body'), '/h ', ' /');
+                };
+                document.getElementById('h3-btn').onclick = function() {
+                    wrapSelection(document.getElementById('body'), '/3 ', ' /');
+                };
+                document.getElementById('math-btn').onclick = function() {
+                    wrapSelection(document.getElementById('body'), '/m ', ' /');
                 };
                 document.getElementById('section-btn').onclick = function() {
                     insertAtCursor(document.getElementById('body'), '/sec');
@@ -444,11 +527,12 @@
                     const category = document.getElementById('category').value;
                     const title = document.getElementById('title').value;
                     const body = document.getElementById('body').value;
+                    const keywords = document.getElementById('keywords').value;
                     if (!title || !body) {
                         alert('Title and body are required to save a draft.');
                         return;
                     }
-                    let payload = { category, title, body };
+                    let payload = { category, title, body, keywords: keywords || "" };
                     if (editingDraft) payload.edit_filename = editingDraft.filename;
                     if (autosaveId) payload.autosave_id = autosaveId;
                     const res = await fetch('save-draft', {
@@ -492,6 +576,7 @@
                         document.getElementById('category').value = category;
                         document.getElementById('title').value = data.title || '';
                         document.getElementById('body').value = data.rawBody || '';
+                        document.getElementById('keywords').value = data.keywords || '';
                         document.getElementById('form-title').textContent = "Edit Post";
                         document.getElementById('submit-btn').textContent = "Edit Post";
                         editingPost = { category, filename };
@@ -518,7 +603,8 @@
                         const data = await res.json();
                         document.getElementById('category').value = data.category || '';
                         document.getElementById('title').value = data.title || '';
-                        document.getElementById('body').value = data.rawBody || '';
+                        document.getElementById('body').value = data.rawBody || data.body || '';
+                        document.getElementById('keywords').value = (typeof data.keywords === 'string') ? data.keywords : '';
                         document.getElementById('form-title').textContent = "Edit Draft";
                         document.getElementById('submit-btn').textContent = "Save as Post";
                         document.getElementById('save-draft-btn').textContent = "Keep as draft";
@@ -654,23 +740,23 @@
                     const res = await fetch('/list-images');
                     let images = [];
                     if (res.ok) images = await res.json();
-                    // Render /pic code [height] [width] [style] [caption]/ as <figure><img ...><figcaption>...</figcaption></figure>
+                    // Render /pic code [height] [width] [style] [caption]/ as <figure class="float-img-container">...<figcaption>...</figcaption></figure>
                     html = html.replace(/\/pic\s+(\d+)(?:\s+(\d+))?(?:\s+(\d+))?(?:\s+(wrap|block))?(?:\s+([^\/]+?))?\s*\//g, (match, code, h, w, style, caption) => {
                         code = parseInt(code, 10);
                         if (!images[code - 1]) return '';
-                        const url = images[code - 1].url;
+                        // Build the src as /HumanityIsObliviouslyBlindedToPowersOfTen/Assets/Uploads/(filename)
+                        const filename = images[code - 1].filename;
+                        const url = `/HumanityIsObliviouslyBlindedToPowersOfTen/Assets/Uploads/${filename}`;
                         let attrs = '';
                         if (h) attrs += ` height="${h}"`;
                         if (w) attrs += ` width="${w}"`;
                         let figClass = '';
-                        let imgClass = '';
                         if (style === 'wrap') {
                             figClass = 'float-img-container';
-                            imgClass = 'float-img';
                         }
-                        let imgTag = `<img src="${url}"${attrs}${imgClass ? ` class="${imgClass}"` : ''} style="max-width:100%;border-radius:0.4em;">`;
+                        let imgTag = `<img src="${url}"${attrs} style="max-width:100%;border-radius:0.4em;">`;
                         let figcaption = caption ? `<figcaption>${caption.trim()}</figcaption>` : '';
-                        return `<figure${figClass ? ` class="${figClass}"` : ''}>${imgTag}${figcaption}</figure>`;
+                        return `<figure${figClass ? ` class=\"${figClass}\"` : ''}>${imgTag}${figcaption}</figure>`;
                     });
                     // ...existing section splitting and preview logic...
                     const sectionParts = html.split(/(?:\r?\n)?\s*\/s\s*(?:\r?\n)?/g);
@@ -1040,15 +1126,10 @@ codedd.querySelectorAll('.code-lang-btn').forEach(btn => {
 });
                 </script>
                 <style>
-                .section-preview {
-                    background: #e6e8ea;
-                    border: 2px solid #4A5568;
-                    border-radius: 1.2rem;
-                    margin: 1.2em 0;
-                    padding: 1.5em 1.2em;
-                    box-shadow: 0 8px 32px 0 rgba(74,85,104,0.08);
+                .toolbar-dropdown {
+                    position: relative;
                 }
-                .form-group > div > button {
+                .toolbar-dropdown > button {
                     background: #F6E05E;
                     color: #4A5568;
                     border: 1px solid #4A5568;
@@ -1058,14 +1139,87 @@ codedd.querySelectorAll('.code-lang-btn').forEach(btn => {
                     font-family: inherit;
                     cursor: pointer;
                     transition: background 0.2s, color 0.2s;
+                    margin-right: 0.1em;
                 }
-                .form-group > div > button:hover,
-                .form-group > div > button:focus {
+                .toolbar-dropdown > button:hover,
+                .toolbar-dropdown > button:focus {
                     background: #FF6B00;
                     color: #fff;
                     outline: none;
                 }
-                /* Make main action buttons equal width and horizontal */
+                .toolbar-dropdown-list {
+                    min-width: 90px;
+                    background: #fffbe6;
+                    border: 1.5px solid #F6E05E;
+                    border-radius: 0.7em;
+                    box-shadow: 0 2px 12px 0 rgba(255,107,0,0.08);
+                    z-index: 1000;
+                }
+                .toolbar-dropdown-list button {
+                    background: none;
+                    color: #4A5568;
+                    border: none;
+                    border-radius: 0;
+                    padding: 0.5em 1.2em;
+                    width: 100%;
+                    text-align: left;
+                    font-size: 1.1em;
+                    font-family: inherit;
+                    cursor: pointer;
+                    transition: background 0.2s, color 0.2s;
+                }
+                .toolbar-dropdown-list button:hover,
+                .toolbar-dropdown-list button:focus {
+                    background: #FF6B00;
+                    color: #fff;
+                    outline: none;
+                }
+                .toolbar {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.4em;
+                    margin-bottom: 0.7em;
+                    background: #fffbe6;
+                    border: 2px solid #F6E05E;
+                    border-radius: 0.8em;
+                    padding: 0.5em 0.7em 0.4em 0.7em;
+                    box-shadow: 0 2px 12px 0 rgba(255,107,0,0.06);
+                    align-items: center;
+                }
+                .toolbar > button,
+                .toolbar #list-dropdown-btn,
+                .toolbar #img-insert-btn,
+                .toolbar #special-char-btn,
+                .toolbar #code-btn {
+                    background: #F6E05E;
+                    color: #4A5568;
+                    border: 1px solid #4A5568;
+                    border-radius: 0.5em;
+                    padding: 0.2em 0.7em;
+                    font-size: 1.1em;
+                    font-family: inherit;
+                    cursor: pointer;
+                    transition: background 0.2s, color 0.2s;
+                    margin-right: 0.1em;
+                }
+                .toolbar > button:hover,
+                .toolbar > button:focus,
+                .toolbar #list-dropdown-btn:hover,
+                .toolbar #img-insert-btn:hover,
+                .toolbar #special-char-btn:hover,
+                .toolbar #code-btn:hover {
+                    background: #FF6B00;
+                    color: #fff;
+                    outline: none;
+                }
+                .section-preview {
+                    background: #e6e8ea;
+                    border: 2px solid #4A5568;
+                    border-radius: 1.2rem;
+                    margin: 1.2em 0;
+                    padding: 1.5em 1.2em;
+                    box-shadow: 0 8px 32px 0 rgba(74,85,104,0.08);
+                }
                 .main-action-btn {
                     flex: 1 1 0;
                     min-width: 0;
@@ -1347,6 +1501,7 @@ codedd.querySelectorAll('.code-lang-btn').forEach(btn => {
                 document.getElementById('category').value = category;
                 document.getElementById('title').value = data.title || '';
                 document.getElementById('body').value = data.rawBody || '';
+                document.getElementById('keywords').value = data.keywords || '';
                 document.getElementById('form-title').textContent = "Edit Post";
                 document.getElementById('submit-btn').textContent = "Edit Post";
                 editingPost = { category, filename };
@@ -1558,11 +1713,13 @@ async function loadDrafts() {
         const category = document.getElementById('category').value;
         const title = document.getElementById('title').value;
         const body = document.getElementById('body').value;
+        const keywords = document.getElementById('keywords').value;
         if (!title || !body) {
             alert('Title and body are required to save a draft.');
             return;
         }
         let payload = { category, title, body };
+        if (keywords) payload.keywords = keywords;
         if (editingDraft) payload.edit_filename = editingDraft.filename;
         if (autosaveId) payload.autosave_id = autosaveId;
         const res = await fetch('save-draft', {
@@ -2056,10 +2213,18 @@ document.getElementById('comments-filter-category').addEventListener('change', f
         return `<ul>${items.join('')}</ul>`;
     });
 
-    // /h text / → <h2>text</h2>
-    html = html.replace(/\/h\s*([^\n\/]+)\s*\//g, (match, headerText) => {
-        return `|||H2|||${headerText.trim()}|||H2|||`;
-    });
+                    // /h text / → <h2>text</h2>
+                    html = html.replace(/\/h\s*([^\n\/]+)\s*\//g, (match, headerText) => {
+                        return `|||H2|||${headerText.trim()}|||H2|||`;
+                    });
+                    // /3 text / → <h3>text</h3>
+                    html = html.replace(/\/3\s*([^\n\/]+)\s*\//g, (match, headerText) => {
+                        return `<h3>${headerText.trim()}</h3>`;
+                    });
+                    // /m text / → <span class="math">text</span>
+                    html = html.replace(/\/m\s*([^\n\/]+)\s*\//g, (match, mathText) => {
+                        return `<span class="math">${mathText.trim()}</span>`;
+                    });
 
     // /b text / → <b>text</b>
     html = html.replace(/\/b\s*([^\n\/]+)\s*\//g, (match, boldText) => {

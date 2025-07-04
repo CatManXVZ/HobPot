@@ -5,8 +5,14 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const { Sequelize, DataTypes } = require('sequelize');
 
-// For Node.js v18+ (native fetch)
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+
+// Use global fetch if available (Node 18+), otherwise fallback to node-fetch
+let fetchFn;
+if (typeof globalThis.fetch === 'function') {
+    fetchFn = globalThis.fetch.bind(globalThis);
+} else {
+    fetchFn = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+}
 
 const app = express();
 const PORT = 3000;
@@ -253,7 +259,7 @@ app.get(/^\/([a-zA-Z0-9\-]+)$/, (req, res, next) => {
                     if (slugWords.length > 0 && slugWords.every(word => titleWords.includes(word))) {
                         // Redirect to the actual post URL (relative to site root)
                         const relPath = path.relative(__dirname, filePath).replace(/\\/g, '/');
-                        return res.redirect('/HumanityIsObliviouslyBlindedToPowersOfTen/' + relPath);
+                        return res.redirect(relPath);
                     }
                 }
             }
@@ -264,8 +270,8 @@ app.get(/^\/([a-zA-Z0-9\-]+)$/, (req, res, next) => {
 });
 
 // When creating or editing a post, store the raw markup as a comment in the HTML for future editing
-app.post('/post-website', (req, res) => {
-    const { category, title, body, edit_category, edit_filename, draft_filename, autosave_id } = req.body;
+app.post('/post-website', async (req, res) => {
+    const { category, title, body, keywords, edit_category, edit_filename, draft_filename, autosave_id } = req.body;
     const postsRoot = path.join(__dirname, 'Posts');
     const folderPath = path.join(postsRoot, category);
 
@@ -301,11 +307,36 @@ app.post('/post-website', (req, res) => {
         filePath = path.join(folderPath, uniqueFilename);
     }
 
+    // --- Gemini AI meta description generation ---
+    async function getGeminiMetaDescription(postTitle, postBody) {
+        try {
+            const apiKey = 'AIzaSyBXaA3tV9kBtkmCuxFetDiwdqxot-8cQUw';
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+            const prompt = `Generate an SEO-friendly meta description for the following blog post. Make it less than 160 words, concise, and engaging. Do not use hashtags.\nTitle: ${postTitle}\nContent: ${postBody.slice(0, 1200)}`;
+            const response = await fetchFn(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                })
+            });
+            const data = await response.json();
+            if (data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) {
+                return data.candidates[0].content.parts[0].text.trim().replace(/\n/g, ' ');
+            }
+        } catch (e) {
+            console.error('Gemini meta description error:', e);
+        }
+        return '';
+    }
+
     // Custom markup processing
     // --- Unified Markup Processing (matches Poster.html preview) ---
     // Replace all /s (section splitter) with /sec (new section marker) before any further processing (to match Poster.html)
     // Accept /s with or without surrounding whitespace/newlines, but only if not already /sec
     let processed = body.replace(/(^|\n)\s*\/s(?!ec)(?=\s|$)/g, '$1/sec');
+    processed = processed.replace(/\s\/s\b/g, ' /sec');
+    processed = processed.replace(/(^|\n)\s*\/s\b/g, '$1/sec');
 
     // --- Replace /s with /sec before any section splitting (to match Poster.html preview) ---
     processed = processed.replace(/\s\/s\b/g, ' /sec');
@@ -341,7 +372,7 @@ app.post('/post-website', (req, res) => {
             code = parseInt(code, 10);
             if (!images[code - 1]) return '';
             // FIX: Correct image URL path
-            const url = `/HumanityIsObliviouslyBlindedToPowersOfTen/Assets/Uploads/${images[code - 1]}`;
+            const url = `/HumanityIsObliviouslyBlindedToPowers/Assets/Uploads/${images[code - 1]}`;
             let attrs = '';
             if (h) attrs += ` height="${h}"`;
             if (w) attrs += ` width="${w}"`;
@@ -351,7 +382,7 @@ app.post('/post-website', (req, res) => {
                 figClass = 'float-img-container';
                 imgClass = 'float-img';
             }
-            let imgTag = `<img src="${url}"${attrs}${imgClass ? ` class="${imgClass}"` : ''} style="max-width:100%;border-radius:0.4em;">`;
+            let imgTag = `<img alt="${caption ? caption.trim() : ''}" src="${url}"${attrs}${imgClass ? ` class="${imgClass}"` : ''} style="max-width:100%;border-radius:0.4em;">`;
             let figcaption = caption ? `<figcaption>${caption.trim()}</figcaption>` : '';
             return `<figure${figClass ? ` class="${figClass}"` : ''}>${imgTag}${figcaption}</figure>`;
         }
@@ -366,6 +397,10 @@ app.post('/post-website', (req, res) => {
     // --- Headers ---
     processed = processed.replace(/\/h\s*([^\n\/]+)\s*\//g, (match, headerText) => {
         return '|||H2|||'+headerText.trim()+'|||H2|||';
+    });
+    // --- H3: /3 ... / ---
+    processed = processed.replace(/\/3\s*([^\n\/]+)\s*\//g, (match, headerText) => {
+        return `<h3>${headerText.trim()}</h3>`;
     });
 
     // --- Bold ---
@@ -414,7 +449,22 @@ app.post('/post-website', (req, res) => {
         return `<math>${math}</math>`;
     });
 
-    // --- Replace -- with / everywhere (after all formatting) ---
+
+    // --- Restore code blocks ---
+    // (Move this BEFORE the double-hyphen replacement to preserve -- inside code blocks)
+    processed = processed.replace(/\|\|\|CODEBLOCK_LANG_(\d+)\|\|\|/g, (match, idx) => {
+        let { lang, code } = codeBlocks[Number(idx)];
+        code = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return `<pre><code class=\"language-${lang}\">${code}</code></pre>`;
+    });
+    processed = processed.replace(/\|\|\|CODEBLOCK_(\d+)\|\|\|/g, (match, idx) => {
+        let { code } = codeBlocks[Number(idx)];
+        code = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return `<pre><code>${code}</code></pre>`;
+    });
+
+    // --- Replace -- with / everywhere (after all formatting, but NOT inside code blocks) ---
+    // This is now safe because code blocks have been restored
     processed = processed.replace(/--/g, '/');
 
     // --- Restore code blocks ---
@@ -431,7 +481,7 @@ app.post('/post-website', (req, res) => {
     });
 
     // --- Sections: split on /sec and wrap in <section> ---
-    const sections = processed
+    let sectionArr = processed
         .split(/(?:\r?\n)?\s*\/sec\s*(?:\r?\n)?/g)
         .map(part => {
             let parts = part.split('|||H2|||');
@@ -440,8 +490,6 @@ app.post('/post-website', (req, res) => {
                 if (i % 2 === 1) {
                     result += `<h2>${parts[i]}</h2>`;
                 } else {
-                    // Paragraphs: split by double newlines or single newlines, wrap in <p>
-                    // But do NOT wrap <pre><code> blocks in <p>
                     let blocks = parts[i].split(/(<pre><code[\s\S]*?<\/code><\/pre>)/g);
                     for (let b = 0; b < blocks.length; b++) {
                         if (/^<pre><code/.test(blocks[b])) {
@@ -454,24 +502,43 @@ app.post('/post-website', (req, res) => {
                 }
             }
             return `<section class=\"section\">\n${result}\n</section>`;
-        })
-        .join('\n');
+        });
+    // Insert <h1>title</h1> before the first section
+    if (sectionArr.length > 0) {
+        sectionArr[0] = `<h1>${escapeHtml(title)}</h1>\n` + sectionArr[0];
+    }
+    const sections = sectionArr.join('\n');
 
     // Store the raw markup as a comment for future editing (hide it with CSS)
     function escapeHtml(str) {
-    if (typeof str !== 'string') return '';
-    return str.replace(/[&<>"']/g, function(tag) {
-        const charsToReplace = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#39;'
-        };
-        return charsToReplace[tag] || tag;
-    });
-}
-const rawMarkupComment = `<div id="raw-body-data" style="display:none !important;">${escapeHtml(body)}</div>`;
+        if (typeof str !== 'string') return '';
+        return str.replace(/[&<>"']/g, function(tag) {
+            const charsToReplace = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            };
+            return charsToReplace[tag] || tag;
+        });
+    }
+    const rawMarkupComment = `<div id="raw-body-data" style="display:none !important;">${escapeHtml(body)}</div>`;
+
+    // --- Get meta description from Gemini AI ---
+    let metaDescription = await getGeminiMetaDescription(title, body);
+    if (!metaDescription) metaDescription = '';
+
+    // --- Meta keywords ---
+    let metaKeywords = '';
+    if (keywords) {
+        if (Array.isArray(keywords)) {
+            metaKeywords = keywords.join(',');
+        } else if (typeof keywords === 'string') {
+            metaKeywords = keywords;
+        }
+        metaKeywords = metaKeywords.split(',').map(k => k.trim()).filter(Boolean).join(', ');
+    }
 
     // HTML content for the posted website, styled like homepage and with partial includes
     const htmlContent = `
@@ -481,6 +548,8 @@ const rawMarkupComment = `<div id="raw-body-data" style="display:none !important
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${title}</title>
+    <meta name="description" content="${escapeHtml(metaDescription)}">
+    ${metaKeywords ? `<meta name="keywords" content="${escapeHtml(metaKeywords)}">` : ''}
     <link
         href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
@@ -688,7 +757,13 @@ if (rawDivMatch) {
         // ...
     }
 }
-        res.json({ title, rawBody });
+        // Extract keywords from meta tag
+        let keywords = '';
+        const keywordsMatch = content.match(/<meta name=["']keywords["'] content=["']([^"']*)["']/i);
+        if (keywordsMatch) {
+            keywords = keywordsMatch[1];
+        }
+        res.json({ title, rawBody, keywords });
     } catch (err) {
         res.status(500).json({ error: 'Failed to load post.' });
     }
@@ -773,7 +848,7 @@ app.get('/list-drafts', requireAuth, (req, res) => {
 
 // Save or update a draft (used by autosave too)
 app.post('/save-draft', requireAuth, (req, res) => {
-    const { category, title, body, edit_filename, autosave_id, is_autosave } = req.body;
+    const { category, title, body, keywords, edit_filename, autosave_id, is_autosave } = req.body;
     if (!title || !body || !category) return res.status(400).json({ error: 'Missing data.' });
     if (!fs.existsSync(DRAFTS_ROOT)) fs.mkdirSync(DRAFTS_ROOT, { recursive: true });
     let filename;
@@ -795,6 +870,7 @@ app.post('/save-draft', requireAuth, (req, res) => {
         category,
         title,
         body,
+        keywords: typeof keywords === 'string' ? keywords : '',
         date: new Date().toISOString()
     };
     fs.writeFileSync(path.join(DRAFTS_ROOT, filename), JSON.stringify(draftData, null, 2));
@@ -813,7 +889,8 @@ app.post('/get-draft', requireAuth, (req, res) => {
         res.json({
             title: data.title,
             category: data.category,
-            rawBody: data.body
+            rawBody: data.body,
+            keywords: typeof data.keywords === 'string' ? data.keywords : ''
         });
     } catch (err) {
         res.status(500).json({ error: 'Failed to load draft.' });
