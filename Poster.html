@@ -123,7 +123,50 @@
                                     <button type="button" id="underline-btn" title="Underline" style="display:block;width:100%;padding:0.5em 1.2em;background:none;border:none;text-align:left;font-size:1.1em;cursor:pointer;"><u>U</u></button>
                                 </div>
                             </div>
+                            <div class="toolbar-dropdown" id="stem-dropdown" style="position:relative;">
+                                <button type="button" id="stem-dropdown-btn" title="Formatting">STM ▼</button>
+                                <div class="toolbar-dropdown-list" id="format-dropdown-list" style="display:none;position:absolute;left:0;top:110%;background:#fffbe6;border:1.5px solid #F6E05E;border-radius:0.7em;box-shadow:0 2px 12px 0 rgba(255,107,0,0.08);z-index:1000;min-width:90px;">
+                            <div id="code-dropdown" style="position:relative;">
+                                <button id="code-btn" type="button">&lt/&gt</button>
+                                                            <div id="special-char-dropdown" style="position:relative;">
+                                <button type="button" id="special-char-btn" title="Insert Special Character">Ω</button>
+                                <div id="special-char-list" style="display:none;position:absolute;z-index:10;top:110%;left:0;background:#fff;border:1px solid #ccc;border-radius:0.7em;box-shadow:0 2px 8px rgba(0,0,0,0.08);padding:0.5em 0;min-width:180px;max-height:220px;overflow-y:auto;">
+                                    <input type="text" id="special-char-search" placeholder="Search..." style="width:90%;margin:0.3em 5%;padding:0.3em 0.7em;border-radius:0.5em;border:1px solid #ccc;font-size:1em;outline:none;">
+                                    <div id="special-char-buttons"></div>
+                                </div>
+                            </div>
+                            </div>
+                            <button type="button" id="math-btn" title="Math" style="background:#F6E05E;color:#4A5568;border:1px solid #4A5568;border-radius:0.5em;padding:0.2em 0.7em;font-size:1.1em;font-family:inherit;cursor:pointer;transition:background 0.2s, color 0.2s;margin-right:0.1em;">𝑓(x)</button>
+                                </div>
+                        </div>
                 <script>
+// STEM Dropdown open/close logic (non-destructive)
+document.addEventListener('DOMContentLoaded', function() {
+    var stemDropdownBtn = document.getElementById('stem-dropdown-btn');
+    // Only select the dropdown list that is a sibling of the button (not format-dropdown-list)
+    var stemDropdownList = null;
+    if (stemDropdownBtn) {
+        // Find the closest .toolbar-dropdown-list within the same parent
+        var parent = stemDropdownBtn.parentNode;
+        stemDropdownList = parent.querySelector('.toolbar-dropdown-list');
+    }
+    if (stemDropdownBtn && stemDropdownList) {
+        stemDropdownBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (stemDropdownList.style.display === 'block') {
+                stemDropdownList.style.display = 'none';
+            } else {
+                stemDropdownList.style.display = 'block';
+            }
+        });
+        document.addEventListener('click', function() {
+            stemDropdownList.style.display = 'none';
+        });
+        stemDropdownList.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+});
                 // Dropdown logic for toolbar
                 function setupToolbarDropdown(dropdownBtnId, dropdownListId) {
                     const btn = document.getElementById(dropdownBtnId);
@@ -146,18 +189,14 @@
                             <div id="list-dropdown" style="display:none;position:relative;">
                                 <button type="button" id="list-dropdown-btn">+ List Item</button>
                             </div>
-                            <button type="button" id="img-insert-btn" title="Insert Image">Insert Image</button>
-                            <div id="special-char-dropdown" style="position:relative;">
-                                <button type="button" id="special-char-btn" title="Insert Special Character">Ω</button>
-                                <div id="special-char-list" style="display:none;position:absolute;z-index:10;top:110%;left:0;background:#fff;border:1px solid #ccc;border-radius:0.7em;box-shadow:0 2px 8px rgba(0,0,0,0.08);padding:0.5em 0;min-width:180px;max-height:220px;overflow-y:auto;">
-                                    <input type="text" id="special-char-search" placeholder="Search..." style="width:90%;margin:0.3em 5%;padding:0.3em 0.7em;border-radius:0.5em;border:1px solid #ccc;font-size:1em;outline:none;">
-                                    <div id="special-char-buttons"></div>
+                            <div class="toolbar-dropdown" id="img-insert-dropdown" style="position:relative;">
+                                <button type="button" id="img-insert-dropdown-btn" title="Insert Image">Insert ▼</button>
+                                <div class="toolbar-dropdown-list" id="img-insert-dropdown-list" style="display:none;position:absolute;left:0;top:110%;background:#fffbe6;border:1.5px solid #F6E05E;border-radius:0.7em;box-shadow:0 2px 12px 0 rgba(255,107,0,0.08);z-index:1000;min-width:120px;">
+                                    <button type="button" id="img-insert-btn" style="display:block;width:100%;padding:0.5em 1.2em;background:none;border:none;text-align:left;font-size:1.1em;cursor:pointer;">Insert Image</button>
+                                    <button type="button" id="insert-link-btn" style="display:block;width:100%;padding:0.5em 1.2em;background:none;border:none;text-align:left;font-size:1.1em;cursor:pointer;">Insert Link</button>
                                 </div>
                             </div>
-                            <div id="code-dropdown" style="position:relative;">
-                                <button id="code-btn" type="button">Code</button>
-                            </div>
-                            <button type="button" id="math-btn" title="Math">𝑓(x)</button>
+
                             <div style="display:flex;align-items:center;gap:1em;margin-top:0.5em;">
                             <label id="preview-label" style="font-weight:bold; color:#4A5568;">Preview:</label>
                             <span id="word-count" style="color:#888;font-size:0.98em;">0 words</span>
@@ -232,6 +271,38 @@
                     </div>
                 </div>
                 <script>
+// Insert Image Dropdown logic
+document.addEventListener('DOMContentLoaded', function() {
+    var imgInsertDropdownBtn = document.getElementById('img-insert-dropdown-btn');
+    var imgInsertDropdownList = null;
+    if (imgInsertDropdownBtn) {
+        var parent = imgInsertDropdownBtn.parentNode;
+        imgInsertDropdownList = parent.querySelector('.toolbar-dropdown-list');
+    }
+    if (imgInsertDropdownBtn && imgInsertDropdownList) {
+        imgInsertDropdownBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (imgInsertDropdownList.style.display === 'block') {
+                imgInsertDropdownList.style.display = 'none';
+            } else {
+                imgInsertDropdownList.style.display = 'block';
+            }
+        });
+        document.addEventListener('click', function() {
+            imgInsertDropdownList.style.display = 'none';
+        });
+        imgInsertDropdownList.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+    // Insert Link button (does nothing for now)
+    var insertLinkBtn = document.getElementById('insert-link-btn');
+    if (insertLinkBtn) {
+        insertLinkBtn.addEventListener('click', function() {
+            // Placeholder: does nothing
+        });
+    }
+});
                 let editingPost = null; // {category, filename}
                 let editingDraft = null;
                 let autosaveId = null;
@@ -371,6 +442,16 @@
                     // /h text / → <h2>text</h2>
                     html = html.replace(/\/h\s*([^\n\/]+)\s*\//g, (match, headerText) => {
                         return `|||H2|||${headerText.trim()}|||H2|||`;
+                    });
+
+                    // /3 text / → <h3>text</h3>
+                    html = html.replace(/\/3\s*([^\n\/]+)\s*\//g, (match, headerText) => {
+                        return `<h3>${headerText.trim()}</h3>`;
+                    });
+
+                    // /m text / → <span class="math">text</span>
+                    html = html.replace(/\/m\s*([^\n\/]+)\s*\//g, (match, mathText) => {
+                        return `<span class="math">${mathText.trim()}</span>`;
                     });
 
                     // /b text / → <b>text</b>
