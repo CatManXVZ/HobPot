@@ -139,14 +139,16 @@
                 setupToolbarDropdown('heading-dropdown-btn', 'heading-dropdown-list');
                 setupToolbarDropdown('format-dropdown-btn', 'format-dropdown-list');
                 </script>
-                            
+                            <button type="button" id="math-btn" title="Math">𝑓(x)</button>
                             <button type="button" id="section-btn" title="Section">/sec</button>
-                            
                             <button type="button" id="list-btn" title="List">/l</button>
                             <div id="list-dropdown" style="display:none;position:relative;">
                                 <button type="button" id="list-dropdown-btn">+ List Item</button>
                             </div>
-                            <button type="button" id="img-insert-btn" title="Insert Image">Insert Image</button>
+                            <button type="button" id="link-btn" title="Insert Link">Link</button>
+                            <div id="img-insert-btn-container" style="display:inline-block;">
+                                <button type="button" id="img-insert-btn" title="Insert Image">Insert Image</button>
+                            </div>
                             <div id="special-char-dropdown" style="position:relative;">
                                 <button type="button" id="special-char-btn" title="Insert Special Character">Ω</button>
                                 <div id="special-char-list" style="display:none;position:absolute;z-index:10;top:110%;left:0;background:#fff;border:1px solid #ccc;border-radius:0.7em;box-shadow:0 2px 8px rgba(0,0,0,0.08);padding:0.5em 0;min-width:180px;max-height:220px;overflow-y:auto;">
@@ -157,24 +159,23 @@
                             <div id="code-dropdown" style="position:relative;">
                                 <button id="code-btn" type="button">Code</button>
                             </div>
-                            <button type="button" id="math-btn" title="Math">𝑓(x)</button>
-                            <div style="display:flex;align-items:center;gap:1em;margin-top:0.5em;">
-                            <label id="preview-label" style="font-weight:bold; color:#4A5568;">Preview:</label>
-                            <span id="word-count" style="color:#888;font-size:0.98em;">0 words</span>
-                            <aside id="seo-checklist" style="background:#fffbe6;border:1.5px solid #F6E05E;border-radius:0.7em;padding:0.7em 1.1em;box-shadow:0 2px 12px 0 rgba(255,107,0,0.08);font-size:1.01em;line-height:1.6;display:inline-block;margin-left:1.5em;min-width:170px;max-width:220px;">
-                                <h4 style="margin-top:0;margin-bottom:0.5em;font-size:1.08em;font-weight:bold;color:#FF6B00;">SEO Checklist</h4>
-                                <ul style="list-style:none;padding:0;margin:0;">
-                                    <li id="check-words"><span style="font-size:1.2em;">&#x2610;</span> 800 words</li>
-                                    <li id="check-extlinks"><span style="font-size:1.2em;">&#x2610;</span> 3 external links</li>
-                                    <li id="check-intlinks"><span style="font-size:1.2em;">&#x2610;</span> 1 internal link</li>
-                                    <li id="check-title"><span style="font-size:1.2em;">&#x2610;</span> Title 10-100 chars</li>
-                                </ul>
-                            </aside>
+                <!-- Link Insert Popup -->
+                <div id="link-insert-popup" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:3000;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;">
+                    <div style="background:#fff;padding:2em 2.5em;border-radius:1.2rem;max-width:350px;width:90vw;box-shadow:0 8px 32px 0 rgba(74,85,104,0.18);position:relative;">
+                        <span id="link-insert-close" style="position:absolute;top:0.7em;right:1.2em;color:#FF6B00;font-size:2em;font-weight:bold;cursor:pointer;">&times;</span>
+                        <h3>Insert Link</h3>
+                        <form id="link-insert-form">
+                            <label for="link-insert-url">URL:</label>
+                            <input type="text" id="link-insert-url" required placeholder="https://example.com" style="width:100%;margin-bottom:1em;">
+                            <button type="submit" style="background:#FF6B00;color:#fff;border:none;border-radius:0.7rem;padding:0.7rem 1.2rem;font-weight:bold;cursor:pointer;width:100%;">Insert</button>
+                        </form>
+                    </div>
+                </div>
                         </div>
-                        </div>
-                        <textarea id="body" name="body" rows="8" required></textarea>
 
+                        <textarea id="body" name="body" rows="8" required style="margin-top:0.7em;"></textarea>
                         <div id="body-preview" style="margin-top:0.3em; background:#f7fafc; border-radius:0.7rem; padding:1em; min-height:2em;"></div>
+               
                     </div>
                     <div class="form-group" id="form-buttons" style="display:flex;flex-direction:row;gap:1em;align-items:stretch;">
                         <button type="submit" id="submit-btn" class="main-action-btn">Create Post</button>
@@ -213,7 +214,7 @@
                     <div style="background:#fff;padding:2em 2.5em;border-radius:1.2rem;max-width:350px;width:90vw;box-shadow:0 8px 32px 0 rgba(74,85,104,0.18);position:relative;">
                         <span id="img-insert-close" style="position:absolute;top:0.7em;right:1.2em;color:#FF6B00;font-size:2em;font-weight:bold;cursor:pointer;">&times;</span>
                         <h3>Insert Image</h3>
-                        <form id="img-insert-form">
+                        <div id="img-insert-form-fields">
                             <label for="img-insert-select">Image:</label>
                             <select id="img-insert-select" required style="width:100%;margin-bottom:1em;"></select>
                             <label for="img-insert-height">Height (px):</label>
@@ -227,8 +228,8 @@
                             </select>
                             <label for="img-insert-caption">Caption:</label>
                             <input type="text" id="img-insert-caption" maxlength="200" style="width:100%;margin-bottom:1em;">
-                            <button type="submit" style="background:#FF6B00;color:#fff;border:none;border-radius:0.7rem;padding:0.7rem 1.2rem;font-weight:bold;cursor:pointer;width:100%;">Insert</button>
-                        </form>
+                            <button id="img-insert-confirm" class="insert-action-btn" style="background:#FF6B00;color:#fff;border:none;border-radius:0.7rem;padding:0.7rem 1.2rem;font-weight:bold;cursor:pointer;width:100%;">Insert</button>
+                        </div>
                     </div>
                 </div>
                 <script>
@@ -362,11 +363,21 @@
                     // Replace -- with /
                     html = html.replace(/--/g, '/');
 
-                    // /l /e item /e item/ → <ul><li>item</li><li>item</li></ul>
-                    html = html.replace(/\/l\s*((?:\/e\s*[^\/]+)+)\/\s*/g, (match, listContent) => {
+                    // --- Lists: process before inline formatting, then restore after ---
+                    const listRegex = /\/l\s*((?:\/e\s*[^\/]+)+)\/\s*/g;
+                    let lists = [];
+                    html = html.replace(listRegex, (match, listContent) => {
                         const items = [...listContent.matchAll(/\/e\s*([^\/\n]+)/g)].map(m => `<li>${m[1].trim()}</li>`);
-                        return `<ul>${items.join('')}</ul>`;
+                        const listHtml = `<ul>${items.join('')}</ul>`;
+                        lists.push(listHtml);
+                        return `|||LIST_${lists.length - 1}|||`;
                     });
+
+                    // /a link text / → <a href="link">text</a>
+                    html = html.replace(/\/a\s+([^\s]+)\s+([^\/]+)\s*\//g, (match, link, text) => {
+                        return `<a href="${link.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}">${text.trim()}</a>`;
+                    });
+
 
                     // /h text / → <h2>text</h2>
                     html = html.replace(/\/h\s*([^\n\/]+)\s*\//g, (match, headerText) => {
@@ -387,6 +398,9 @@
                     html = html.replace(/\/u\s*([^\n\/]+)\s*\//g, (match, underlineText) => {
                         return `<u>${underlineText.trim()}</u>`;
                     });
+
+                    // Restore lists after inline formatting
+                    html = html.replace(/\|\|\|LIST_(\d+)\|\|\|/g, (match, idx) => lists[Number(idx)]);
 
                     // Fetch images for /pic code/ rendering
                     let images = [];
@@ -485,6 +499,22 @@
                 };
                 document.getElementById('section-btn').onclick = function() {
                     insertAtCursor(document.getElementById('body'), '/sec');
+                };
+
+                // Link button logic
+                document.getElementById('link-btn').onclick = function() {
+                    document.getElementById('link-insert-url').value = '';
+                    document.getElementById('link-insert-popup').style.display = 'flex';
+                };
+                document.getElementById('link-insert-close').onclick = function() {
+                    document.getElementById('link-insert-popup').style.display = 'none';
+                };
+                document.getElementById('link-insert-form').onsubmit = function(e) {
+                    e.preventDefault();
+                    const url = document.getElementById('link-insert-url').value.trim();
+                    if (!url) return;
+                    insertAtCursor(document.getElementById('body'), `<a href=\"${url.replace(/"/g,'&quot;')}\"></a>`);
+                    document.getElementById('link-insert-popup').style.display = 'none';
                 };
 
                 document.getElementById('list-btn').onclick = function() {
@@ -722,7 +752,8 @@
                     document.getElementById('img-insert-popup').style.display = 'none';
                 };
                 document.getElementById('img-insert-form').onsubmit = function(e) {
-                    e.preventDefault();
+                    // (No longer used)
+                document.getElementById('img-insert-confirm').onclick = function() {
                     const code = document.getElementById('img-insert-select').value;
                     const h = document.getElementById('img-insert-height').value;
                     const w = document.getElementById('img-insert-width').value;
@@ -736,6 +767,7 @@
                     markup += ' /';
                     insertAtCursor(document.getElementById('body'), markup);
                     document.getElementById('img-insert-popup').style.display = 'none';
+                };
                 };
 
                 // In preview: render /pic code height width/ as <img src="..." height="..." width="...">
@@ -1491,7 +1523,42 @@ codedd.querySelectorAll('.code-lang-btn').forEach(btn => {
                 }
             };
         });
-
+ // --- SEO Checklist Logic ---
+                function updateSeoChecklist() {
+                    // Word count
+                    const body = document.getElementById('body').value;
+                    let text = body.replace(/\s+/g, ' ').trim();
+                    text = text.replace(/\/[a-z]+\b[^/]*\//g, ' ');
+                    text = text.replace(/[\/]/g, ' ');
+                    text = text.replace(/<[^>]+>/g, ' ');
+                    const words = text.length ? text.split(/\s+/).filter(Boolean).length : 0;
+                    // External links: count http(s):// links
+                    const extLinks = (body.match(/https?:\/\//g) || []).length;
+                    // Internal links: count /Posts/ or /HumanityIsObliviouslyBlindedToPowersOfTen/Posts/ or /category/post.html
+                    let intLinks = 0;
+                    // Try to match /Posts/ or /HumanityIsObliviouslyBlindedToPowersOfTen/Posts/ or hrefs to .html in site
+                    const intLinkRegex = /\b(?:\/HumanityIsObliviouslyBlindedToPowersOfTen)?\/Posts\/[\w\/-]+\.html\b/g;
+                    intLinks += (body.match(intLinkRegex) || []).length;
+                    // Also count [text](/category/post.html) style
+                    intLinks += (body.match(/\[[^\]]+\]\((?:\/)?[\w\/-]+\.html\)/g) || []).length;
+                    // Title length
+                    const title = document.getElementById('title').value || '';
+                    // Update checklist
+                    function setCheck(id, pass) {
+                        const li = document.getElementById(id);
+                        if (!li) return;
+                        li.innerHTML = `<span style=\"font-size:1.2em;\">${pass ? '&#x2611;' : '&#x2610;'}</span> ` + li.textContent.replace(/^\s*[\u2610\u2611]\s*/, '');
+                        li.style.color = pass ? '#228B22' : '#a00';
+                    }
+                    setCheck('check-words', words >= 800);
+                    setCheck('check-extlinks', extLinks >= 3);
+                    setCheck('check-intlinks', intLinks >= 1);
+                    setCheck('check-title', title.length >= 10 && title.length <= 100);
+                }
+                document.getElementById('body').addEventListener('input', updateSeoChecklist);
+                document.getElementById('title').addEventListener('input', updateSeoChecklist);
+                // Initial call
+                updateSeoChecklist();
         // Add edit button logic
         document.querySelectorAll('.edit-post-btn').forEach(btn => {
             btn.onclick = async function() {
@@ -2343,49 +2410,7 @@ document.getElementById('comments-filter-category').addEventListener('change', f
     } catch (e) {}
     requestAnimationFrame(foreverPreviewReload);
 })();
-// --- SEO Checklist Logic (robust, always updates) ---
-function updateSeoChecklist() {
-    const checklist = document.getElementById('seo-checklist');
-    if (!checklist) return;
-    // Word count (count only visible words, not markup)
-    const body = document.getElementById('body').value;
-    // Remove all markup commands (e.g. /b ... /, /h ... /, /l ... /, etc.)
-    let text = body
-        .replace(/\/l\s*((?:\/e\s*[^\/]+)+)\//g, (m, list) => {
-            // Extract list items
-            return (list.match(/\/e\s*([^\/\n]+)/g) || []).map(e => e.replace(/\/e\s*/, '')).join(' ');
-        })
-        .replace(/\/[a-zA-Z0-9]+\s*([^\/]*)\//g, '$1') // Replace /b text /, /h text /, etc. with just text
-        .replace(/<[^>]+>/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-    const words = text.length ? text.split(/\s+/).filter(Boolean).length : 0;
-    // External links: count http(s):// links
-    const extLinks = (body.match(/https?:\/\//g) || []).length;
-    // Internal links: count /Posts/ or /HumanityIsObliviouslyBlindedToPowersOfTen/Posts/ or /category/post.html
-    let intLinks = 0;
-    // Try to match /Posts/ or /HumanityIsObliviouslyBlindedToPowersOfTen/Posts/ or hrefs to .html in site
-    const intLinkRegex = /\b(?:\/HumanityIsObliviouslyBlindedToPowersOfTen)?\/Posts\/[\w\/-]+\.html\b/g;
-    intLinks += (body.match(intLinkRegex) || []).length;
-    // Also count [text](/category/post.html) style
-    intLinks += (body.match(/\[[^\]]+\]\((?:\/)?[\w\/-]+\.html\)/g) || []).length;
-    // Title length
-    const title = document.getElementById('title').value || '';
-    // Update checklist
-    function setCheck(id, pass) {
-        const li = document.getElementById(id);
-        if (!li) return;
-        li.innerHTML = `<span style=\"font-size:1.2em;\">${pass ? '&#x2611;' : '&#x2610;'}</span> ` + li.textContent.replace(/^\s*[\u2610\u2611]\s*/, '');
-        li.style.color = pass ? '#228B22' : '#a00';
-    }
-    setCheck('check-words', words >= 800);
-    setCheck('check-extlinks', extLinks >= 3);
-    setCheck('check-intlinks', intLinks >= 1);
-    setCheck('check-title', title.length >= 10 && title.length <= 100);
-}
-document.getElementById('body').addEventListener('input', updateSeoChecklist);
-document.getElementById('title').addEventListener('input', updateSeoChecklist);
-setTimeout(updateSeoChecklist, 0);
+
     </script>
     <style>
     /* ...existing code... */

@@ -1,0 +1,102 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>what is life</title>
+    <meta name="description" content="/l /e appel ta copine /e va grate la visa /e la villa / hey /b blond/">
+    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/HumanityIsObliviouslyBlindedToPowersOfTen/style.css">
+    <!-- Prism.js for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7840248288117001"
+     crossorigin="anonymous"></script>
+    </head>
+<body>
+    <div id="header-include"></div>
+    <div id="sidebar-include"></div>
+    <div class="content-layout" style="display:flex;align-items:flex-start;position:relative;">
+        <main style="flex:1;">
+            <div id="raw-body-data" style="display:none !important;">/l
+/e appel ta copine
+/e va grate la visa
+/e la villa
+/
+hey
+/b blond/ </div>
+            <h1>ComputerScience</h1>
+<section class="section">
+<p><ul><li>appel ta copine</li><li>va grate la visa</li><li>la villa</li></ul>hey<br><b>blond</b></p>
+</section>
+        </main>
+    </div>
+    <section id="comments-section" class="comments-section" style="margin-left:25% !important;">
+      <h3> <span class="comments-tag">Comments</span></h3>
+      <div id="google-login-prompt" style="display:none;margin-bottom:1em;">
+        <a href="/auth/google" class="google-login-btn">Sign in with Google to comment</a>
+      </div>
+      <form id="comment-form" style="margin-bottom:1.5em;display:none;">
+        <textarea id="comment-text" placeholder="Your comment" required maxlength="1000" style="width:100%;min-height:60px;margin-bottom:0.5em;"></textarea>
+        <button type="submit" id="comment-submit-btn" style="padding:0.5em 1.2em;">Post Comment</button>
+        <span id="comment-status" style="margin-left:1em;color:#a00;font-weight:bold;"></span>
+      </form>
+      <div id="comments-list"></div>
+      <div id="comments-pagination" style="text-align:center;margin-top:1em;"></div>
+    </section>
+    <div id="footer-include"></div>
+    <script src="/HumanityIsObliviouslyBlindedToPowersOfTen/partials/code/header.js"></script>
+    <script src="/HumanityIsObliviouslyBlindedToPowersOfTen/partials/code/sidebar.js"></script>
+    <script src="/HumanityIsObliviouslyBlindedToPowersOfTen/partials/code/footer.js"></script>
+    <script>
+    function includeHTML(id, url, cb) {
+        fetch('/HumanityIsObliviouslyBlindedToPowersOfTen/partials/' + url)
+          .then(res => res.text())
+          .then(html => {
+              document.getElementById(id).innerHTML = html;
+              if (cb) cb();
+              // Ensure scripts in sidebar partial are executed
+              if (id === 'sidebar-include') {
+                  var scripts = document.getElementById(id).querySelectorAll('script');
+                  scripts.forEach(function(oldScript) {
+                      var newScript = document.createElement('script');
+                      if (oldScript.src) {
+                          newScript.src = oldScript.src;
+                      } else {
+                          newScript.textContent = oldScript.textContent;
+                      }
+                      oldScript.parentNode.replaceChild(newScript, oldScript);
+                  });
+                  // Open sidebar by default on desktop
+                  var sidebar = document.querySelector('#sidebar-include .sidebar');
+                  if (sidebar) {
+                      sidebar.classList.remove('closed');
+                      sidebar.classList.add('open');
+                  }
+              }
+          });
+    }
+    includeHTML('header-include', 'header.html', function() {
+        var titleSpan = document.getElementById('header-title');
+        if (titleSpan) titleSpan.textContent = "what is life";
+        var homeMenu = document.getElementById('menu-homepage');
+        if (homeMenu) homeMenu.classList.remove('dulled');
+    });
+    includeHTML('sidebar-include', 'sidebar.html');
+    includeHTML('footer-include', 'footer.html');
+    // --- Comment Section JS ---
+    let currentUser = null;
+    let commentsData = [];
+    let currentPage = 1;
+    const COMMENTS_PER_PAGE = 8;
+    const commentCategory = "ComputerScience";
+    const commentFilename = "04-07-2025_1751659525534_1.html";
+    </script>
+    <script src="/HumanityIsObliviouslyBlindedToPowersOfTen/partials/code/post.js"></script>
+</body>
+</html>

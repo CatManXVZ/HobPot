@@ -14,10 +14,20 @@ if (typeof globalThis.fetch === 'function') {
     fetchFn = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 }
 
+
 const app = express();
 const PORT = 3000;
 
+// --- Redirect www.hobpot.website to hobpot.website ---
+app.use((req, res, next) => {
+    if (req.hostname && req.hostname.toLowerCase() === 'www.hobpot.website') {
+        // Use 301 permanent redirect
+        return res.redirect(301, req.protocol + '://hobpot.website' + req.originalUrl);
+    }
+    next();
+});
 
+app.disable('x-powered-by');
 const RECAPTCHA_SECRET = '6Lfi3x4rAAAAAJAPeAMJQsnZviJsmIfu5HUZaSbV';
 
 
@@ -372,7 +382,7 @@ app.post('/post-website', async (req, res) => {
             code = parseInt(code, 10);
             if (!images[code - 1]) return '';
             // FIX: Correct image URL path
-            const url = `/HumanityIsObliviouslyBlindedToPowers/Assets/Uploads/${images[code - 1]}`;
+            const url = `/HumanityIsObliviouslyBlindedToPowersOfTen/Assets/Uploads/${images[code - 1]}`;
             let attrs = '';
             if (h) attrs += ` height="${h}"`;
             if (w) attrs += ` width="${w}"`;
@@ -382,17 +392,48 @@ app.post('/post-website', async (req, res) => {
                 figClass = 'float-img-container';
                 imgClass = 'float-img';
             }
-            let imgTag = `<img alt="${caption ? caption.trim() : ''}" src="${url}"${attrs}${imgClass ? ` class="${imgClass}"` : ''} style="max-width:100%;border-radius:0.4em;">`;
+            // Always set alt to caption (even if empty string)
+            let altText = caption ? caption.trim() : '';
+            let imgTag = `<img alt="${altText}" src="${url}"${attrs}${imgClass ? ` class="${imgClass}"` : ''} style="max-width:100%;border-radius:0.4em;">`;
             let figcaption = caption ? `<figcaption>${caption.trim()}</figcaption>` : '';
             return `<figure${figClass ? ` class="${figClass}"` : ''}>${imgTag}${figcaption}</figure>`;
         }
     );
 
     // --- Lists ---
-    processed = processed.replace(/\/l\s*((?:\/e\s*[^\/]+)+)\/\s*/g, (match, listContent) => {
+    // --- Lists ---
+    // Process lists AFTER inline formatting to avoid /u/ breaking </ul>
+    const listRegex = /\/l\s*((?:\/e\s*[^\/]+)+)\/\s*/g;
+    let lists = [];
+    processed = processed.replace(listRegex, (match, listContent) => {
         const items = [...listContent.matchAll(/\/e\s*([^\/\n]+)/g)].map(m => `<li>${m[1].trim()}</li>`);
-        return `<ul>${items.join('')}</ul>`;
+        const listHtml = `<ul>${items.join('')}</ul>`;
+        lists.push(listHtml);
+        return `|||LIST_${lists.length - 1}|||`;
     });
+
+    // --- /a link text / ---
+    processed = processed.replace(/\/a\s+([^\s]+)\s+([^\/]+)\s*\//g, (match, link, text) => {
+        return `<a href="${link.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}">${text.trim()}</a>`;
+    });
+
+    // --- Bold ---
+    processed = processed.replace(/\/b\s*([^\n\/]+)\s*\//g, (match, boldText) => {
+        return `<b>${boldText.trim()}</b>`;
+    });
+
+    // --- Italics ---
+    processed = processed.replace(/\/i\s*([^\n\/]+)\s*\//g, (match, italicText) => {
+        return `<i>${italicText.trim()}</i>`;
+    });
+
+    // --- Underline ---
+    processed = processed.replace(/\/u\s*([^\n\/]+)\s*\//g, (match, underlineText) => {
+        return `<u>${underlineText.trim()}</u>`;
+    });
+
+    // Restore lists after inline formatting
+    processed = processed.replace(/\|\|\|LIST_(\d+)\|\|\|/g, (match, idx) => lists[Number(idx)]);
 
     // --- Headers ---
     processed = processed.replace(/\/h\s*([^\n\/]+)\s*\//g, (match, headerText) => {
@@ -505,7 +546,8 @@ app.post('/post-website', async (req, res) => {
         });
     // Insert <h1>title</h1> before the first section
     if (sectionArr.length > 0) {
-        sectionArr[0] = `<h1>${escapeHtml(title)}</h1>\n` + sectionArr[0];
+        // Show the category as the h1 heading instead of the title
+        sectionArr[0] = `<h1>${escapeHtml(category)}</h1>\n` + sectionArr[0];
     }
     const sections = sectionArr.join('\n');
 
@@ -527,7 +569,11 @@ app.post('/post-website', async (req, res) => {
 
     // --- Get meta description from Gemini AI ---
     let metaDescription = await getGeminiMetaDescription(title, body);
-    if (!metaDescription) metaDescription = '';
+    // Fallback: use first 150 chars of plain text (strip HTML tags from body)
+    if (!metaDescription) {
+        let plain = body.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+        metaDescription = plain.slice(0, 150);
+    }
 
     // --- Meta keywords ---
     let metaKeywords = '';
