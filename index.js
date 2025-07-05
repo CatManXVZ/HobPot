@@ -39,11 +39,12 @@ function requireAuth(req, res, next) {
     if ((req.session && req.session.loggedIn) || (req.isAuthenticated && req.isAuthenticated())) {
         return next();
     }  
+
     res.redirect('/auth/google');
 }
 
 // Session setup
-const session = require('express-session');
+const session = require('express-session'); 
 app.use(session({
     secret: 'change_this_secret',
     resave: false,

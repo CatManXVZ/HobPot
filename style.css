@@ -553,11 +553,6 @@ main {
     margin-top: 0px;
     transition: margin-top 0.5s ease; 
 }
-    color: #4A5568;
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    border-bottom: 2px solid #FF6B00;
-    padding-bottom: 0.5rem;
 
 /* h3 Styling */
 .section h3, h3 {
